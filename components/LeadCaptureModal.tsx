@@ -137,29 +137,29 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
         {/* Success View */}
         {isSuccess ? (
-          <div className="p-8 sm:p-12 text-center flex flex-col items-center justify-center space-y-6 overflow-y-auto">
-            <div className="w-16 h-16 rounded-full bg-[#EAF1ED] border border-[#14382B]/20 flex items-center justify-center text-[#14382B] shadow-inner">
-              <Check className="w-8 h-8 stroke-[2.5]" />
+          <div className="p-6 sm:p-10 md:p-12 text-center flex flex-col items-center justify-center space-y-4 sm:space-y-6 overflow-y-auto">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#EAF1ED] border border-[#14382B]/20 flex items-center justify-center text-[#14382B] shadow-inner">
+              <Check className="w-7 h-7 sm:w-8 sm:h-8 stroke-[2.5]" />
             </div>
 
-            <div className="space-y-2 max-w-md">
-              <span className="text-xs font-bold uppercase tracking-widest text-[#B85D36]">
+            <div className="space-y-1.5 sm:space-y-2 max-w-md">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#B85D36]">
                 Access Granted & Queued
               </span>
-              <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#14382B]">
+              <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-[#14382B]">
                 Welcome aboard, {firstName.trim() || 'friend'}!
               </h3>
-              <p className="text-sm text-[#4A463F] leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
                 Your complimentary copy of <strong className="text-[#14382B]">The 7-Day Gentle Gut Reset</strong> has been unlocked. We have also queued the welcome sequence to <span className="font-semibold text-[#14382B]">{email}</span>.
               </p>
             </div>
 
             {/* Quick Access CTAs */}
-            <div className="w-full max-w-sm space-y-3 pt-2">
+            <div className="w-full max-w-sm space-y-2.5 sm:space-y-3 pt-1 sm:pt-2">
               <button
                 type="button"
                 onClick={handleOpenReaderFromSuccess}
-                className="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 bg-[#14382B] hover:bg-[#0E281E] text-white font-semibold text-sm rounded-xl shadow-md transition-all group"
+                className="w-full flex items-center justify-center gap-2.5 py-3 sm:py-3.5 px-6 bg-[#14382B] hover:bg-[#0E281E] text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md transition-all group cursor-pointer"
               >
                 <BookOpen className="w-4 h-4" />
                 <span>Open Full eBook Reader Now</span>
@@ -171,23 +171,23 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 onClick={() => {
                   window.print();
                 }}
-                className="w-full flex items-center justify-center gap-2 py-3 px-6 bg-white hover:bg-[#F3EFE6] text-[#14382B] border border-[#14382B]/30 font-medium text-xs rounded-xl transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-6 bg-white hover:bg-[#F3EFE6] text-[#14382B] border border-[#14382B]/30 font-medium text-xs rounded-xl transition-colors cursor-pointer"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Print or Save Daily Tracker (PDF)</span>
               </button>
             </div>
 
-            <div className="pt-2 flex items-center gap-1.5 text-xs text-[#8C877D]">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <div className="pt-1 flex items-center gap-1.5 text-[11px] sm:text-xs text-[#8C877D]">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Free lifetime access. Unsubscribe anytime in 1 click.</span>
             </div>
           </div>
         ) : (
           /* Form View */
           <div className="grid grid-cols-1 md:grid-cols-12 overflow-y-auto">
-            {/* Left Panel: Cover & Highlights (Desktop 5 cols) */}
-            <div className="md:col-span-5 bg-[#F2EDE4] p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#E5DFD5]">
+            {/* Left Panel: Cover & Highlights (Desktop only: 5 cols, hidden on mobile so form appears immediately) */}
+            <div className="hidden md:flex md:col-span-5 bg-[#F2EDE4] p-6 sm:p-8 flex-col justify-between border-b md:border-b-0 md:border-r border-[#E5DFD5]">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#14382B] text-white text-[10px] font-semibold tracking-wider uppercase">
                   <Sparkles className="w-3 h-3 text-[#EAD3C7]" />
@@ -226,13 +226,15 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
               </div>
             </div>
 
-            {/* Right Panel: Lead Capture Form (Desktop 7 cols) */}
-            <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-6">
-              <div className="space-y-3">
-                <span className="text-[11px] uppercase tracking-wider text-[#B85D36] font-bold">
+            {/* Right Panel: Lead Capture Form (Mobile: Full width instant form, Desktop: 7 cols) */}
+            <div className="col-span-1 md:col-span-7 p-6 sm:p-7 md:p-8 flex flex-col justify-between space-y-4 sm:space-y-5">
+              
+              {/* Header - Exactly matches user's screenshot as the immediate top view */}
+              <div className="space-y-2 pr-8 sm:pr-0">
+                <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#B85D36] font-bold">
                   Instant Download & In-Browser Access
                 </span>
-                <h3 className="text-2xl font-serif font-bold text-[#14382B] leading-snug">
+                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#14382B] leading-tight">
                   Get The 7-Day Gentle Gut Reset eBook
                 </h3>
                 <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
@@ -241,26 +243,27 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
               </div>
 
               {errorMessage && (
-                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+                <div className="p-2.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
                   {errorMessage}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              {/* The Form - Immediately actionable on Mobile */}
+              <form onSubmit={handleSubmit} className="space-y-3.5">
                 {/* First Name Field */}
                 <div>
                   <label htmlFor="lead-name" className="block text-xs font-semibold text-[#14382B] mb-1">
                     First Name <span className="text-[#8C877D] font-normal">(Optional)</span>
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-[#8C877D] absolute left-3 top-3" />
+                    <User className="w-4 h-4 text-[#8C877D] absolute left-3.5 top-3" />
                     <input
                       id="lead-name"
                       type="text"
                       placeholder="e.g. Maria"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 bg-white border border-[#D5CFC5] rounded-xl text-xs sm:text-sm text-[#14382B] placeholder-[#A49F96] focus:outline-none focus:ring-2 focus:ring-[#14382B]/20 focus:border-[#14382B]"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#D5CFC5] rounded-xl text-sm text-[#14382B] placeholder-[#A49F96] focus:outline-none focus:ring-2 focus:ring-[#14382B]/20 focus:border-[#14382B]"
                     />
                   </div>
                 </div>
@@ -271,7 +274,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                     Email Address <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-[#8C877D] absolute left-3 top-3" />
+                    <Mail className="w-4 h-4 text-[#8C877D] absolute left-3.5 top-3" />
                     <input
                       id="lead-email"
                       type="email"
@@ -279,22 +282,22 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                       placeholder="your.email@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2.5 bg-white border border-[#D5CFC5] rounded-xl text-xs sm:text-sm text-[#14382B] placeholder-[#A49F96] focus:outline-none focus:ring-2 focus:ring-[#14382B]/20 focus:border-[#14382B]"
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#D5CFC5] rounded-xl text-sm text-[#14382B] placeholder-[#A49F96] focus:outline-none focus:ring-2 focus:ring-[#14382B]/20 focus:border-[#14382B]"
                     />
                   </div>
                 </div>
 
                 {/* Consent Checkbox */}
-                <div className="flex items-start gap-2.5 pt-1">
+                <div className="flex items-start gap-2.5 pt-0.5">
                   <input
                     id="lead-consent"
                     type="checkbox"
                     checked={agreed}
                     onChange={(e) => setAgreed(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-[#D5CFC5] text-[#14382B] focus:ring-[#14382B]"
+                    className="w-4 h-4 mt-0.5 rounded border-[#D5CFC5] text-[#14382B] focus:ring-[#14382B] accent-[#14382B]"
                   />
-                  <label htmlFor="lead-consent" className="text-[11px] text-[#4A463F] leading-tight select-none">
-                    Send me the free 7-Day Reset Guide & weekly evidence-informed gut wellness notes. No spam; 1-click unsubscribe anytime.
+                  <label htmlFor="lead-consent" className="text-xs text-[#4A463F] leading-snug select-none">
+                    Send me the free 7–Day Reset Guide & weekly evidence–informed gut wellness notes. No spam; 1–click unsubscribe anytime.
                   </label>
                 </div>
 
@@ -302,7 +305,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3.5 px-6 bg-[#14382B] hover:bg-[#0E281E] disabled:bg-[#14382B]/60 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                  className="w-full py-3.5 px-6 bg-[#14382B] hover:bg-[#0E281E] disabled:bg-[#14382B]/60 text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group cursor-pointer"
                 >
                   {isLoading ? (
                     <>
@@ -319,22 +322,22 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
               </form>
 
               {/* Direct Reader Bypass Option & Trust Badges */}
-              <div className="space-y-3 pt-1 border-t border-[#E5DFD5]">
+              <div className="space-y-2.5 pt-1.5 border-t border-[#E5DFD5]">
                 {onDirectOpenReader && (
                   <div className="text-center">
                     <button
                       type="button"
                       onClick={onDirectOpenReader}
-                      className="text-xs text-[#8C877D] hover:text-[#14382B] underline transition-colors"
+                      className="text-xs text-[#8C877D] hover:text-[#14382B] underline transition-colors cursor-pointer"
                     >
                       Already subscribed? Click here to skip directly to reader →
                     </button>
                   </div>
                 )}
 
-                <div className="flex items-center justify-center gap-3 text-[11px] text-[#8C877D]">
+                <div className="flex items-center justify-center gap-2 sm:gap-3 text-[11px] text-[#8C877D]">
                   <span className="flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     100% Privacy Protected
                   </span>
                   <span>·</span>
