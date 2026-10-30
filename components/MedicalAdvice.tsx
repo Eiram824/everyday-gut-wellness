@@ -44,23 +44,33 @@ export const MedicalAdvice: React.FC = () => {
               If you experience any of the following symptoms, do not attempt to self-manage with lifestyle adjustments, supplements, or home remedies. Seek immediate emergency medical care, call local emergency services, or visit an urgent care facility:
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
               {urgentSigns.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-[#F8EFEA]/80 border border-[#EAD3C7] rounded-xl p-4.5 space-y-2"
+                  className="bg-[#FDF9F7] border border-[#EAD3C7] rounded-2xl p-6 sm:p-7 flex flex-col justify-between shadow-xs hover:border-[#B85D36]/40 transition-all duration-200"
                 >
-                  <div className="flex items-start gap-2.5">
-                    <AlertTriangle className="w-4 h-4 text-[#B85D36] shrink-0 mt-0.5" />
-                    <h4 className="text-sm font-bold text-[#9A4622] leading-snug">
-                      {item.symptom}
-                    </h4>
+                  <div>
+                    <div className="flex items-start gap-3.5 mb-3.5">
+                      <div className="w-8 h-8 rounded-lg bg-[#B85D36]/15 text-[#B85D36] flex items-center justify-center shrink-0 mt-0.5">
+                        <AlertTriangle className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-base font-serif font-bold text-[#9A4622] leading-snug">
+                        {item.symptom}
+                      </h4>
+                    </div>
+                    <p className="text-sm text-[#5A554D] leading-relaxed">
+                      {item.reason}
+                    </p>
                   </div>
-                  <p className="text-xs text-[#4A463F] leading-relaxed pl-6.5">
-                    {item.reason}
-                  </p>
-                  <div className="text-[11px] font-semibold text-[#14382B] pl-6.5 pt-1">
-                    Action: {item.actionRequired}
+
+                  <div className="mt-5 pt-4 border-t border-[#EAD3C7] flex flex-col sm:flex-row sm:items-start gap-2.5">
+                    <span className="inline-flex items-center text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-[#B85D36]/10 text-[#9A4622] shrink-0 self-start">
+                      Action
+                    </span>
+                    <p className="text-xs sm:text-[13px] font-medium text-[#14382B] leading-relaxed">
+                      {item.actionRequired}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -82,23 +92,33 @@ export const MedicalAdvice: React.FC = () => {
               Occasional mild shifts in digestion following travel, temporary stress, or dietary changes are common. However, persistent symptoms lasting more than 2 to 3 weeks deserve comprehensive evaluation by a primary care doctor or gastroenterologist:
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
               {routineSigns.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-[#FBF9F5] border border-[#E5DFD5] rounded-xl p-4.5 space-y-2"
+                  className="bg-[#FBF9F5] border border-[#E5DFD5] rounded-2xl p-6 sm:p-7 flex flex-col justify-between shadow-xs hover:border-[#14382B]/30 transition-all duration-200"
                 >
-                  <div className="flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-[#14382B] shrink-0 mt-0.5" />
-                    <h4 className="text-sm font-bold text-[#14382B] leading-snug">
-                      {item.symptom}
-                    </h4>
+                  <div>
+                    <div className="flex items-start gap-3.5 mb-3.5">
+                      <div className="w-8 h-8 rounded-lg bg-[#14382B]/10 text-[#14382B] flex items-center justify-center shrink-0 mt-0.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-base font-serif font-bold text-[#14382B] leading-snug">
+                        {item.symptom}
+                      </h4>
+                    </div>
+                    <p className="text-sm text-[#5A554D] leading-relaxed">
+                      {item.reason}
+                    </p>
                   </div>
-                  <p className="text-xs text-[#635F57] leading-relaxed pl-6.5">
-                    {item.reason}
-                  </p>
-                  <div className="text-[11px] font-semibold text-[#B85D36] pl-6.5 pt-1">
-                    Recommendation: {item.actionRequired}
+
+                  <div className="mt-5 pt-4 border-t border-[#E5DFD5] flex flex-col sm:flex-row sm:items-start gap-2.5">
+                    <span className="inline-flex items-center text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-[#14382B]/10 text-[#14382B] shrink-0 self-start">
+                      Recommendation
+                    </span>
+                    <p className="text-xs sm:text-[13px] font-medium text-[#4A463F] leading-relaxed">
+                      {item.actionRequired}
+                    </p>
                   </div>
                 </div>
               ))}
