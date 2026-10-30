@@ -5,6 +5,8 @@
 
 import { HabitQuestion, FiberFood, MealUpgradeExample, DailyHabitItem, MythFactItem, WarningSign } from './types';
 
+export const CLICKBANK_AFFILIATE_URL = 'https://hop.clickbank.net/?affiliate=maddog1914&vendor=bellyfh&cbpage=lander&pid=indexsalesletter&tid=maddog1914';
+
 export const HABIT_QUESTIONS: HabitQuestion[] = [
   {
     id: 'fiber-variety',

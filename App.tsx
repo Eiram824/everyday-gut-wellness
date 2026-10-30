@@ -126,7 +126,7 @@ export function App() {
         {/* Section 6: When to Seek Medical Advice */}
         <MedicalAdvice />
 
-        {/* Section 7: Optional Product Information */}
+        {/* Section 7: Product Review & Supplement Transparency */}
         <ProductSection />
       </main>
 
