@@ -10,7 +10,7 @@ export default defineConfig(() => {
       host: '0.0.0.0',
     },
     build: {
-      target: 'esnext',
+      target: 'es2020',
     },
     plugins: [react()],
     resolve: {

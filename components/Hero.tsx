@@ -9,9 +9,10 @@ import { ArrowDown, Clock, BookOpen, ShieldCheck } from 'lucide-react';
 interface HeroProps {
   onExplore: () => void;
   onJumpToReset: () => void;
+  onOpenEBook?: () => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset }) => {
+export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBook }) => {
   return (
     <section id="hero" className="relative pt-12 pb-20 md:pt-20 md:pb-28 border-b border-[#E5DFD5] overflow-hidden">
       {/* Background Subtle Wash */}
@@ -42,19 +43,20 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset }) => {
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
               <button
                 type="button"
-                onClick={onExplore}
+                onClick={onOpenEBook || onExplore}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#14382B] hover:bg-[#0E281E] text-white text-sm font-semibold tracking-wide rounded shadow-sm hover:shadow transition-all group"
               >
-                <span>Explore the Guide</span>
-                <ArrowDown className="w-4 h-4 transition-transform group-hover:translate-y-0.5" />
+                <BookOpen className="w-4 h-4 text-emerald-300" />
+                <span>Read Free 7-Day Reset eBook</span>
               </button>
 
               <button
                 type="button"
-                onClick={onJumpToReset}
+                onClick={onExplore}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-transparent hover:bg-[#E5DFD5]/40 text-[#14382B] border border-[#14382B]/30 text-sm font-medium rounded transition-all"
               >
-                <span>View Daily Routine Reset</span>
+                <span>Explore the Guide</span>
+                <ArrowDown className="w-4 h-4 transition-transform group-hover:translate-y-0.5" />
               </button>
             </div>
 

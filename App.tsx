@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import EBookBanner from './components/EBookBanner';
+import EBookReader from './components/EBookReader';
 import DailyHabitCheck from './components/DailyHabitCheck';
 import FiberLesson from './components/FiberLesson';
 import RoutineReset from './components/RoutineReset';
@@ -15,7 +17,14 @@ import ProductSection from './components/ProductSection';
 import TrustAndFooter from './components/TrustAndFooter';
 
 export function App() {
+  const [isEBookOpen, setIsEBookOpen] = useState(false);
+
   const scrollToSection = (targetId: string) => {
+    if (targetId === 'ebook') {
+      setIsEBookOpen(true);
+      return;
+    }
+
     if (!targetId || targetId === 'hero') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       try {
@@ -63,13 +72,20 @@ export function App() {
   return (
     <div className="min-h-screen bg-[#FBF9F5] font-sans text-[#2C2A26] selection:bg-[#EAD3C7] selection:text-[#14382B]">
       {/* Top Bar Navigation */}
-      <Navbar onNavigate={scrollToSection} />
+      <Navbar 
+        onNavigate={scrollToSection} 
+        onOpenEBook={() => setIsEBookOpen(true)} 
+      />
 
       {/* Hero Section */}
       <Hero
         onExplore={() => scrollToSection('educational-guide')}
         onJumpToReset={() => scrollToSection('routine-reset')}
+        onOpenEBook={() => setIsEBookOpen(true)}
       />
+
+      {/* eBook Feature Spotlight Banner */}
+      <EBookBanner onOpenEBook={() => setIsEBookOpen(true)} />
 
       {/* Main Educational Guide Landmark */}
       <main id="educational-guide" className="scroll-mt-24">
@@ -94,6 +110,12 @@ export function App() {
 
       {/* Section 8: Trust, Transparency & Footer */}
       <TrustAndFooter onNavigate={scrollToSection} />
+
+      {/* Fullscreen Interactive & Printable eBook Reader */}
+      <EBookReader 
+        isOpen={isEBookOpen} 
+        onClose={() => setIsEBookOpen(false)} 
+      />
     </div>
   );
 }

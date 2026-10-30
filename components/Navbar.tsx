@@ -4,13 +4,14 @@
  */
 
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, BookOpen } from 'lucide-react';
 
 interface NavbarProps {
   onNavigate: (sectionId: string) => void;
+  onOpenEBook?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
@@ -54,8 +55,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             ))}
           </nav>
 
-          {/* Zone 3: START HABIT CHECK Primary Action */}
-          <div className="hidden md:flex items-center gap-3 shrink-0">
+          {/* Zone 3: Actions */}
+          <div className="hidden md:flex items-center gap-2.5 shrink-0">
+            {onOpenEBook && (
+              <button
+                type="button"
+                onClick={onOpenEBook}
+                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold uppercase tracking-wider text-[#14382B] bg-[#EAF1ED] hover:bg-[#D5E3DB] border border-[#14382B]/20 rounded transition-all whitespace-nowrap shadow-sm"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-[#B85D36]" />
+                <span>Free eBook</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={(e) => handleLinkClick(e, 'daily-check')}
@@ -94,6 +105,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate }) => {
             </a>
           ))}
           <div className="pt-2 space-y-2">
+            {onOpenEBook && (
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenEBook();
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#14382B] bg-[#EAF1ED] border border-[#14382B]/30 rounded shadow-sm hover:bg-[#D5E3DB]"
+              >
+                <BookOpen className="w-4 h-4 text-[#B85D36]" />
+                <span>Read Free 7-Day Reset eBook</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={(e) => handleLinkClick(e, 'daily-check')}
