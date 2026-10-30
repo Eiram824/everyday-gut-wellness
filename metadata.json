@@ -1,0 +1,8 @@
+{
+  "name": "Everyday Gut Wellness",
+  "description": "A practical digestive wellness guide that helps readers understand fiber, hydration, daily routines, and evidence-informed habits for better digestive health.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

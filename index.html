@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Everyday Gut Wellness – Evidence-Informed Digestive Health Guide</title>
+    <meta name="description" content="A practical digestive wellness guide that helps readers understand fiber, hydration, daily routines, and evidence-informed habits for better digestive health." />
+    
+    <!-- OpenGraph / Social Cards -->
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Everyday Gut Wellness – Your Gut Has a Routine" />
+    <meta property="og:description" content="A practical guide to fiber, fluids, movement, and the small daily choices that influence bowel regularity." />
+    <meta property="og:site_name" content="Everyday Gut Wellness" />
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Everyday Gut Wellness – Your Gut Has a Routine" />
+    <meta name="twitter:description" content="A practical guide to fiber, fluids, movement, and the small daily choices that influence bowel regularity." />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet" />
+
+    <!-- Tailwind Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              serif: ['Playfair Display', 'Georgia', 'serif'],
+              sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              ivory: {
+                DEFAULT: '#FBF9F5',
+                dark: '#F3EFE6',
+                surface: '#FFFFFF',
+              },
+              forest: {
+                DEFAULT: '#14382B',
+                dark: '#0E281E',
+                light: '#245240',
+                soft: '#EAF1ED',
+              },
+              terracotta: {
+                DEFAULT: '#B85D36',
+                dark: '#9A4622',
+                light: '#EAD3C7',
+                soft: '#F8EFEA',
+              },
+              earth: {
+                DEFAULT: '#2C2A26',
+                muted: '#635F57',
+                subtle: '#8C877D',
+                border: '#E5DFD5',
+              }
+            }
+          }
+        }
+      }
+    </script>
+    
+    <style>
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 80px;
+      }
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #FBF9F5;
+        color: #2C2A26;
+      }
+      h1, h2, h3, h4, .font-serif {
+        font-family: 'Playfair Display', Georgia, serif;
+      }
+    </style>
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MedicalWebPage",
+      "name": "Everyday Gut Wellness",
+      "headline": "Your Gut Has a Routine. Are Your Daily Habits Working With It?",
+      "description": "A practical guide to fiber, fluids, movement, and the small daily choices that can influence bowel regularity.",
+      "about": [
+        {
+          "@type": "Thing",
+          "name": "Dietary Fiber"
+        },
+        {
+          "@type": "Thing",
+          "name": "Gastrointestinal Motility"
+        },
+        {
+          "@type": "Thing",
+          "name": "Constipation Prevention"
+        }
+      ],
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "General Public"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Everyday Gut Wellness"
+      }
+    }
+    </script>
+  </head>
+  <body class="bg-[#FBF9F5] text-[#2C2A26] antialiased selection:bg-[#EAD3C7] selection:text-[#14382B]">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
