@@ -4,13 +4,14 @@
  */
 
 import React, { useState } from 'react';
-import { ShieldCheck, Mail, Lock, X, Heart, ExternalLink } from 'lucide-react';
+import { ShieldCheck, Mail, Lock, X, Heart, ExternalLink, FileSpreadsheet } from 'lucide-react';
 
 interface TrustAndFooterProps {
   onNavigate: (sectionId: string) => void;
+  onOpenLeadAdmin?: () => void;
 }
 
-export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) => {
+export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate, onOpenLeadAdmin }) => {
   const [activeModal, setActiveModal] = useState<'privacy' | 'contact' | 'editorial' | null>(null);
 
   return (
@@ -113,6 +114,16 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
               >
                 Contact Editorial Desk
               </button>
+              {onOpenLeadAdmin && (
+                <button
+                  type="button"
+                  onClick={onOpenLeadAdmin}
+                  className="inline-flex items-center gap-1.5 text-xs text-[#EAD3C7] hover:text-white transition-colors text-left font-medium pt-1"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>Subscribers & CSV Export (Admin)</span>
+                </button>
+              )}
             </div>
 
             <div className="pt-2 text-xs text-[#EAF1ED]/70 leading-relaxed bg-white/5 p-3 rounded-lg border border-white/10">

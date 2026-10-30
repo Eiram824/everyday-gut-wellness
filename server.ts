@@ -57,6 +57,191 @@ async function startServer() {
     res.json({ status: "ok" });
   });
 
+  // Subscriber Lead Management & Sender.net Integration
+  const DATA_DIR = path.join(process.cwd(), "data");
+  const SUBSCRIBERS_FILE = path.join(DATA_DIR, "subscribers.json");
+
+  function getSubscribers(): Array<{ id: string; name: string; email: string; date: string; source: string; senderSynced: boolean }> {
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      if (!fs.existsSync(SUBSCRIBERS_FILE)) {
+        fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify([], null, 2), "utf8");
+        return [];
+      }
+      const data = fs.readFileSync(SUBSCRIBERS_FILE, "utf8");
+      return JSON.parse(data) || [];
+    } catch (err) {
+      console.error("[Backend] Error reading subscribers file:", err);
+      return [];
+    }
+  }
+
+  function saveSubscribers(subscribers: any[]) {
+    try {
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2), "utf8");
+    } catch (err) {
+      console.error("[Backend] Error saving subscribers file:", err);
+    }
+  }
+
+  // Sender.net Configuration Helper
+  const SENDER_CONFIG_FILE = path.join(DATA_DIR, "sender_config.json");
+  function getSenderConfig(): { apiToken?: string; groupId?: string; groupTitle?: string } {
+    try {
+      if (fs.existsSync(SENDER_CONFIG_FILE)) {
+        const raw = fs.readFileSync(SENDER_CONFIG_FILE, "utf8");
+        return JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn("[Backend] Error reading sender_config.json:", e);
+    }
+    return {
+      apiToken: process.env.SENDER_API_TOKEN,
+      groupId: process.env.SENDER_GROUP_ID,
+    };
+  }
+
+  app.post("/api/subscribe", async (req, res): Promise<any> => {
+    try {
+      const { name, email, source = "ebook_lead_magnet" } = req.body || {};
+      const trimmedEmail = (email || "").trim().toLowerCase();
+      const trimmedName = (name || "").trim() || "Reader";
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+        return res.status(400).json({ error: "Please provide a valid email address." });
+      }
+
+      const subscribers = getSubscribers();
+      const existingIndex = subscribers.findIndex((s) => s.email === trimmedEmail);
+
+      let senderSynced = false;
+      let senderMessage = "";
+
+      // Sender.net API integration (v2)
+      const senderCfg = getSenderConfig();
+      const senderToken = process.env.SENDER_API_TOKEN || senderCfg.apiToken;
+      const senderGroupId = process.env.SENDER_GROUP_ID || senderCfg.groupId;
+
+      if (senderToken) {
+        try {
+          const senderPayload: any = {
+            email: trimmedEmail,
+            firstname: trimmedName,
+          };
+          if (senderGroupId) {
+            senderPayload.groups = [senderGroupId];
+          }
+
+          const senderRes = await fetch("https://api.sender.net/v2/subscribers", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${senderToken}`,
+              "Content-Type": "application/json",
+              "Accept": "application/json",
+            },
+            body: JSON.stringify(senderPayload),
+          });
+
+          if (senderRes.ok) {
+            senderSynced = true;
+            senderMessage = "Successfully synced with Sender.net list.";
+          } else {
+            const errData = await senderRes.json().catch(() => ({}));
+            console.warn("[Backend] Sender.net API non-OK response:", senderRes.status, errData);
+            senderMessage = `Sender.net status ${senderRes.status}. Saved to local subscriber list.`;
+          }
+        } catch (senderErr: any) {
+          console.error("[Backend] Sender.net API error:", senderErr.message);
+          senderMessage = "Saved locally; Sender.net sync will retry.";
+        }
+      } else {
+        senderMessage = "Saved to local subscriber list (Sender.net token not configured).";
+      }
+
+      const subscriberRecord = {
+        id: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        name: trimmedName,
+        email: trimmedEmail,
+        date: new Date().toISOString(),
+        source: String(source),
+        senderSynced,
+      };
+
+      if (existingIndex >= 0) {
+        subscribers[existingIndex] = {
+          ...subscribers[existingIndex],
+          name: trimmedName,
+          date: new Date().toISOString(),
+          senderSynced: senderSynced || subscribers[existingIndex].senderSynced,
+        };
+      } else {
+        subscribers.unshift(subscriberRecord);
+      }
+
+      saveSubscribers(subscribers);
+
+      return res.json({
+        success: true,
+        message: "Thank you for subscribing! Your free 7-Day Reset Guide is unlocked.",
+        subscriber: { name: trimmedName, email: trimmedEmail },
+        senderSynced,
+        senderStatus: senderMessage,
+      });
+    } catch (error: any) {
+      console.error("[Backend] /api/subscribe error:", error);
+      return res.status(500).json({ error: error.message || "Failed to process subscription." });
+    }
+  });
+
+  // Fetch subscriber count and list for admin viewing
+  app.get("/api/leads", (_req, res) => {
+    const subscribers = getSubscribers();
+    const senderCfg = getSenderConfig();
+    const isConfigured = Boolean(process.env.SENDER_API_TOKEN || senderCfg.apiToken);
+    res.json({
+      total: subscribers.length,
+      senderConfigured: isConfigured,
+      senderGroupTitle: senderCfg.groupTitle || "Gut Wellness - eBook Leads",
+      subscribers,
+    });
+  });
+
+  // Export subscriber list as CSV file
+  app.get("/api/leads/export.csv", (_req, res) => {
+    const subscribers = getSubscribers();
+    
+    // RFC-compliant CSV escaping
+    const escapeCsv = (val: any) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const header = ["ID", "Name", "Email", "Date Subscribed", "Source", "Sender Synced"];
+    const rows = subscribers.map((sub) => [
+      escapeCsv(sub.id),
+      escapeCsv(sub.name),
+      escapeCsv(sub.email),
+      escapeCsv(sub.date),
+      escapeCsv(sub.source),
+      escapeCsv(sub.senderSynced ? "Yes" : "No"),
+    ]);
+
+    const csvContent = [header.join(","), ...rows.map((r) => r.join(","))].join("\n") + "\n";
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="gut_wellness_subscribers.csv"');
+    res.status(200).send(csvContent);
+  });
+
+
   app.post("/api/generate-content", async (req, res): Promise<any> => {
     try {
       const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;

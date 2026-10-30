@@ -8,6 +8,8 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import EBookBanner from './components/EBookBanner';
 import EBookReader from './components/EBookReader';
+import LeadCaptureModal from './components/LeadCaptureModal';
+import LeadAdminModal from './components/LeadAdminModal';
 import DailyHabitCheck from './components/DailyHabitCheck';
 import FiberLesson from './components/FiberLesson';
 import RoutineReset from './components/RoutineReset';
@@ -18,10 +20,30 @@ import TrustAndFooter from './components/TrustAndFooter';
 
 export function App() {
   const [isEBookOpen, setIsEBookOpen] = useState(false);
+  const [isLeadCaptureOpen, setIsLeadCaptureOpen] = useState(false);
+  const [isLeadAdminOpen, setIsLeadAdminOpen] = useState(false);
+
+  // Checks whether the user is already subscribed before opening the lead modal
+  const handleOpenEBook = (forceDirect = false) => {
+    if (forceDirect) {
+      setIsEBookOpen(true);
+      return;
+    }
+
+    try {
+      const existing = localStorage.getItem('gut_reset_subscriber');
+      if (existing) {
+        setIsEBookOpen(true);
+        return;
+      }
+    } catch (err) {}
+
+    setIsLeadCaptureOpen(true);
+  };
 
   const scrollToSection = (targetId: string) => {
     if (targetId === 'ebook') {
-      setIsEBookOpen(true);
+      handleOpenEBook();
       return;
     }
 
@@ -74,18 +96,18 @@ export function App() {
       {/* Top Bar Navigation */}
       <Navbar 
         onNavigate={scrollToSection} 
-        onOpenEBook={() => setIsEBookOpen(true)} 
+        onOpenEBook={() => handleOpenEBook()} 
       />
 
       {/* Hero Section */}
       <Hero
         onExplore={() => scrollToSection('educational-guide')}
         onJumpToReset={() => scrollToSection('routine-reset')}
-        onOpenEBook={() => setIsEBookOpen(true)}
+        onOpenEBook={() => handleOpenEBook()}
       />
 
       {/* eBook Feature Spotlight Banner */}
-      <EBookBanner onOpenEBook={() => setIsEBookOpen(true)} />
+      <EBookBanner onOpenEBook={() => handleOpenEBook()} />
 
       {/* Main Educational Guide Landmark */}
       <main id="educational-guide" className="scroll-mt-24">
@@ -109,12 +131,35 @@ export function App() {
       </main>
 
       {/* Section 8: Trust, Transparency & Footer */}
-      <TrustAndFooter onNavigate={scrollToSection} />
+      <TrustAndFooter 
+        onNavigate={scrollToSection} 
+        onOpenLeadAdmin={() => setIsLeadAdminOpen(true)}
+      />
+
+      {/* High-Converting Lead Capture Modal */}
+      <LeadCaptureModal
+        isOpen={isLeadCaptureOpen}
+        onClose={() => setIsLeadCaptureOpen(false)}
+        onSuccess={(_subscriber) => {
+          setIsLeadCaptureOpen(false);
+          setIsEBookOpen(true);
+        }}
+        onDirectOpenReader={() => {
+          setIsLeadCaptureOpen(false);
+          setIsEBookOpen(true);
+        }}
+      />
 
       {/* Fullscreen Interactive & Printable eBook Reader */}
       <EBookReader 
         isOpen={isEBookOpen} 
         onClose={() => setIsEBookOpen(false)} 
+      />
+
+      {/* Admin Lead Management & CSV Export Modal */}
+      <LeadAdminModal
+        isOpen={isLeadAdminOpen}
+        onClose={() => setIsLeadAdminOpen(false)}
       />
     </div>
   );
