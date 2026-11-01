@@ -23,14 +23,12 @@ interface LeadCaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (subscriber: { name: string; email: string }) => void;
-  onDirectOpenReader?: () => void;
 }
 
 export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  onDirectOpenReader,
 }) => {
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
@@ -353,17 +351,6 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
               {/* Direct Reader Bypass Option & Trust Badges */}
               <div className="space-y-2.5 pt-1.5 border-t border-[#E5DFD5]">
-                {onDirectOpenReader && (
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={onDirectOpenReader}
-                      className="text-xs text-[#8C877D] hover:text-[#14382B] underline transition-colors cursor-pointer"
-                    >
-                      Already subscribed? Click here to skip directly to reader →
-                    </button>
-                  </div>
-                )}
 
                 <div className="flex items-center justify-center gap-2 sm:gap-3 text-[11px] text-[#8C877D]">
                   <span className="flex items-center gap-1">

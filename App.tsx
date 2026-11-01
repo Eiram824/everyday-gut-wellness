@@ -144,10 +144,6 @@ export function App() {
           setIsLeadCaptureOpen(false);
           setIsEBookOpen(true);
         }}
-        onDirectOpenReader={() => {
-          setIsLeadCaptureOpen(false);
-          setIsEBookOpen(true);
-        }}
       />
 
       {/* Fullscreen Interactive & Printable eBook Reader */}

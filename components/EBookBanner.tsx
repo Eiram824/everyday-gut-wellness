@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { BookOpen, Sparkles, Download, CheckCircle2, ArrowRight } from 'lucide-react';
+import { BookOpen, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 
 interface EBookBannerProps {
   onOpenEBook: () => void;
@@ -86,14 +86,6 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </button>
 
-                <a
-                  href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
-                  download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-[#B85D36] hover:bg-[#9B4E2D] text-white text-sm font-semibold rounded-lg shadow-sm transition-all"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Download Free PDF (Instant)</span>
-                </a>
               </div>
 
               <div className="text-[11px] text-[#8C877D] italic">

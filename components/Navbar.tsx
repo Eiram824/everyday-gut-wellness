@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Menu, X, BookOpen, Download } from 'lucide-react';
+import { Menu, X, BookOpen } from 'lucide-react';
 
 interface NavbarProps {
   onNavigate: (sectionId: string) => void;
@@ -57,15 +57,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
 
           {/* Zone 3: Actions */}
           <div className="hidden md:flex items-center gap-2.5 shrink-0">
-            <a
-              href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
-              download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
-              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-[#B85D36] hover:bg-[#9B4E2D] rounded transition-all whitespace-nowrap shadow-sm"
-              title="Download Free 7-Day Guide (PDF)"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Download PDF</span>
-            </a>
 
             {onOpenEBook && (
               <button
@@ -128,15 +119,6 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
                 <span>Read Free 7-Day Reset eBook</span>
               </button>
             )}
-            <a
-              href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
-              download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white bg-[#B85D36] hover:bg-[#9B4E2D] rounded shadow-sm"
-            >
-              <Download className="w-4 h-4" />
-              <span>Download Free PDF Guide</span>
-            </a>
             <button
               type="button"
               onClick={(e) => handleLinkClick(e, 'daily-check')}

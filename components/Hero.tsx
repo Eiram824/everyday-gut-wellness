@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ArrowDown, Clock, BookOpen, ShieldCheck, Download } from 'lucide-react';
+import { ArrowDown, Clock, BookOpen, ShieldCheck } from 'lucide-react';
 
 interface HeroProps {
   onExplore: () => void;
@@ -50,14 +50,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
                 <span>Read Free 7-Day Reset eBook</span>
               </button>
 
-              <a
-                href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
-                download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-[#B85D36] hover:bg-[#9B4E2D] text-white text-sm font-semibold rounded shadow-sm hover:shadow transition-all"
-              >
-                <Download className="w-4 h-4" />
-                <span>Download Free PDF</span>
-              </a>
+
 
               <button
                 type="button"
