@@ -80,14 +80,24 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
           </div>
 
           <div className="flex items-center gap-2">
+            <a
+              href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+              download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#14382B] hover:bg-[#0E281E] text-white text-xs font-semibold shadow-sm transition-all"
+              title="Download PDF File Directly"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-300" />
+              <span>Download PDF</span>
+            </a>
+
             <button
               onClick={handlePrint}
               type="button"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EFE6] hover:bg-[#E5DFD5] text-[#14382B] text-xs font-semibold transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EFE6] hover:bg-[#E5DFD5] text-[#14382B] text-xs font-medium transition-colors"
               title="Print or Save as PDF"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Save as PDF / Print</span>
+              <span className="hidden sm:inline">Print</span>
             </button>
 
             <button
@@ -200,12 +210,21 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                         <span>Start Reading Chapter 1</span>
                         <ChevronRight className="w-4 h-4" />
                       </button>
+                      <a
+                        href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+                        download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-[#14382B] hover:bg-emerald-50 rounded-lg text-sm font-bold transition-all shadow-md"
+                      >
+                        <Download className="w-4 h-4 text-[#B85D36]" />
+                        <span>Download Free PDF Guide</span>
+                      </a>
                       <button
                         onClick={handlePrint}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors"
+                        className="inline-flex items-center gap-2 px-3.5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors"
+                        title="Print or Save via Browser"
                       >
-                        <Download className="w-4 h-4" />
-                        <span>Download / Print Full PDF</span>
+                        <Printer className="w-4 h-4" />
+                        <span className="hidden sm:inline">Print</span>
                       </button>
                     </div>
                   </div>
@@ -804,13 +823,23 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                   <ArrowLeft className="w-3.5 h-3.5" />
                   <span>Back to Chapter 4</span>
                 </button>
-                <button
-                  onClick={handlePrint}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#14382B] text-white rounded-lg text-xs font-semibold hover:bg-[#0E281E]"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>Print / Save Complete eBook (All Chapters)</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <a
+                    href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+                    download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#B85D36] hover:bg-[#9B4E2D] text-white rounded-lg text-xs font-semibold shadow-sm transition-all"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Download PDF File (Instant)</span>
+                  </a>
+                  <button
+                    onClick={handlePrint}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#14382B] text-white rounded-lg text-xs font-semibold hover:bg-[#0E281E]"
+                  >
+                    <Printer className="w-4 h-4" />
+                    <span className="hidden sm:inline">Print via Browser</span>
+                  </button>
+                </div>
               </div>
             </article>
           )}

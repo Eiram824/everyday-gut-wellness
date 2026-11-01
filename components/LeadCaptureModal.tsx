@@ -76,35 +76,67 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
         throw new Error(data.error || 'Failed to submit. Please try again.');
       }
 
-      // Save to localStorage so future visits recognize subscriber
+      // Save to localStorage so future visits recognize subscriber & admin can export
       try {
-        localStorage.setItem(
-          'gut_reset_subscriber',
-          JSON.stringify({
-            name: firstName.trim() || 'Reader',
-            email: trimmedEmail,
-            date: new Date().toISOString(),
-          })
-        );
+        const subscriberObj = {
+          name: firstName.trim() || 'Reader',
+          email: trimmedEmail,
+          date: new Date().toISOString(),
+          source: 'ebook_lead_modal',
+        };
+        localStorage.setItem('gut_reset_subscriber', JSON.stringify(subscriberObj));
+
+        // Maintain full list of all subscribers in local storage as reliable backup
+        const existingListRaw = localStorage.getItem('all_gut_subscribers');
+        const existingList = existingListRaw ? JSON.parse(existingListRaw) : [];
+        if (!existingList.some((s: any) => s.email === trimmedEmail)) {
+          existingList.unshift(subscriberObj);
+          localStorage.setItem('all_gut_subscribers', JSON.stringify(existingList));
+        }
       } catch (err) {
         // localStorage ignore in sandbox
       }
 
       setIsSuccess(true);
+
+      // Auto-trigger PDF download for instant gratification
+      try {
+        const autoLink = document.createElement('a');
+        autoLink.href = '/The-7-Day-Gentle-Gut-Reset-Guide.pdf';
+        autoLink.download = 'The-7-Day-Gentle-Gut-Reset-Guide.pdf';
+        document.body.appendChild(autoLink);
+        autoLink.click();
+        document.body.removeChild(autoLink);
+      } catch (dlErr) {
+        // Fallback handled by manual download button
+      }
     } catch (err: any) {
       console.error('Subscription error:', err);
-      // Fallback: even if server network hiccups, save locally and grant access
+      // Fallback: even if server network hiccups (e.g. static hosting on Netlify), save locally and grant access
       try {
-        localStorage.setItem(
-          'gut_reset_subscriber',
-          JSON.stringify({
-            name: firstName.trim() || 'Reader',
-            email: trimmedEmail,
-            date: new Date().toISOString(),
-            offlineFallback: true,
-          })
-        );
+        const subscriberObj = {
+          name: firstName.trim() || 'Reader',
+          email: trimmedEmail,
+          date: new Date().toISOString(),
+          source: 'ebook_lead_modal (offline/static)',
+          offlineFallback: true,
+        };
+        localStorage.setItem('gut_reset_subscriber', JSON.stringify(subscriberObj));
+        const existingListRaw = localStorage.getItem('all_gut_subscribers');
+        const existingList = existingListRaw ? JSON.parse(existingListRaw) : [];
+        if (!existingList.some((s: any) => s.email === trimmedEmail)) {
+          existingList.unshift(subscriberObj);
+          localStorage.setItem('all_gut_subscribers', JSON.stringify(existingList));
+        }
         setIsSuccess(true);
+
+        // Auto-trigger PDF download
+        const autoLink = document.createElement('a');
+        autoLink.href = '/The-7-Day-Gentle-Gut-Reset-Guide.pdf';
+        autoLink.download = 'The-7-Day-Gentle-Gut-Reset-Guide.pdf';
+        document.body.appendChild(autoLink);
+        autoLink.click();
+        document.body.removeChild(autoLink);
       } catch (storageErr) {
         setErrorMessage(err.message || 'Something went wrong. Please try again.');
       }
@@ -144,43 +176,41 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
             <div className="space-y-1.5 sm:space-y-2 max-w-md">
               <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#B85D36]">
-                Access Granted & Queued
+                Access Granted · PDF Ready
               </span>
               <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-[#14382B]">
                 Welcome aboard, {firstName.trim() || 'friend'}!
               </h3>
               <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
-                Your complimentary copy of <strong className="text-[#14382B]">The 7-Day Gentle Gut Reset</strong> has been unlocked. We have also queued the welcome sequence to <span className="font-semibold text-[#14382B]">{email}</span>.
+                Your complimentary copy of <strong className="text-[#14382B]">The 7-Day Gentle Gut Reset Guide</strong> is ready. Your download should begin automatically.
               </p>
             </div>
 
             {/* Quick Access CTAs */}
             <div className="w-full max-w-sm space-y-2.5 sm:space-y-3 pt-1 sm:pt-2">
+              <a
+                href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+                download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+                className="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 bg-[#B85D36] hover:bg-[#9B4E2D] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md transition-all group cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download PDF Guide (Instant .pdf)</span>
+              </a>
+
               <button
                 type="button"
                 onClick={handleOpenReaderFromSuccess}
                 className="w-full flex items-center justify-center gap-2.5 py-3 sm:py-3.5 px-6 bg-[#14382B] hover:bg-[#0E281E] text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md transition-all group cursor-pointer"
               >
-                <BookOpen className="w-4 h-4" />
-                <span>Open Full eBook Reader Now</span>
+                <BookOpen className="w-4 h-4 text-emerald-300" />
+                <span>Open Full Interactive Reader</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  window.print();
-                }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-6 bg-white hover:bg-[#F3EFE6] text-[#14382B] border border-[#14382B]/30 font-medium text-xs rounded-xl transition-colors cursor-pointer"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Print or Save Daily Tracker (PDF)</span>
               </button>
             </div>
 
             <div className="pt-1 flex items-center gap-1.5 text-[11px] sm:text-xs text-[#8C877D]">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Free lifetime access. Unsubscribe anytime in 1 click.</span>
+              <span>Free lifetime access. No spam. 1–click unsubscribe anytime.</span>
             </div>
           </div>
         ) : (

@@ -39,19 +39,84 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
 
   const fetchLeads = async () => {
     setIsLoading(true);
+    let apiSuccess = false;
     try {
       const res = await fetch('/api/leads');
       if (res.ok) {
         const data = await res.json();
-        setSubscribers(data.subscribers || []);
-        setTotal(data.total || 0);
-        setSenderConfigured(Boolean(data.senderConfigured));
+        if (data.subscribers && data.subscribers.length > 0) {
+          setSubscribers(data.subscribers);
+          setTotal(data.total || data.subscribers.length);
+          setSenderConfigured(Boolean(data.senderConfigured));
+          apiSuccess = true;
+        }
       }
     } catch (err) {
-      console.error('Error fetching leads:', err);
-    } finally {
-      setIsLoading(false);
+      console.warn('API leads endpoint offline, using local storage fallback:', err);
     }
+
+    if (!apiSuccess) {
+      try {
+        const localListRaw = localStorage.getItem('all_gut_subscribers');
+        const singleSubRaw = localStorage.getItem('gut_reset_subscriber');
+        let localSubs: Subscriber[] = [];
+
+        if (localListRaw) {
+          const parsed = JSON.parse(localListRaw);
+          localSubs = parsed.map((item: any, i: number) => ({
+            id: item.id || `loc_${i + 1}`,
+            name: item.name || 'Reader',
+            email: item.email,
+            date: item.date || new Date().toISOString(),
+            source: item.source || 'ebook_lead_modal',
+            senderSynced: false,
+          }));
+        } else if (singleSubRaw) {
+          const parsed = JSON.parse(singleSubRaw);
+          localSubs = [{
+            id: 'loc_1',
+            name: parsed.name || 'Reader',
+            email: parsed.email,
+            date: parsed.date || new Date().toISOString(),
+            source: 'ebook_lead_modal',
+            senderSynced: false,
+          }];
+        }
+
+        setSubscribers(localSubs);
+        setTotal(localSubs.length);
+      } catch (e) {
+        console.error('Local fallback read error:', e);
+      }
+    }
+    setIsLoading(false);
+  };
+
+  const handleExportCsv = () => {
+    if (subscribers.length === 0) {
+      alert('No subscribers to export yet.');
+      return;
+    }
+    const escapeCsv = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+    const header = ["ID", "Name", "Email", "Date Subscribed", "Source", "Sender Synced"];
+    const rows = subscribers.map((sub) => [
+      escapeCsv(sub.id),
+      escapeCsv(sub.name),
+      escapeCsv(sub.email),
+      escapeCsv(sub.date),
+      escapeCsv(sub.source),
+      escapeCsv(sub.senderSynced ? "Yes" : "No"),
+    ]);
+    const csvContent = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'gut_wellness_subscribers.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   useEffect(() => {
@@ -124,14 +189,14 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
           </div>
 
           <div className="flex items-center gap-2">
-            <a
-              href="/api/leads/export.csv"
-              download="gut_wellness_subscribers.csv"
-              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#14382B] hover:bg-[#0E281E] text-white text-xs font-semibold rounded-xl shadow-sm transition-colors text-center"
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#14382B] hover:bg-[#0E281E] text-white text-xs font-semibold rounded-xl shadow-sm transition-colors text-center cursor-pointer"
             >
               <FileSpreadsheet className="w-4 h-4" />
               <span>Download CSV</span>
-            </a>
+            </button>
             <button
               type="button"
               onClick={fetchLeads}

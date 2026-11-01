@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ArrowDown, Clock, BookOpen, ShieldCheck } from 'lucide-react';
+import { ArrowDown, Clock, BookOpen, ShieldCheck, Download } from 'lucide-react';
 
 interface HeroProps {
   onExplore: () => void;
@@ -40,22 +40,31 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
               A practical guide to fiber, fluids, movement, and the small daily choices that can influence bowel regularity.
             </p>
 
-            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <button
                 type="button"
                 onClick={onOpenEBook || onExplore}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#14382B] hover:bg-[#0E281E] text-white text-sm font-semibold tracking-wide rounded shadow-sm hover:shadow transition-all group"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-[#14382B] hover:bg-[#0E281E] text-white text-sm font-semibold tracking-wide rounded shadow-sm hover:shadow transition-all group"
               >
                 <BookOpen className="w-4 h-4 text-emerald-300" />
                 <span>Read Free 7-Day Reset eBook</span>
               </button>
 
+              <a
+                href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+                download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3.5 bg-[#B85D36] hover:bg-[#9B4E2D] text-white text-sm font-semibold rounded shadow-sm hover:shadow transition-all"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download Free PDF</span>
+              </a>
+
               <button
                 type="button"
                 onClick={onExplore}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-transparent hover:bg-[#E5DFD5]/40 text-[#14382B] border border-[#14382B]/30 text-sm font-medium rounded transition-all"
+                className="inline-flex items-center justify-center gap-2 px-4 py-3.5 bg-transparent hover:bg-[#E5DFD5]/40 text-[#14382B] border border-[#14382B]/30 text-sm font-medium rounded transition-all"
               >
-                <span>Explore the Guide</span>
+                <span>Explore Guide</span>
                 <ArrowDown className="w-4 h-4 transition-transform group-hover:translate-y-0.5" />
               </button>
             </div>
