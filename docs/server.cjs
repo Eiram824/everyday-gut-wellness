@@ -70,13 +70,26 @@ async function startServer() {
   });
   const DATA_DIR = import_path.default.join(process.cwd(), "data");
   const SUBSCRIBERS_FILE = import_path.default.join(DATA_DIR, "subscribers.json");
-  const ADMIN_ACCESS_KEY = (process.env.ADMIN_ACCESS_KEY || "gutwellness_admin_2026").trim();
+  const ADMIN_ACCESS_KEY = (process.env.ADMIN_ACCESS_KEY || "").trim();
   function verifyAdminAccess(req) {
+    if (!ADMIN_ACCESS_KEY) {
+      return {
+        authorized: false,
+        status: 503,
+        error: "Server configuration error: ADMIN_ACCESS_KEY is not configured on the server. Administrative access is locked."
+      };
+    }
     const authHeader = req.headers["authorization"] || "";
     const bearerKey = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
     const customHeaderKey = (req.headers["x-admin-key"] || "").trim();
-    const queryKey = (req.query.key || "").trim();
-    return customHeaderKey === ADMIN_ACCESS_KEY || bearerKey === ADMIN_ACCESS_KEY || queryKey === ADMIN_ACCESS_KEY;
+    if (bearerKey && bearerKey === ADMIN_ACCESS_KEY || customHeaderKey && customHeaderKey === ADMIN_ACCESS_KEY) {
+      return { authorized: true, status: 200 };
+    }
+    return {
+      authorized: false,
+      status: 401,
+      error: "Unauthorized access. Valid administrator key required in Authorization or X-Admin-Key header."
+    };
   }
   function getSubscribers() {
     try {
@@ -132,11 +145,17 @@ async function startServer() {
     };
   }
   app.post("/api/admin/verify", (req, res) => {
+    if (!ADMIN_ACCESS_KEY) {
+      return res.status(503).json({
+        success: false,
+        error: "Server configuration error: ADMIN_ACCESS_KEY is not configured on the server. Administrative access is locked."
+      });
+    }
     const key = (req.body?.key || "").trim();
-    if (key === ADMIN_ACCESS_KEY) {
+    if (key && key === ADMIN_ACCESS_KEY) {
       return res.json({ success: true, message: "Admin authenticated." });
     }
-    return res.status(401).json({ success: false, error: "Invalid admin key." });
+    return res.status(401).json({ success: false, error: "Invalid administrator key." });
   });
   app.post("/api/subscribe", async (req, res) => {
     try {
@@ -226,8 +245,9 @@ async function startServer() {
     }
   });
   app.get("/api/leads", (req, res) => {
-    if (!verifyAdminAccess(req)) {
-      return res.status(401).json({ error: "Unauthorized access. Valid administrator key required." });
+    const auth = verifyAdminAccess(req);
+    if (!auth.authorized) {
+      return res.status(auth.status).json({ error: auth.error || "Unauthorized access. Valid administrator key required." });
     }
     const subscribers = getSubscribers();
     const senderCfg = getSenderConfig();
@@ -240,8 +260,9 @@ async function startServer() {
     });
   });
   app.get("/api/leads/export.csv", (req, res) => {
-    if (!verifyAdminAccess(req)) {
-      return res.status(401).send("Unauthorized. Administrator authentication required.");
+    const auth = verifyAdminAccess(req);
+    if (!auth.authorized) {
+      return res.status(auth.status).send(auth.error || "Unauthorized. Administrator authentication required.");
     }
     const subscribers = getSubscribers();
     const escapeCsv = (val) => {

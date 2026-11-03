@@ -87,7 +87,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 Configure environment variables in `.env` (refer to `.env.example`):
 
 - `VITE_GUMROAD_PRODUCT_URL`: The public Gumroad checkout link for the 30-Day Planner.
-- `ADMIN_ACCESS_KEY`: Secret key required to access `/api/leads` and download CSV exports (defaults to `gutwellness_admin_2026` if unset).
+- `ADMIN_ACCESS_KEY`: Secret key required to access `/api/leads` and download CSV exports. Must be configured; administrative routes fail closed if unset.
 - `SENDER_API_TOKEN`: Optional API token for Sender.net synchronization.
 - `SENDER_GROUP_ID`: Optional Sender.net subscriber group tag.
 - `GEMINI_API_KEY`: Required only for server-side Google GenAI proxy endpoints.
@@ -97,7 +97,7 @@ Configure environment variables in `.env` (refer to `.env.example`):
 ## Security & Privacy Standards
 
 - **Open Source Safety**: Live subscriber data (`data/subscribers.json`) and private API tokens (`data/sender_config.json`) are strictly excluded via `.gitignore` to prevent data leakage in public repositories.
-- **Admin Route Protection**: Backend routes (`/api/leads`, `/api/leads/export.csv`, `/api/admin/verify`) require authentication via header (`x-admin-key`, `Authorization: Bearer <key>`) or query parameter (`?key=<key>`).
+- **Admin Route Protection**: Backend routes (`/api/leads`, `/api/leads/export.csv`, `/api/admin/verify`) strictly require header-based authentication (`x-admin-key` or `Authorization: Bearer <key>`). URL query parameter authentication is disabled to prevent credential leakage in access logs, referrers, and browser histories.
 - **GDPR & CAN-SPAM Compliance**: Transactional guide delivery is strictly decoupled from promotional marketing. Users can access the free guide without consenting to ongoing marketing emails.
 - **No Affiliate Code**: All ClickBank, BellyFlush, and third-party affiliate scripts have been permanently purged.
 

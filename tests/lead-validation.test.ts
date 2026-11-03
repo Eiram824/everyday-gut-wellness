@@ -27,23 +27,44 @@ describe('Lead Capture & Export Security Logic', () => {
     assert.equal(escapeCsv(undefined), '""');
   });
 
-  it('ensures admin key verification handles header, bearer, and query correctly', () => {
-    const ADMIN_ACCESS_KEY = 'test_secret_key_123';
-    const verifyKey = (customHeader?: string, bearerHeader?: string, queryKey?: string) => {
-      const bKey = bearerHeader?.startsWith('Bearer ') ? bearerHeader.slice(7).trim() : '';
-      return (
-        (customHeader || '').trim() === ADMIN_ACCESS_KEY ||
-        bKey === ADMIN_ACCESS_KEY ||
-        (queryKey || '').trim() === ADMIN_ACCESS_KEY
-      );
+  it('ensures admin verification strictly enforces headers, rejects query params, and fails closed', () => {
+    const createVerifier = (configuredSecret: string) => {
+      return (headers: { authorization?: string; 'x-admin-key'?: string }, query?: { key?: string }) => {
+        if (!configuredSecret.trim()) {
+          return { authorized: false, status: 503, error: 'Unconfigured key' };
+        }
+        const authHeader = headers['authorization'] || '';
+        const bearerKey = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+        const customHeaderKey = (headers['x-admin-key'] || '').trim();
+
+        // Query parameters must NOT be accepted for authentication
+        if (bearerKey === configuredSecret || customHeaderKey === configuredSecret) {
+          return { authorized: true, status: 200 };
+        }
+        return { authorized: false, status: 401, error: 'Unauthorized' };
+      };
     };
 
-    assert.ok(verifyKey('test_secret_key_123', undefined, undefined));
-    assert.ok(verifyKey(undefined, 'Bearer test_secret_key_123', undefined));
-    assert.ok(verifyKey(undefined, undefined, 'test_secret_key_123'));
-    assert.ok(!verifyKey('wrong_key', undefined, undefined));
-    assert.ok(!verifyKey(undefined, 'Bearer wrong_key', undefined));
-    assert.ok(!verifyKey(undefined, undefined, 'wrong_key'));
-    assert.ok(!verifyKey('', '', ''));
+    const verifier = createVerifier('test_secret_key_123');
+
+    // Header-based authentication succeeds
+    assert.equal(verifier({ 'x-admin-key': 'test_secret_key_123' }).authorized, true);
+    assert.equal(verifier({ authorization: 'Bearer test_secret_key_123' }).authorized, true);
+
+    // Query parameter authentication MUST be rejected (no query bypass)
+    assert.equal(verifier({}, { key: 'test_secret_key_123' }).authorized, false);
+    assert.equal(verifier({}, { key: 'test_secret_key_123' }).status, 401);
+
+    // Invalid credentials rejected
+    assert.equal(verifier({ 'x-admin-key': 'wrong_key' }).authorized, false);
+    assert.equal(verifier({ authorization: 'Bearer wrong_key' }).authorized, false);
+    assert.equal(verifier({}).authorized, false);
+
+    // Unconfigured environment key MUST fail closed (503 status)
+    const unconfiguredVerifier = createVerifier('');
+    assert.equal(unconfiguredVerifier({ 'x-admin-key': 'test_secret_key_123' }).authorized, false);
+    assert.equal(unconfiguredVerifier({ 'x-admin-key': 'test_secret_key_123' }).status, 503);
+    assert.equal(unconfiguredVerifier({}).authorized, false);
+    assert.equal(unconfiguredVerifier({}).status, 503);
   });
 });

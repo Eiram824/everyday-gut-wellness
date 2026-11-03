@@ -178,22 +178,43 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
     setIsLoading(false);
   };
 
-  const handleExportCsv = () => {
+  const handleExportCsv = async () => {
     if (subscribers.length === 0) {
       alert('No subscribers to export yet.');
       return;
     }
 
     if (adminKey) {
-      // Trigger authenticated direct download from server
-      const downloadUrl = `/api/leads/export.csv?key=${encodeURIComponent(adminKey)}`;
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      link.setAttribute('download', 'everyday_gut_wellness_subscribers.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      return;
+      try {
+        // Trigger authenticated direct download from server via headers (no query parameter)
+        const response = await fetch('/api/leads/export.csv', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${adminKey}`,
+            'X-Admin-Key': adminKey,
+          },
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(errText || `Server responded with ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'everyday_gut_wellness_subscribers.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        return;
+      } catch (err: any) {
+        console.error('CSV export failed:', err);
+        alert(`Failed to export CSV: ${err.message || 'Authentication failed'}`);
+        return;
+      }
     }
 
     // Client-side fallback if in offline mode
@@ -601,7 +622,7 @@ Instant digital download immediately following checkout. Accessible on desktop, 
                 </form>
 
                 <p className="text-[11px] text-[#8C877D]">
-                  Default key: <code className="bg-stone-100 px-1 py-0.5 rounded text-stone-700">gutwellness_admin_2026</code> (configurable via <code className="bg-stone-100 px-1 py-0.5 rounded text-stone-700">ADMIN_ACCESS_KEY</code> in environment settings).
+                  Access restricted to authorized administrators. Configure your secret key via <code className="bg-stone-100 px-1 py-0.5 rounded text-stone-700">ADMIN_ACCESS_KEY</code> in server environment variables.
                 </p>
               </div>
             ) : (
