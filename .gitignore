@@ -1,3 +1,36 @@
+# Environment & Local Secrets
+.env
+.env.*
+!.env.example
+
+# Production & Build outputs
+dist
+dist-ssr
+build
+
+# Dependencies
+node_modules
+
+# Subscriber Data, Leads, and Third-Party API Tokens (Strictly Excluded)
+data/subscribers.json
+data/subscribers.json.tmp
+data/sender_config.json
+data/*.json
+!data/.gitkeep
+
+# System & Editor Files
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.local
+
 # Logs
 logs
 *.log
@@ -6,19 +39,3 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
