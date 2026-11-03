@@ -97,6 +97,21 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
       setIsSuccess(true);
 
+      // Track conversion in Google Analytics 4
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'generate_lead', {
+          event_category: 'Lead Capture',
+          event_label: '7-Day Gentle Gut Reset Guide',
+          value: 1.0,
+          currency: 'USD',
+        });
+        (window as any).gtag('event', 'file_download', {
+          file_name: 'The-7-Day-Gentle-Gut-Reset-Guide.pdf',
+          file_extension: 'pdf',
+          link_text: 'Download Free PDF',
+        });
+      }
+
       // Auto-trigger PDF download for instant gratification
       try {
         const autoLink = document.createElement('a');

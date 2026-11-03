@@ -23,6 +23,28 @@ export function App() {
   const [isLeadCaptureOpen, setIsLeadCaptureOpen] = useState(false);
   const [isLeadAdminOpen, setIsLeadAdminOpen] = useState(false);
 
+  // Discreet creator access (Ctrl+Shift+L or #admin in URL) without showing public footer button
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'L' || e.key === 'l')) {
+        e.preventDefault();
+        setIsLeadAdminOpen((prev) => !prev);
+      }
+    };
+    const checkHash = () => {
+      if (window.location.hash === '#admin' || window.location.search.includes('admin=true')) {
+        setIsLeadAdminOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('hashchange', checkHash);
+    checkHash();
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('hashchange', checkHash);
+    };
+  }, []);
+
   // Checks whether the user is already subscribed before opening the lead modal
   const handleOpenEBook = (forceDirect = false) => {
     if (forceDirect) {
@@ -133,7 +155,6 @@ export function App() {
       {/* Section 8: Trust, Transparency & Footer */}
       <TrustAndFooter 
         onNavigate={scrollToSection} 
-        onOpenLeadAdmin={() => setIsLeadAdminOpen(true)}
       />
 
       {/* High-Converting Lead Capture Modal */}

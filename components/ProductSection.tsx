@@ -183,6 +183,15 @@ export const ProductSection: React.FC = () => {
                   href={affiliateHoplink}
                   target="_blank"
                   rel="noopener noreferrer sponsored"
+                  onClick={() => {
+                    if (typeof window !== 'undefined' && (window as any).gtag) {
+                      (window as any).gtag('event', 'select_promotion', {
+                        promotion_id: 'bellyflush_hoplink',
+                        promotion_name: 'BellyFlush ClickBank Review',
+                        creative_name: 'Product Spotlight CTA',
+                      });
+                    }
+                  }}
                   className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-[#B85D36] hover:bg-[#A04E2B] active:scale-[0.99] text-white font-serif font-bold text-base sm:text-lg rounded-xl shadow-lg transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[#B85D36]/30 group"
                 >
                   <span>Check BellyFlush Availability & Pricing</span>
