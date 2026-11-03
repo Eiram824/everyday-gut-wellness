@@ -5,7 +5,14 @@
 
 import { HabitQuestion, FiberFood, MealUpgradeExample, DailyHabitItem, MythFactItem, WarningSign } from './types';
 
-export const CLICKBANK_AFFILIATE_URL = 'https://hop.clickbank.net/?affiliate=maddog1914&vendor=bellyfh&cbpage=lander&pid=indexsalesletter&tid=maddog1914';
+export const PLANNER_PRODUCT_INFO = {
+  id: '30-day-digestive-wellness-planner',
+  title: 'The 30-Day Digestive Wellness Planner',
+  subtitle: 'A Practical Habit-Tracking Workbook for Everyday Digestive Rhythm',
+  defaultPrice: '$14.99',
+  format: 'Printable PDF & Interactive Digital Workbook',
+  pages: '68 Pages (8.5" x 11" Standard Print-Ready & Tablet Fillable)',
+};
 
 export const HABIT_QUESTIONS: HabitQuestion[] = [
   {

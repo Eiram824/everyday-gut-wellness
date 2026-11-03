@@ -582,17 +582,17 @@ async function generatePDF() {
     );
     y -= 20;
 
-    // Supplement & Botanical Overview Box
+    // Original Digital Product Feature Box
     page.drawRectangle({
       x: 50, y: y - 150, width: 495, height: 150, color: colorCardBg, borderColor: colorBorder, borderWidth: 1
     });
-    page.drawText('OPTIONAL BOTANICAL MOTILITY SUPPORT: BellyFlush REVIEW', { x: 65, y: y - 22, size: 9.5, font: helveticaBold, color: colorForest });
+    page.drawText('LOOKING FOR STRUCTURED DAILY TRACKING? THE 30-DAY WELLNESS PLANNER', { x: 65, y: y - 22, size: 8.5, font: helveticaBold, color: colorForest });
     drawParagraph(
       page,
-      'For individuals who struggle to hit daily fiber targets through whole food alone or experience recurring sluggishness during travel and busy work schedules, a gentle botanical formulation can offer supplementary support.\n\n' +
-      'In our clinical breakdown, BellyFlush combines Psyllium Husk (soluble bulk fiber) with soothing Aloe Vera, Bentonite Clay, and L. Acidophilus probiotics. Unlike harsh stimulant laxatives (such as heavy senna), it works gently with your natural peristalsis.\n\n' +
-      'Learn more and view official third-party transparency standards on our review page at:\n' +
-      'https://everyday-gut-wellness.netlify.app/#product-review',
+      'Ready to turn these 7 days into lasting, month-long consistency? Explore our original companion workbook: The 30-Day Digestive Wellness Planner.\n\n' +
+      'Featuring 68 pages of structured daily food & hydration journals, gentle fiber addition worksheets, post-meal movement logs, Bristol Stool consistency records, and weekly progress reflections.\n\n' +
+      'Available as an instant printable and tablet-fillable digital workbook download via Gumroad at:\n' +
+      'https://everydaygutwellness.org/#planner-product',
       65, y - 42, 465, helvetica, 8.5, 14, colorText
     );
     y -= 175;

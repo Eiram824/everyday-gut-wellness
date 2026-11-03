@@ -20,6 +20,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
     { label: 'Routine Reset', id: 'routine-reset' },
     { label: 'Myth vs Fact', id: 'myths' },
     { label: 'Medical Signs', id: 'medical-advice' },
+    { label: '30-Day Planner', id: 'planner-product' },
   ];
 
   const handleLinkClick = (e: React.MouseEvent, id: string) => {

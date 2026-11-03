@@ -61,7 +61,34 @@ async function startServer() {
   const DATA_DIR = path.join(process.cwd(), "data");
   const SUBSCRIBERS_FILE = path.join(DATA_DIR, "subscribers.json");
 
-  function getSubscribers(): Array<{ id: string; name: string; email: string; date: string; source: string; senderSynced: boolean }> {
+  // Admin access key configuration (from environment variable or secure default)
+  const ADMIN_ACCESS_KEY = (process.env.ADMIN_ACCESS_KEY || "gutwellness_admin_2026").trim();
+
+  function verifyAdminAccess(req: express.Request): boolean {
+    const authHeader = req.headers["authorization"] || "";
+    const bearerKey = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+    const customHeaderKey = (req.headers["x-admin-key"] as string || "").trim();
+    const queryKey = (req.query.key as string || "").trim();
+
+    return (
+      customHeaderKey === ADMIN_ACCESS_KEY ||
+      bearerKey === ADMIN_ACCESS_KEY ||
+      queryKey === ADMIN_ACCESS_KEY
+    );
+  }
+
+  interface SubscriberRecord {
+    id: string;
+    name: string;
+    email: string;
+    date: string;
+    source: string;
+    marketingConsent: boolean;
+    consentDate: string | null;
+    senderSynced: boolean;
+  }
+
+  function getSubscribers(): SubscriberRecord[] {
     try {
       if (!fs.existsSync(DATA_DIR)) {
         fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -71,19 +98,33 @@ async function startServer() {
         return [];
       }
       const data = fs.readFileSync(SUBSCRIBERS_FILE, "utf8");
-      return JSON.parse(data) || [];
+      const list = JSON.parse(data) || [];
+      // Normalize older records if missing marketingConsent
+      return list.map((item: any) => ({
+        id: item.id || `sub_${Date.now()}`,
+        name: item.name || "Reader",
+        email: item.email || "",
+        date: item.date || new Date().toISOString(),
+        source: item.source || "ebook_lead_magnet",
+        marketingConsent: Boolean(item.marketingConsent),
+        consentDate: item.consentDate || null,
+        senderSynced: Boolean(item.senderSynced),
+      }));
     } catch (err) {
       console.error("[Backend] Error reading subscribers file:", err);
       return [];
     }
   }
 
-  function saveSubscribers(subscribers: any[]) {
+  function saveSubscribers(subscribers: SubscriberRecord[]) {
     try {
       if (!fs.existsSync(DATA_DIR)) {
         fs.mkdirSync(DATA_DIR, { recursive: true });
       }
-      fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify(subscribers, null, 2), "utf8");
+      // Safe atomic write to avoid data corruption
+      const tempFile = `${SUBSCRIBERS_FILE}.tmp`;
+      fs.writeFileSync(tempFile, JSON.stringify(subscribers, null, 2), "utf8");
+      fs.renameSync(tempFile, SUBSCRIBERS_FILE);
     } catch (err) {
       console.error("[Backend] Error saving subscribers file:", err);
     }
@@ -106,14 +147,28 @@ async function startServer() {
     };
   }
 
+  // Admin key verification endpoint
+  app.post("/api/admin/verify", (req, res): any => {
+    const key = (req.body?.key || "").trim();
+    if (key === ADMIN_ACCESS_KEY) {
+      return res.json({ success: true, message: "Admin authenticated." });
+    }
+    return res.status(401).json({ success: false, error: "Invalid admin key." });
+  });
+
   app.post("/api/subscribe", async (req, res): Promise<any> => {
     try {
-      const { name, email, source = "ebook_lead_magnet" } = req.body || {};
-      const trimmedEmail = (email || "").trim().toLowerCase();
-      const trimmedName = (name || "").trim() || "Reader";
+      const { name, email, source = "ebook_lead_magnet", marketingConsent = false } = req.body || {};
+      
+      // Input sanitization
+      const trimmedEmail = (email || "").trim().toLowerCase().slice(0, 254);
+      const cleanName = (name || "").replace(/<[^>]*>?/gm, "").trim().slice(0, 80) || "Reader";
+      const cleanSource = String(source).replace(/<[^>]*>?/gm, "").trim().slice(0, 50);
+      const hasMarketingConsent = Boolean(marketingConsent);
+      const consentDate = hasMarketingConsent ? new Date().toISOString() : null;
 
-      // Email format validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      // Strict email format validation
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
       if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
         return res.status(400).json({ error: "Please provide a valid email address." });
       }
@@ -124,7 +179,7 @@ async function startServer() {
       let senderSynced = false;
       let senderMessage = "";
 
-      // Sender.net API integration (v2)
+      // Sender.net API integration (v2) - respect marketing consent
       const senderCfg = getSenderConfig();
       const senderToken = process.env.SENDER_API_TOKEN || senderCfg.apiToken;
       const senderGroupId = process.env.SENDER_GROUP_ID || senderCfg.groupId;
@@ -133,9 +188,11 @@ async function startServer() {
         try {
           const senderPayload: any = {
             email: trimmedEmail,
-            firstname: trimmedName,
+            firstname: cleanName,
           };
-          if (senderGroupId) {
+          
+          // Only add to promotional marketing group if user voluntarily opted in
+          if (hasMarketingConsent && senderGroupId) {
             senderPayload.groups = [senderGroupId];
           }
 
@@ -151,7 +208,9 @@ async function startServer() {
 
           if (senderRes.ok) {
             senderSynced = true;
-            senderMessage = "Successfully synced with Sender.net list.";
+            senderMessage = hasMarketingConsent 
+              ? "Successfully synced with Sender.net list." 
+              : "Registered with Sender.net (Transactional guide delivery only).";
           } else {
             const errData = await senderRes.json().catch(() => ({}));
             console.warn("[Backend] Sender.net API non-OK response:", senderRes.status, errData);
@@ -165,20 +224,24 @@ async function startServer() {
         senderMessage = "Saved to local subscriber list (Sender.net token not configured).";
       }
 
-      const subscriberRecord = {
+      const subscriberRecord: SubscriberRecord = {
         id: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        name: trimmedName,
+        name: cleanName,
         email: trimmedEmail,
         date: new Date().toISOString(),
-        source: String(source),
+        source: cleanSource,
+        marketingConsent: hasMarketingConsent,
+        consentDate,
         senderSynced,
       };
 
       if (existingIndex >= 0) {
         subscribers[existingIndex] = {
           ...subscribers[existingIndex],
-          name: trimmedName,
+          name: cleanName,
           date: new Date().toISOString(),
+          marketingConsent: hasMarketingConsent || subscribers[existingIndex].marketingConsent,
+          consentDate: consentDate || subscribers[existingIndex].consentDate,
           senderSynced: senderSynced || subscribers[existingIndex].senderSynced,
         };
       } else {
@@ -189,8 +252,8 @@ async function startServer() {
 
       return res.json({
         success: true,
-        message: "Thank you for subscribing! Your free 7-Day Reset Guide is unlocked.",
-        subscriber: { name: trimmedName, email: trimmedEmail },
+        message: "Your free 7-Day Gentle Gut Reset Guide is ready for instant download.",
+        subscriber: { name: cleanName, email: trimmedEmail, marketingConsent: hasMarketingConsent },
         senderSynced,
         senderStatus: senderMessage,
       });
@@ -200,21 +263,29 @@ async function startServer() {
     }
   });
 
-  // Fetch subscriber count and list for admin viewing
-  app.get("/api/leads", (_req, res) => {
+  // Protected Admin Route: Fetch subscriber list
+  app.get("/api/leads", (req, res): any => {
+    if (!verifyAdminAccess(req)) {
+      return res.status(401).json({ error: "Unauthorized access. Valid administrator key required." });
+    }
+
     const subscribers = getSubscribers();
     const senderCfg = getSenderConfig();
     const isConfigured = Boolean(process.env.SENDER_API_TOKEN || senderCfg.apiToken);
     res.json({
       total: subscribers.length,
       senderConfigured: isConfigured,
-      senderGroupTitle: senderCfg.groupTitle || "Gut Wellness - eBook Leads",
+      senderGroupTitle: senderCfg.groupTitle || "Gut Wellness - Lead Magnet",
       subscribers,
     });
   });
 
-  // Export subscriber list as CSV file
-  app.get("/api/leads/export.csv", (_req, res) => {
+  // Protected Admin Route: Export subscriber list as CSV file
+  app.get("/api/leads/export.csv", (req, res): any => {
+    if (!verifyAdminAccess(req)) {
+      return res.status(401).send("Unauthorized. Administrator authentication required.");
+    }
+
     const subscribers = getSubscribers();
     
     // RFC-compliant CSV escaping
@@ -224,20 +295,22 @@ async function startServer() {
       return `"${str}"`;
     };
 
-    const header = ["ID", "Name", "Email", "Date Subscribed", "Source", "Sender Synced"];
+    const header = ["ID", "Name", "Email", "Date Requested", "Source", "Marketing Consent", "Consent Date", "Sender Synced"];
     const rows = subscribers.map((sub) => [
       escapeCsv(sub.id),
       escapeCsv(sub.name),
       escapeCsv(sub.email),
       escapeCsv(sub.date),
       escapeCsv(sub.source),
+      escapeCsv(sub.marketingConsent ? "Yes" : "No"),
+      escapeCsv(sub.consentDate || "N/A"),
       escapeCsv(sub.senderSynced ? "Yes" : "No"),
     ]);
 
     const csvContent = [header.join(","), ...rows.map((r) => r.join(","))].join("\n") + "\n";
 
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    res.setHeader("Content-Disposition", 'attachment; filename="gut_wellness_subscribers.csv"');
+    res.setHeader("Content-Disposition", 'attachment; filename="everyday_gut_wellness_subscribers.csv"');
     res.status(200).send(csvContent);
   });
 

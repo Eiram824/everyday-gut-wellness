@@ -89,7 +89,9 @@ export function App() {
       'myth-vs-fact': 'myths',
       'medical-advice': 'medical-advice',
       'medical-signs': 'medical-advice',
-      'product-review': 'product-review',
+      'product-review': 'planner-product',
+      'product': 'planner-product',
+      'planner-product': 'planner-product',
     };
 
     const resolvedId = idMap[targetId] || targetId;
@@ -148,8 +150,8 @@ export function App() {
         {/* Section 6: When to Seek Medical Advice */}
         <MedicalAdvice />
 
-        {/* Section 7: Product Review & Supplement Transparency */}
-        <ProductSection />
+        {/* Section 7: Original Digital Product - The 30-Day Digestive Wellness Planner */}
+        <ProductSection onJoinWaitlist={() => setIsLeadCaptureOpen(true)} />
       </main>
 
       {/* Section 8: Trust, Transparency & Footer */}

@@ -3,19 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JE9KCKNQ54"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-JE9KCKNQ54');
+    </script>
     <title>Everyday Gut Wellness – Evidence-Informed Digestive Health Guide</title>
     <meta name="description" content="A practical digestive wellness guide that helps readers understand fiber, hydration, daily routines, and evidence-informed habits for better digestive health." />
+    <link rel="canonical" href="https://everydaygutwellness.org/" />
     
     <!-- OpenGraph / Social Cards -->
-    <meta property="og:type" content="article" />
+    <meta property="og:type" content="website" />
     <meta property="og:title" content="Everyday Gut Wellness – Your Gut Has a Routine" />
-    <meta property="og:description" content="A practical guide to fiber, fluids, movement, and the small daily choices that influence bowel regularity." />
+    <meta property="og:description" content="A practical guide to fiber, fluids, movement, and the small daily choices that influence bowel regularity. Explore our free 7-Day Reset Guide and 30-Day Planner." />
     <meta property="og:site_name" content="Everyday Gut Wellness" />
+    <meta property="og:image" content="./assets/images/ebook_cover_guide_1793359029909.jpg" />
     
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Everyday Gut Wellness – Your Gut Has a Routine" />
     <meta name="twitter:description" content="A practical guide to fiber, fluids, movement, and the small daily choices that influence bowel regularity." />
+    <meta name="twitter:image" content="./assets/images/ebook_cover_guide_1793359029909.jpg" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -81,35 +94,62 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "MedicalWebPage",
-      "name": "Everyday Gut Wellness",
-      "headline": "Your Gut Has a Routine. Are Your Daily Habits Working With It?",
-      "description": "A practical guide to fiber, fluids, movement, and the small daily choices that can influence bowel regularity.",
-      "about": [
+      "@graph": [
         {
-          "@type": "Thing",
-          "name": "Dietary Fiber"
+          "@type": "WebSite",
+          "@id": "https://everydaygutwellness.org/#website",
+          "url": "https://everydaygutwellness.org/",
+          "name": "Everyday Gut Wellness",
+          "description": "Evidence-informed digestive wellness education and original digital workbooks.",
+          "publisher": {
+            "@id": "https://everydaygutwellness.org/#organization"
+          }
         },
         {
-          "@type": "Thing",
-          "name": "Gastrointestinal Motility"
+          "@type": "Organization",
+          "@id": "https://everydaygutwellness.org/#organization",
+          "name": "Everyday Gut Wellness",
+          "url": "https://everydaygutwellness.org/",
+          "logo": "https://everydaygutwellness.org/assets/images/ebook_cover_guide_1793359029909.jpg"
         },
         {
-          "@type": "Thing",
-          "name": "Constipation Prevention"
+          "@type": "MedicalWebPage",
+          "@id": "https://everydaygutwellness.org/#webpage",
+          "url": "https://everydaygutwellness.org/",
+          "name": "Everyday Gut Wellness – Your Gut Has a Routine",
+          "headline": "Your Gut Has a Routine. Are Your Daily Habits Working With It?",
+          "description": "A practical guide to fiber, fluids, movement, and the small daily choices that can influence bowel regularity.",
+          "about": [
+            { "@type": "Thing", "name": "Dietary Fiber" },
+            { "@type": "Thing", "name": "Gastrointestinal Motility" },
+            { "@type": "Thing", "name": "Bowel Regularity Habits" }
+          ],
+          "audience": {
+            "@type": "Audience",
+            "audienceType": "General Public"
+          }
+        },
+        {
+          "@type": "Product",
+          "@id": "https://everydaygutwellness.org/#planner-product",
+          "name": "The 30-Day Digestive Wellness Planner",
+          "description": "A practical 68-page habit-tracking workbook to organize daily hydration, plant fiber diversity, gentle movement, and unhurried digestive routines.",
+          "brand": {
+            "@type": "Brand",
+            "name": "Everyday Gut Wellness"
+          },
+          "offers": {
+            "@type": "Offer",
+            "price": "14.99",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "url": "https://everydaygutwellness.org/#planner-product"
+          }
         }
-      ],
-      "audience": {
-        "@type": "Audience",
-        "audienceType": "General Public"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Everyday Gut Wellness"
-      }
+      ]
     }
     </script>
-    <script type="module" crossorigin src="./assets/index-BR0zba54.js"></script>
+    <script type="module" crossorigin src="./assets/index-DvjGV2jO.js"></script>
   </head>
   <body class="bg-[#FBF9F5] text-[#2C2A26] antialiased selection:bg-[#EAD3C7] selection:text-[#14382B]">
     <div id="root">

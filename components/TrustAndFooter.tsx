@@ -83,6 +83,15 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                   When to Seek Medical Advice
                 </button>
               </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('planner-product')}
+                  className="hover:text-white transition-colors text-[#EAD3C7] font-medium"
+                >
+                  The 30-Day Wellness Planner
+                </button>
+              </li>
             </ul>
           </div>
 
@@ -123,8 +132,8 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
             </div>
 
             <div className="pt-2 text-xs text-[#EAF1ED]/70 leading-relaxed bg-white/5 p-3 rounded-lg border border-white/10">
-              <span className="font-semibold text-white block mb-0.5">FTC Affiliate & Advertising Disclosure:</span>
-              This page contains educational information and may include affiliate links. If you purchase through an affiliate link, we may earn a commission at no additional cost to you. We only recommend solutions that align with clinical digestive health criteria.
+              <span className="font-semibold text-white block mb-0.5">Independent Educational Publishing:</span>
+              Everyday Gut Wellness is an independent digital health publisher. We create original educational guides, printables, and habit workbooks. Our digital products are fulfilled securely via Gumroad. We do not sell or promote third-party affiliate supplements.
             </div>
           </div>
         </div>
@@ -183,19 +192,19 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                 </h3>
                 <div className="text-xs sm:text-sm text-[#4A463F] space-y-3 leading-relaxed">
                   <p>
-                    Everyday Gut Wellness is committed to protecting your privacy. This policy outlines how we handle information gathered on our website.
+                    Everyday Gut Wellness is committed to protecting your privacy and practicing transparent data management.
                   </p>
                   <p>
-                    <strong>Information We Collect:</strong> When you voluntarily request our free 7-Day Gentle Gut Reset Guide, we collect your first name and email address. We do NOT collect sensitive medical records, credit card numbers, or personal identifying government numbers.
+                    <strong>Information We Collect:</strong> When you request our free 7-Day Gentle Gut Reset Guide, we collect your name and email address to provide immediate access. We do NOT collect credit card numbers, health records, or personal identification documents on this website.
                   </p>
                   <p>
-                    <strong>How We Use Your Information:</strong> Your email is used solely to deliver the requested educational guide and relevant digestive wellness tips or product reviews. We never sell, rent, lease, or share your contact info with third-party telemarketers or data brokers.
+                    <strong>Email Delivery & Marketing Consent:</strong> Requesting the free guide delivers the publication immediately. If you optionally choose to check the marketing consent box, you may receive educational articles and wellness newsletters. You may unsubscribe at any time with a single click using the link at the bottom of every email.
                   </p>
                   <p>
-                    <strong>Your Unsubscribe Rights:</strong> You can unsubscribe from our mailing list at any time with one click using the link at the bottom of every email.
+                    <strong>Digital Product Purchases:</strong> Purchases of our digital workbooks (such as The 30-Day Digestive Wellness Planner) are securely processed and fulfilled by Gumroad. Gumroad handles billing, tax collection, and file delivery. We never receive or store your payment card numbers.
                   </p>
                   <p>
-                    <strong>Cookies & Web Analytics:</strong> We use Google Analytics (GA4) with anonymized IP tracking to monitor aggregate site performance and improve user experience.
+                    <strong>Analytics:</strong> We use Google Analytics 4 (GA4) with IP anonymization to evaluate aggregate website traffic and usability. We do not pass health symptoms or personal medical data into analytics.
                   </p>
                 </div>
               </div>
@@ -213,19 +222,19 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                 </h3>
                 <div className="text-xs sm:text-sm text-[#4A463F] space-y-3 leading-relaxed">
                   <p>
-                    By accessing or using Everyday Gut Wellness, you agree to comply with and be bound by these Terms of Service. If you do not agree, please do not use this site.
+                    By accessing or using Everyday Gut Wellness, you agree to comply with and be bound by these Terms of Service.
                   </p>
                   <p>
-                    <strong>Educational Use Only:</strong> All content, checklists, guides, and tools provided on this website are for educational and informational purposes only and are not a substitute for professional medical diagnosis or treatment.
+                    <strong>Educational Use Only:</strong> All content, checklists, planners, and articles provided on this website are for educational and self-reflection purposes only and are not a substitute for professional medical diagnosis or treatment.
                   </p>
                   <p>
-                    <strong>Affiliate Relationships:</strong> Certain links on this website lead to external merchant websites where we may receive affiliate commissions on qualifying purchases. We are not responsible for the products, fulfillment, or customer service of third-party vendors.
+                    <strong>Digital Products & Payments:</strong> Original digital workbooks and planners offered on this website are sold and fulfilled via Gumroad. By initiating a purchase, you agree to Gumroad's terms and privacy policies. All downloadable materials are licensed for personal, non-commercial use.
                   </p>
                   <p>
-                    <strong>Intellectual Property:</strong> The articles, graphics, and layout on Everyday Gut Wellness are protected by copyright laws. You may not reproduce, republish, or redistribute our materials without prior written consent.
+                    <strong>Intellectual Property:</strong> The articles, graphics, habit trackers, and workbook designs on Everyday Gut Wellness are original intellectual property protected by copyright. You may not republish, resell, or distribute our materials without prior written consent.
                   </p>
                   <p>
-                    <strong>Limitation of Liability:</strong> Under no circumstances shall Everyday Gut Wellness or its contributors be held liable for any direct or indirect damages resulting from the use of information provided on this platform.
+                    <strong>Limitation of Liability:</strong> Under no circumstances shall Everyday Gut Wellness or its creators be held liable for any direct or indirect damages resulting from the use or misuse of educational information or habit worksheets provided on this site.
                   </p>
                 </div>
               </div>

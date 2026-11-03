@@ -32,7 +32,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 }) => {
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
-  const [agreed, setAgreed] = useState(true);
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -50,22 +50,21 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
       return;
     }
 
-    if (!agreed) {
-      setErrorMessage('Please confirm your consent to receive the eBook and reset emails.');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
+      const payload = {
+        name: firstName.trim() || 'Reader',
+        email: trimmedEmail,
+        source: 'ebook_lead_modal',
+        marketingConsent: Boolean(marketingConsent),
+        consentDate: marketingConsent ? new Date().toISOString() : null,
+      };
+
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: firstName.trim() || 'Reader',
-          email: trimmedEmail,
-          source: 'ebook_lead_modal',
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json().catch(() => ({}));
@@ -81,6 +80,8 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
           email: trimmedEmail,
           date: new Date().toISOString(),
           source: 'ebook_lead_modal',
+          marketingConsent: Boolean(marketingConsent),
+          consentDate: marketingConsent ? new Date().toISOString() : null,
         };
         localStorage.setItem('gut_reset_subscriber', JSON.stringify(subscriberObj));
 
@@ -132,6 +133,8 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
           email: trimmedEmail,
           date: new Date().toISOString(),
           source: 'ebook_lead_modal (offline/static)',
+          marketingConsent: Boolean(marketingConsent),
+          consentDate: marketingConsent ? new Date().toISOString() : null,
           offlineFallback: true,
         };
         localStorage.setItem('gut_reset_subscriber', JSON.stringify(subscriberObj));
@@ -330,17 +333,17 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                   </div>
                 </div>
 
-                {/* Consent Checkbox */}
-                <div className="flex items-start gap-2.5 pt-0.5">
+                {/* Optional Marketing Consent Checkbox */}
+                <div className="flex items-start gap-2.5 pt-1 bg-[#F8F6F0] p-3 rounded-xl border border-[#E5DFD5]">
                   <input
-                    id="lead-consent"
+                    id="lead-marketing-consent"
                     type="checkbox"
-                    checked={agreed}
-                    onChange={(e) => setAgreed(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-[#D5CFC5] text-[#14382B] focus:ring-[#14382B] accent-[#14382B]"
+                    checked={marketingConsent}
+                    onChange={(e) => setMarketingConsent(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 rounded border-[#D5CFC5] text-[#14382B] focus:ring-[#14382B] accent-[#14382B] cursor-pointer"
                   />
-                  <label htmlFor="lead-consent" className="text-xs text-[#4A463F] leading-snug select-none">
-                    Send me the free 7–Day Reset Guide & weekly evidence–informed gut wellness notes. No spam; 1–click unsubscribe anytime.
+                  <label htmlFor="lead-marketing-consent" className="text-xs text-[#4A463F] leading-snug select-none cursor-pointer">
+                    <span className="font-semibold text-[#14382B]">(Optional)</span> Yes, I would also like to receive future educational wellness articles, daily habit tips, and digital product updates. You can unsubscribe at any time with 1 click.
                   </label>
                 </div>
 

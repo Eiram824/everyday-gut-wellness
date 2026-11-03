@@ -68,6 +68,203 @@ async function startServer() {
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok" });
   });
+  const DATA_DIR = import_path.default.join(process.cwd(), "data");
+  const SUBSCRIBERS_FILE = import_path.default.join(DATA_DIR, "subscribers.json");
+  const ADMIN_ACCESS_KEY = (process.env.ADMIN_ACCESS_KEY || "gutwellness_admin_2026").trim();
+  function verifyAdminAccess(req) {
+    const authHeader = req.headers["authorization"] || "";
+    const bearerKey = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+    const customHeaderKey = (req.headers["x-admin-key"] || "").trim();
+    const queryKey = (req.query.key || "").trim();
+    return customHeaderKey === ADMIN_ACCESS_KEY || bearerKey === ADMIN_ACCESS_KEY || queryKey === ADMIN_ACCESS_KEY;
+  }
+  function getSubscribers() {
+    try {
+      if (!import_fs.default.existsSync(DATA_DIR)) {
+        import_fs.default.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      if (!import_fs.default.existsSync(SUBSCRIBERS_FILE)) {
+        import_fs.default.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify([], null, 2), "utf8");
+        return [];
+      }
+      const data = import_fs.default.readFileSync(SUBSCRIBERS_FILE, "utf8");
+      const list = JSON.parse(data) || [];
+      return list.map((item) => ({
+        id: item.id || `sub_${Date.now()}`,
+        name: item.name || "Reader",
+        email: item.email || "",
+        date: item.date || (/* @__PURE__ */ new Date()).toISOString(),
+        source: item.source || "ebook_lead_magnet",
+        marketingConsent: Boolean(item.marketingConsent),
+        consentDate: item.consentDate || null,
+        senderSynced: Boolean(item.senderSynced)
+      }));
+    } catch (err) {
+      console.error("[Backend] Error reading subscribers file:", err);
+      return [];
+    }
+  }
+  function saveSubscribers(subscribers) {
+    try {
+      if (!import_fs.default.existsSync(DATA_DIR)) {
+        import_fs.default.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      const tempFile = `${SUBSCRIBERS_FILE}.tmp`;
+      import_fs.default.writeFileSync(tempFile, JSON.stringify(subscribers, null, 2), "utf8");
+      import_fs.default.renameSync(tempFile, SUBSCRIBERS_FILE);
+    } catch (err) {
+      console.error("[Backend] Error saving subscribers file:", err);
+    }
+  }
+  const SENDER_CONFIG_FILE = import_path.default.join(DATA_DIR, "sender_config.json");
+  function getSenderConfig() {
+    try {
+      if (import_fs.default.existsSync(SENDER_CONFIG_FILE)) {
+        const raw = import_fs.default.readFileSync(SENDER_CONFIG_FILE, "utf8");
+        return JSON.parse(raw);
+      }
+    } catch (e) {
+      console.warn("[Backend] Error reading sender_config.json:", e);
+    }
+    return {
+      apiToken: process.env.SENDER_API_TOKEN,
+      groupId: process.env.SENDER_GROUP_ID
+    };
+  }
+  app.post("/api/admin/verify", (req, res) => {
+    const key = (req.body?.key || "").trim();
+    if (key === ADMIN_ACCESS_KEY) {
+      return res.json({ success: true, message: "Admin authenticated." });
+    }
+    return res.status(401).json({ success: false, error: "Invalid admin key." });
+  });
+  app.post("/api/subscribe", async (req, res) => {
+    try {
+      const { name, email, source = "ebook_lead_magnet", marketingConsent = false } = req.body || {};
+      const trimmedEmail = (email || "").trim().toLowerCase().slice(0, 254);
+      const cleanName = (name || "").replace(/<[^>]*>?/gm, "").trim().slice(0, 80) || "Reader";
+      const cleanSource = String(source).replace(/<[^>]*>?/gm, "").trim().slice(0, 50);
+      const hasMarketingConsent = Boolean(marketingConsent);
+      const consentDate = hasMarketingConsent ? (/* @__PURE__ */ new Date()).toISOString() : null;
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+      if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
+        return res.status(400).json({ error: "Please provide a valid email address." });
+      }
+      const subscribers = getSubscribers();
+      const existingIndex = subscribers.findIndex((s) => s.email === trimmedEmail);
+      let senderSynced = false;
+      let senderMessage = "";
+      const senderCfg = getSenderConfig();
+      const senderToken = process.env.SENDER_API_TOKEN || senderCfg.apiToken;
+      const senderGroupId = process.env.SENDER_GROUP_ID || senderCfg.groupId;
+      if (senderToken) {
+        try {
+          const senderPayload = {
+            email: trimmedEmail,
+            firstname: cleanName
+          };
+          if (hasMarketingConsent && senderGroupId) {
+            senderPayload.groups = [senderGroupId];
+          }
+          const senderRes = await fetch("https://api.sender.net/v2/subscribers", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${senderToken}`,
+              "Content-Type": "application/json",
+              "Accept": "application/json"
+            },
+            body: JSON.stringify(senderPayload)
+          });
+          if (senderRes.ok) {
+            senderSynced = true;
+            senderMessage = hasMarketingConsent ? "Successfully synced with Sender.net list." : "Registered with Sender.net (Transactional guide delivery only).";
+          } else {
+            const errData = await senderRes.json().catch(() => ({}));
+            console.warn("[Backend] Sender.net API non-OK response:", senderRes.status, errData);
+            senderMessage = `Sender.net status ${senderRes.status}. Saved to local subscriber list.`;
+          }
+        } catch (senderErr) {
+          console.error("[Backend] Sender.net API error:", senderErr.message);
+          senderMessage = "Saved locally; Sender.net sync will retry.";
+        }
+      } else {
+        senderMessage = "Saved to local subscriber list (Sender.net token not configured).";
+      }
+      const subscriberRecord = {
+        id: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        name: cleanName,
+        email: trimmedEmail,
+        date: (/* @__PURE__ */ new Date()).toISOString(),
+        source: cleanSource,
+        marketingConsent: hasMarketingConsent,
+        consentDate,
+        senderSynced
+      };
+      if (existingIndex >= 0) {
+        subscribers[existingIndex] = {
+          ...subscribers[existingIndex],
+          name: cleanName,
+          date: (/* @__PURE__ */ new Date()).toISOString(),
+          marketingConsent: hasMarketingConsent || subscribers[existingIndex].marketingConsent,
+          consentDate: consentDate || subscribers[existingIndex].consentDate,
+          senderSynced: senderSynced || subscribers[existingIndex].senderSynced
+        };
+      } else {
+        subscribers.unshift(subscriberRecord);
+      }
+      saveSubscribers(subscribers);
+      return res.json({
+        success: true,
+        message: "Your free 7-Day Gentle Gut Reset Guide is ready for instant download.",
+        subscriber: { name: cleanName, email: trimmedEmail, marketingConsent: hasMarketingConsent },
+        senderSynced,
+        senderStatus: senderMessage
+      });
+    } catch (error) {
+      console.error("[Backend] /api/subscribe error:", error);
+      return res.status(500).json({ error: error.message || "Failed to process subscription." });
+    }
+  });
+  app.get("/api/leads", (req, res) => {
+    if (!verifyAdminAccess(req)) {
+      return res.status(401).json({ error: "Unauthorized access. Valid administrator key required." });
+    }
+    const subscribers = getSubscribers();
+    const senderCfg = getSenderConfig();
+    const isConfigured = Boolean(process.env.SENDER_API_TOKEN || senderCfg.apiToken);
+    res.json({
+      total: subscribers.length,
+      senderConfigured: isConfigured,
+      senderGroupTitle: senderCfg.groupTitle || "Gut Wellness - Lead Magnet",
+      subscribers
+    });
+  });
+  app.get("/api/leads/export.csv", (req, res) => {
+    if (!verifyAdminAccess(req)) {
+      return res.status(401).send("Unauthorized. Administrator authentication required.");
+    }
+    const subscribers = getSubscribers();
+    const escapeCsv = (val) => {
+      if (val === null || val === void 0) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+    const header = ["ID", "Name", "Email", "Date Requested", "Source", "Marketing Consent", "Consent Date", "Sender Synced"];
+    const rows = subscribers.map((sub) => [
+      escapeCsv(sub.id),
+      escapeCsv(sub.name),
+      escapeCsv(sub.email),
+      escapeCsv(sub.date),
+      escapeCsv(sub.source),
+      escapeCsv(sub.marketingConsent ? "Yes" : "No"),
+      escapeCsv(sub.consentDate || "N/A"),
+      escapeCsv(sub.senderSynced ? "Yes" : "No")
+    ]);
+    const csvContent = [header.join(","), ...rows.map((r) => r.join(","))].join("\n") + "\n";
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="everyday_gut_wellness_subscribers.csv"');
+    res.status(200).send(csvContent);
+  });
   app.post("/api/generate-content", async (req, res) => {
     try {
       const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;

@@ -23,8 +23,11 @@ import {
   ExternalLink,
   DollarSign,
   TrendingUp,
-  FileText
+  FileText,
+  Lock,
+  Unlock
 } from 'lucide-react';
+import { PLANNER_PRODUCT_INFO } from '../constants';
 
 interface Subscriber {
   id: string;
@@ -32,6 +35,8 @@ interface Subscriber {
   email: string;
   date: string;
   source: string;
+  marketingConsent?: boolean;
+  consentDate?: string | null;
   senderSynced: boolean;
 }
 
@@ -49,25 +54,90 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
   const [copiedPrompt, setCopiedPrompt] = useState(false);
   const [copiedListing, setCopiedListing] = useState(false);
 
-  const fetchLeads = async () => {
+  // Admin authentication state
+  const [adminKey, setAdminKey] = useState<string>(() => {
+    try {
+      return sessionStorage.getItem('gut_admin_key') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return Boolean(sessionStorage.getItem('gut_admin_key'));
+    } catch {
+      return false;
+    }
+  });
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState<boolean>(false);
+
+  const verifyAndSaveKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(null);
+    setIsVerifying(true);
+
+    try {
+      const res = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: adminKey.trim() }),
+      });
+
+      if (res.ok) {
+        setIsAuthenticated(true);
+        try {
+          sessionStorage.setItem('gut_admin_key', adminKey.trim());
+        } catch {}
+        fetchLeads(adminKey.trim());
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setAuthError(data.error || 'Invalid administrator key. Please check your credentials.');
+      }
+    } catch (err: any) {
+      setAuthError('Connection error while verifying administrator key.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleLogout = () => {
+    try {
+      sessionStorage.removeItem('gut_admin_key');
+    } catch {}
+    setIsAuthenticated(false);
+    setAdminKey('');
+  };
+
+  const fetchLeads = async (customKey?: string) => {
+    const keyToUse = customKey ?? adminKey;
     setIsLoading(true);
     let apiSuccess = false;
+
     try {
-      const res = await fetch('/api/leads');
+      const res = await fetch('/api/leads', {
+        headers: {
+          'x-admin-key': keyToUse,
+        },
+      });
+
       if (res.ok) {
         const data = await res.json();
-        if (data.subscribers && data.subscribers.length > 0) {
+        if (data.subscribers) {
           setSubscribers(data.subscribers);
-          setTotal(data.total || data.subscribers.length);
+          setTotal(data.total ?? data.subscribers.length);
           setSenderConfigured(Boolean(data.senderConfigured));
           apiSuccess = true;
         }
+      } else if (res.status === 401) {
+        setIsAuthenticated(false);
+        setAuthError('Session expired or invalid key. Please enter your administrator key.');
       }
     } catch (err) {
-      console.warn('API leads endpoint offline, using local storage fallback:', err);
+      console.warn('Backend leads API unavailable, attempting local storage fallback:', err);
     }
 
-    if (!apiSuccess) {
+    if (!apiSuccess && isAuthenticated) {
       try {
         const localListRaw = localStorage.getItem('all_gut_subscribers');
         const singleSubRaw = localStorage.getItem('gut_reset_subscriber');
@@ -81,6 +151,8 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
             email: item.email,
             date: item.date || new Date().toISOString(),
             source: item.source || 'ebook_lead_modal',
+            marketingConsent: Boolean(item.marketingConsent),
+            consentDate: item.consentDate || null,
             senderSynced: false,
           }));
         } else if (singleSubRaw) {
@@ -91,6 +163,8 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
             email: parsed.email,
             date: parsed.date || new Date().toISOString(),
             source: 'ebook_lead_modal',
+            marketingConsent: Boolean(parsed.marketingConsent),
+            consentDate: parsed.consentDate || null,
             senderSynced: false,
           }];
         }
@@ -109,14 +183,30 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
       alert('No subscribers to export yet.');
       return;
     }
+
+    if (adminKey) {
+      // Trigger authenticated direct download from server
+      const downloadUrl = `/api/leads/export.csv?key=${encodeURIComponent(adminKey)}`;
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', 'everyday_gut_wellness_subscribers.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      return;
+    }
+
+    // Client-side fallback if in offline mode
     const escapeCsv = (val: any) => `"${String(val ?? '').replace(/"/g, '""')}"`;
-    const header = ["ID", "Name", "Email", "Date Subscribed", "Source", "Sender Synced"];
+    const header = ["ID", "Name", "Email", "Date Requested", "Source", "Marketing Consent", "Consent Date", "Sender Synced"];
     const rows = subscribers.map((sub) => [
       escapeCsv(sub.id),
       escapeCsv(sub.name),
       escapeCsv(sub.email),
       escapeCsv(sub.date),
       escapeCsv(sub.source),
+      escapeCsv(sub.marketingConsent ? "Yes" : "No"),
+      escapeCsv(sub.consentDate || "N/A"),
       escapeCsv(sub.senderSynced ? "Yes" : "No"),
     ]);
     const csvContent = [header.join(","), ...rows.map((r) => r.join(","))].join("\n");
@@ -124,96 +214,107 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'gut_wellness_subscribers.csv');
+    link.setAttribute('download', 'everyday_gut_wellness_subscribers.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  const claudeMasterPrompt = `You are a world-class Clinical Nutritionist, Functional Gastroenterology Educator, and Bestselling Digital Health Author. 
+  // Author Master Prompt for The 30-Day Digestive Wellness Planner
+  const claudeMasterPrompt = `You are a world-class Clinical Nutritionist, Functional Health Educator, and Professional Digital Health Workbook Designer.
 
-Write an authoritative, publication-quality eBook titled:
-"The 30-Day Gut Motility & Metabolic Rhythm Blueprint: A Clinical Protocol for Smooth Transit, Lasting Bloat Relief, and Microbial Balance"
+Write the complete editorial manuscript and worksheets for an original 68-page digital wellness product titled:
+"The 30-Day Digestive Wellness Planner: A Practical Habit-Tracking Workbook for Everyday Digestive Rhythm"
+
+BRAND: Everyday Gut Wellness (US Edition)
+PRODUCT TYPE: Educational workbook & daily habit tracker (NOT a medical treatment program or detox protocol).
+PRICE: $14.99 on Gumroad.
 
 TARGET AUDIENCE:
-Busy adults aged 28-65 experiencing recurring afternoon abdominal distension, irregular bowel transit (Bristol Stool Type 1-2 or alternating), brain fog, and fatigue. They are exhausted by extreme "detox cleanses" and want a physiology-grounded lifestyle protocol that delivers permanent regularity without harsh stimulant laxatives.
+English-speaking adults (primarily US) seeking a structured, compassionate, and evidence-informed habit system to observe daily food variety, hydration timing, gentle movement, and unhurried bathroom routines. They want to avoid extreme cleanses, unverified detox teas, and rigid diet plans.
 
-TONE & EDITORIAL STANDARDS:
-- Authoritative, empathetic, clear, clinical yet accessible (like a top functional medicine practitioner speaking to an intelligent patient).
-- Zero miracle cure promises, zero sensationalism. Strictly compliant with FTC and US Dietary Guidelines.
-- Deep physiological explanations (Enteric Nervous System, Peristalsis, Migrating Motor Complex [MMC], Gastric Acid, Soluble Beta-Glucans, Short-Chain Fatty Acids [SCFAs]).
+SCIENTIFIC & HEALTH COMPLIANCE REQUIREMENTS (STRICT):
+1. Do NOT claim that this planner cures, treats, reverses, or prevents any disease or medical condition.
+2. Do NOT promise that customers will eliminate constipation, bloating, or other symptoms.
+3. Do NOT claim that the planner stimulates intestinal movement or produces guaranteed metabolic results.
+4. Do NOT prescribe supplements, medications, or treatment protocols.
+5. Do NOT impose a universal fiber target; explain clearly that individual fiber tolerance varies and that fiber should be increased gradually.
+6. Avoid unsupported claims and fabricated scientific references. Use responsible, evidence-informed educational language.
+7. Always advise customers to consult a qualified healthcare professional for persistent, severe, or concerning digestive symptoms.
+8. Include an appropriate medical and FDA disclaimer.
 
-BOOK STRUCTURE (GENERATE FULL CHAPTERS WITH HIGH DETAIL):
+WORKBOOK STRUCTURE (PROVIDE FULL TEXT AND WORKSHEET TEMPLATES FOR ALL 11 MODULES):
 
-1. COVER & TITLE PAGE
-   - Full Subtitle, Author Bylaw (Everyday Gut Wellness Editorial Board), Edition Year, Copyright Notice, and Clinical Disclaimer.
+Module 01: Introduction & Workbook Instructions
+- How to pace yourself over 30 days without habit fatigue.
+- How to establish a personal baseline without judgment.
 
-2. FOREWORD & INTRODUCTION: The Trap of Aggressive Cleanses
-   - Why colon detoxes and stimulant teas create dependency and mucosal irritation.
-   - The "Housekeeper Wave": Understanding the Migrating Motor Complex (MMC).
+Module 02: 30-Day Wellness Habit Tracker Grid
+- Clear 30-day checkbox matrix for baseline hydration, fiber anchors, and movement.
 
-3. CHAPTER 1: The Physiology of Digestive Motility
-   - The Gut-Brain Axis & Autonomic Tone: Why sympathetic stress pauses peristalsis.
-   - Normal Transit Spectrum: Demystifying the myth of mandatory daily 7:00 AM evacuation.
-   - The Gastrocolic Reflex: How morning warm liquids signal colonic contractions.
+Module 03: Daily Food & Hydration Journal
+- Spread templates for tracking meal composition, fluid timing, and mindful chewing awareness.
 
-4. CHAPTER 2: The 35-Gram Soluble Fiber Matrix
-   - The crucial difference between rough insoluble scraping fiber and smooth gel-forming soluble fiber.
-   - Exact Daily Fiber Stacking Protocol (Rolled oats, chia mucilage, pectin in stewed apples, cooked lentils).
-   - Practical Table: "High Bloat Catalyst vs. Gentle Gut Swap".
+Module 04: Fiber & Nutrition Awareness Worksheets
+- Detailed breakdown of gentle soluble fibers (oats, cooked legumes, chia, peeled carrots) vs. insoluble roughage.
+- The "Gradual Fiber Addition Protocol" (adding 3-5g per week alongside adequate water).
 
-5. CHAPTER 3: The 30-Day Phased Reset Protocol
-   - Phase 1 (Days 1-7): Gastrocolic Awakening & Hydration Anchors.
-   - Phase 2 (Days 8-21): Plant Diversity Expansion & Pelvic Floor Alignment (35° Squat Angle).
-   - Phase 3 (Days 22-30): Circadian Eating Windows & Evening MMC Optimization.
+Module 05: Meal Planning Worksheets
+- Weekly templates to plan diverse plant foods across breakfasts, lunches, and dinners.
 
-6. CHAPTER 4: 14 Easy Gut-Friendly Recipes
-   - Morning Elixirs, High-Soluble Breakfast Bowls, Soothing Midday Stews, and 3-Ingredient Evening Teas. Include exact ingredients, preparation time, and digestive benefits.
+Module 06: Gentle Movement & Daily Routine Tracker
+- Tracking 10-15 minute post-meal walks, desk mobility breaks, and pelvic floor toilet ergonomics (35° footstool position).
 
-7. CHAPTER 5: Targeted Botanical Synergy & Evening Motility Support
-   - When whole foods need gentle botanical reinforcement.
-   - Objective breakdown of clinically backed botanicals: Psyllium Husk (mucilaginous bulk), Soothing Aloe Vera extract, Bentonite Clay (toxin binder), and L. Acidophilus.
-   - Spotlight recommendation for BellyFlush as an optional evening botanical partner with transparent sourcing standards.
+Module 07: Sleep & Lifestyle Habit Tracker
+- Evening wind-downs, 3-hour pre-bed dinner cutoffs, and stress-reduction logs.
 
-8. CHAPTER 6: Printable 30-Day Daily Tracker & Bristol Consistency Diary
-   - Daily checklist: 16oz morning water, slow chewing tally, fluid counter, Bristol Stool scale tracker (Type 1-7), and bloating severity log (1-10).
+Module 08: Digestive Symptom Observation Journal
+- Objective 1-10 daily comfort ratings to observe personal food tolerances.
 
-9. APPENDIX: Medical Red Flags (When to Seek a Gastroenterologist)
-   - Rectal bleeding, unexplained weight loss, nocturnal symptoms, sudden severe acute pain.
+Module 09: Bristol Stool Chart Clinical Reference
+- Educational spectrum (Types 1-7) explained objectively with dietary context.
 
-Provide the complete text in pristine, publication-ready Markdown format with beautiful subheadings, callout boxes, bullet points, and tables.`;
+Module 10: Weekly Reflection & Adjustment Pages
+- Weeks 1, 2, 3, and 4 reflection prompts to adjust water and fiber pacing.
 
+Module 11: Final 30-Day Progress Review
+- Comprehensive synthesis of month-long self-care habits and long-term maintenance recommendations.
+
+Output the entire manuscript in clean, formatted Markdown with tables, printable worksheet layouts, and callout boxes.`;
+
+  // First-Party Gumroad Product Listing Copy
   const gumroadListingCopy = `PRODUCT TITLE:
-The 30-Day Gut Motility & Metabolic Rhythm Blueprint: Masterclass Edition
+The 30-Day Digestive Wellness Planner: Digital Workbook Edition
 
 PRICE:
-$9.99 (Standard) or $14.99 (Deluxe with 14 Gut-Friendly Recipes & Printable Journal)
+$14.99 (Instant Digital Download)
 
-TAGLINE:
-A comprehensive 4-phase clinical protocol, 14 gut-friendly recipes, and daily motility trackers to soothe chronic bloating and re-establish regular bowel habits without harsh cleanses.
+SUBTITLE / TAGLINE:
+A practical 68-page habit-tracking workbook to organize your daily hydration, diverse plant fiber, gentle movement, and unhurried digestive routines.
 
 PRODUCT DESCRIPTION:
-Are you tired of feeling bloated by 3:00 PM, struggling with irregular transit, or relying on aggressive laxative teas that leave your stomach cramping?
+Take the overwhelm out of everyday gut wellness.
 
-Your digestive system isn't "broken"—it's simply out of sync with its natural physiological rhythm.
+Healthy digestive rhythm isn't built on extreme detox teas, restrictive crash diets, or aggressive cleanses. It is built on steady, daily habits: drinking enough fluids, eating a diverse variety of plant fibers, allowing unhurried time after meals, and staying gently active.
 
-Inside this comprehensive 30-Day Master Blueprint, you'll discover:
-✓ The Enteric Nervous System & Transit Biology: How autonomic tone and the "gut housekeeper wave" (MMC) dictate peristalsis.
-✓ The 35-Gram Soluble Fiber Matrix: Gentle gel-forming fiber protocols that soothe mucosal walls without triggering fermentative gas.
-✓ The 4-Phase Step-by-Step Reset: Phased protocols from gastrocolic morning awakening to circadian eating windows.
-✓ 14 Easy Gut-Restoring Recipes: Delicious morning elixirs, soothing high-soluble breakfast bowls, easy stews, and bedtime herbal broths.
-✓ Complete 30-Day Printable Bristol Stool & Bloating Severity Tracker: Document your motility improvements daily.
-✓ Targeted Botanical Synergy: Objective analysis of psyllium husk, soothing aloe, and evening motility support.
+The 30-Day Digestive Wellness Planner provides structured, non-judgmental worksheets to help you observe what works best for your unique body.
 
-WHAT YOU RECEIVE:
-• Complete High-Resolution Masterclass Guide (PDF)
-• 14 Printable Gut-Friendly Recipe Cards
-• 30-Day Bristol Stool Consistency & Symptom Journal (Printable Bedside Edition)
-• Clinical Dietary & Botanical Reference Guide
+WHAT IS INCLUDED:
+✓ 68-Page High-Resolution US Letter (8.5" x 11") Printable PDF
+✓ A4 Print-Ready PDF Edition
+✓ Interactive Fillable Digital PDF (compatible with iPad GoodNotes, Notability, and PDF readers)
+✓ 11 Complete Habit & Reflection Modules
+✓ Daily Food, Fluid, and Mindful Chewing Journals
+✓ Gentle Soluble Fiber & Nutrition Worksheets
+✓ Bristol Stool Form Clinical Educational Reference
+✓ Weekly Progress Reflections and 30-Day Review Summary
 
-POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
-"Thank you for investing in your digestive health! Start Phase 1 tomorrow morning. For accelerated results alongside your whole-food routine, check out our recommended evening botanical motility supplement, BellyFlush: [YOUR CLICKBANK AFFILIATE LINK HERE]"`;
+IMPORTANT HEALTH NOTICE:
+This planner is strictly an educational workbook and personal habit tracker. It does not provide medical advice, diagnosis, or treatment, and does not claim to cure, prevent, or treat any medical condition. Always consult your healthcare provider regarding persistent digestive concerns.
+
+DELIVERY:
+Instant digital download immediately following checkout. Accessible on desktop, tablet, and smartphone.`;
 
   const handleCopyPrompt = () => {
     if (navigator.clipboard) {
@@ -232,10 +333,10 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && isAuthenticated) {
       fetchLeads();
     }
-  }, [isOpen]);
+  }, [isOpen, isAuthenticated]);
 
   if (!isOpen) return null;
 
@@ -254,20 +355,34 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
             </div>
             <div>
               <h3 className="font-serif font-bold text-lg text-white">
-                Creator Admin: Gumroad Suite & Leads Hub
+                Creator Admin: Digital Products & Subscriber Hub
               </h3>
               <p className="text-xs text-white/70">
-                Manage your eBook digital product, export Gumroad-ready PDF, copy Claude Master Prompt, and view subscribers
+                Manage your original Gumroad digital products, copy author prompts, and view verified subscribers
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          
+          <div className="flex items-center gap-3">
+            {isAuthenticated && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-xs text-white/70 hover:text-white underline underline-offset-2 flex items-center gap-1"
+                title="Lock session"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>Lock</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Navigation Tabs */}
@@ -282,7 +397,7 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
             }`}
           >
             <Sparkles className="w-4 h-4" />
-            <span>Gumroad eBook Suite & Claude Prompt</span>
+            <span>Digital Product Suite (Planner & Prompts)</span>
           </button>
 
           <button
@@ -295,50 +410,52 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
             }`}
           >
             <Users className="w-4 h-4" />
-            <span>Email Subscribers ({total})</span>
+            <span>Subscriber Database ({total})</span>
           </button>
         </div>
 
-        {/* TAB 1: GUMROAD DIGITAL PRODUCT SUITE & CLAUDE PROMPT */}
+        {/* TAB 1: GUMROAD DIGITAL PRODUCT SUITE & AUTHOR PROMPT */}
         {activeTab === 'gumroad' && (
           <div className="p-6 overflow-y-auto flex-1 space-y-6">
-            {/* Strategy Banner: Why Gumroad Own Product + ClickBank Affiliate is the Golden Combination */}
+            
+            {/* Strategy Banner: Original Digital Publishing Model */}
             <div className="p-5 bg-gradient-to-r from-[#14382B] to-[#1E4D3C] text-white rounded-2xl shadow-sm space-y-3">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#EAD3C7]">
                 <TrendingUp className="w-4 h-4" />
-                The Ultimate Funnel Strategy: Own Product + Clickbank Affiliate
+                Independent Digital Publishing & Direct Ownership
               </div>
               <h4 className="text-xl font-serif font-bold text-white">
-                Bakit Mas Mainam ang May Sariling Digital eBook sa Gumroad?
+                Bakit Mas Profitable at Secure ang Sariling Digital Products?
               </h4>
               <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
-                1. <strong>100% Facebook at Google Ads Approval:</strong> Mas madaling ma-approve ang Ads kung lehitimong digital product (Educational eBook Guide) ang ibinebenta kaysa direct affiliate link na madalas ma-flag.<br/>
-                2. <strong>Pag-aari mo ang Customer List (100% Leads):</strong> Sa Gumroad, makukuha mo ang buong pangalan at email ng bawat bumibili. Ang buyer list ay 10x mas valuable.<br/>
-                3. <strong>Self-Liquidating Ad Spend:</strong> Ang $9 - $14 na benta ng eBook ay magbabalik ng puhunan mo sa Ads ($0 Customer Acquisition Cost).<br/>
-                4. <strong>Double Kita sa Backend:</strong> Sa loob ng eBook at sa Gumroad Thank-You page, i-recommend ang BellyFlush affiliate offer ($100-$150 commission) bilang "Recommended Botanical Accelerator"!
+                1. <strong>100% Ad Network Compliance (Meta & Google Ads):</strong> Walang ban o flag dahil lehitimong editorial educational workbook ang iyong produkto.<br/>
+                2. <strong>100% Customer List Ownership:</strong> Bawat bumibili sa Gumroad ay iyong verified buyer lead para sa mga susunod na edisyon.<br/>
+                3. <strong>Zero Affiliate Risk:</strong> Walang dependency sa third-party affiliate vendors, deceptions, o biglaang vendor cancellations.<br/>
+                4. <strong>High Margin & Clean Brand:</strong> Ang $14.99 ay 100% direct revenue minus standard minimal payment processing fees.
               </p>
             </div>
 
-            {/* Funnel Clarification: Free Lead Magnet vs Paid Gumroad Product */}
+            {/* Clear Funnel Architecture */}
             <div className="p-5 bg-white rounded-2xl border border-[#E5DFD5] shadow-sm space-y-4">
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#14382B]">
                 <BookOpen className="w-4 h-4 text-[#B85D36]" />
-                Malinaw na Paghihiwalay: Free Lead Magnet vs. Paid Gumroad Product
+                Malinaw na Funnel Architecture (Tier 1 vs. Tier 2)
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Free Lead Magnet Card */}
+                
+                {/* Free Lead Magnet */}
                 <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E5DFD5] space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider">
-                      Tier 1: Libre ($0)
+                      Tier 1: Libreng Guide ($0)
                     </span>
-                    <span className="text-[11px] text-[#635F57] font-medium">Pang-Email List</span>
+                    <span className="text-[11px] text-[#635F57] font-medium">Lead Magnet</span>
                   </div>
                   <h6 className="font-serif font-bold text-sm text-[#14382B]">
-                    The 7-Day Gentle Gut Reset (Starter Guide)
+                    The 7-Day Gentle Gut Reset Guide
                   </h6>
                   <p className="text-xs text-[#635F57] leading-relaxed">
-                    Mabilisang 8-pahinang Quick-Start guide. Ibinibigay nang <strong>100% LIBRE</strong> sa website kapalit ng pangalan at email address ng bisita para ma-build ang iyong email list.
+                    Mabilisang starter guide na ibinibigay sa website kapalit ng email address para ma-build ang iyong audience. May hiwalay na optional consent checkbox para sa legal compliance.
                   </p>
                   <a
                     href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
@@ -346,43 +463,43 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
                     className="inline-flex items-center gap-1.5 text-xs text-[#14382B] hover:text-[#0E281E] font-medium underline underline-offset-4"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    <span>Download Libreng Copy (Pang-Review)</span>
+                    <span>Download Libreng PDF (Review Copy)</span>
                   </a>
                 </div>
 
-                {/* Paid Gumroad Product Card */}
+                {/* Paid Original Digital Product */}
                 <div className="p-4 rounded-xl bg-[#FFF9F5] border border-[#EAD3C7] space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="px-2 py-0.5 rounded bg-[#B85D36] text-white text-[10px] font-bold uppercase tracking-wider">
-                      Tier 2: Bayad ($9.99 - $14.99)
+                      Tier 2: Bayad na Produkto ($14.99)
                     </span>
-                    <span className="text-[11px] text-[#B85D36] font-semibold">100% Kita Mo</span>
+                    <span className="text-[11px] text-[#B85D36] font-semibold">100% Sariling Kita</span>
                   </div>
                   <h6 className="font-serif font-bold text-sm text-[#14382B]">
-                    The 30-Day Gut Motility Masterclass Blueprint
+                    {PLANNER_PRODUCT_INFO.title}
                   </h6>
                   <p className="text-xs text-[#635F57] leading-relaxed">
-                    Ang komprehensibong 40+ pahinang master program na may <strong>14 Gut-Healing Recipes</strong>, 4 Phased Protocols, at 30-Day Bristol Journal. Ipagagawa mo ito kay Claude gamit ang Master Prompt sa ibaba.
+                    Ang kumpletong 68-pahinang workbook na may 11 modules, food journals, fiber awareness worksheets, at weekly progress reviews. Ibinebenta sa Gumroad gamit ang ready-to-copy listing sa ibaba.
                   </p>
                   <div className="text-[11px] text-[#B85D36] font-medium flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
-                    <span>Gamitin ang Claude prompt sa ibaba para gawin ito</span>
+                    <span>Walang affiliate links — 100% authentic digital workbook</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Claude Master Prompt Box */}
+            {/* Author Master Prompt for Complete Manuscript */}
             <div className="p-5 bg-white rounded-2xl border border-[#E5DFD5] shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#14382B]">
                   <Sparkles className="w-4 h-4 text-[#B85D36]" />
-                  Professional Master Prompt para kay Claude
+                  Claude / Author Master Prompt (68-Page Planner)
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyPrompt}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EFE6] hover:bg-[#E5DFD5] text-[#14382B] text-xs font-semibold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EFE6] hover:bg-[#E5DFD5] text-[#14382B] text-xs font-semibold transition-colors cursor-pointer"
                 >
                   {copiedPrompt ? (
                     <>
@@ -392,30 +509,30 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
                   ) : (
                     <>
                       <Copy className="w-3.5 h-3.5" />
-                      <span>Copy Claude Prompt</span>
+                      <span>Copy Author Prompt</span>
                     </>
                   )}
                 </button>
               </div>
               <p className="text-xs text-[#635F57]">
-                Kopyahin ito at i-paste kay Claude (Sonnet o Opus). Dinisenyo ito gamit ang clinical frameworks, anti-AI cliches, step-by-step chapters, recipes, at natural affiliate bridge.
+                Kopyahin ito at i-paste kay Claude para buuin ang kumpletong printable manuskrito. Nakadisenyo ito gamit ang responsableng clinical language na walang sensationalized claims.
               </p>
               <pre className="p-4 bg-[#FBF9F5] border border-[#E5DFD5] rounded-xl text-[11px] font-mono text-[#333] overflow-x-auto max-h-56 leading-relaxed select-all">
                 {claudeMasterPrompt}
               </pre>
             </div>
 
-            {/* Gumroad Listing Copy & Setup Kit */}
+            {/* Gumroad Listing Copy */}
             <div className="p-5 bg-white rounded-2xl border border-[#E5DFD5] shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#14382B]">
                   <DollarSign className="w-4 h-4 text-emerald-600" />
-                  Ready-to-Use Gumroad Listing Copy (Title, Price & Description)
+                  Gumroad Product Listing Copy (Title, Price & Description)
                 </div>
                 <button
                   type="button"
                   onClick={handleCopyListing}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EFE6] hover:bg-[#E5DFD5] text-[#14382B] text-xs font-semibold transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F3EFE6] hover:bg-[#E5DFD5] text-[#14382B] text-xs font-semibold transition-colors cursor-pointer"
                 >
                   {copiedListing ? (
                     <>
@@ -431,7 +548,7 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
                 </button>
               </div>
               <p className="text-xs text-[#635F57]">
-                I-paste ito direkta sa iyong Gumroad Product Page para mabilis kang makapagsimulang magbenta.
+                Direktang i-paste sa iyong Gumroad Product creation page pagkatapos i-upload ang PDF file.
               </p>
               <pre className="p-4 bg-[#FBF9F5] border border-[#E5DFD5] rounded-xl text-[11px] font-mono text-[#333] overflow-x-auto max-h-48 leading-relaxed select-all">
                 {gumroadListingCopy}
@@ -440,122 +557,164 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
           </div>
         )}
 
-        {/* TAB 2: EMAIL SUBSCRIBERS / LEADS */}
+        {/* TAB 2: SUBSCRIBER DATABASE & ADMIN AUTHENTICATION */}
         {activeTab === 'leads' && (
           <div className="p-6 overflow-y-auto flex-1 space-y-6">
-            {/* Status Bar */}
-            <div className="p-5 border border-[#E5DFD5] bg-white rounded-2xl grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E5DFD5]">
-                <span className="text-[11px] text-[#7A7469] font-medium uppercase tracking-wider block">
-                  Total Subscribers
-                </span>
-                <div className="text-2xl font-bold font-serif text-[#14382B] mt-0.5">
-                  {total}
+            {!isAuthenticated ? (
+              /* Security Gate: Password Required */
+              <div className="max-w-md mx-auto py-10 space-y-5 text-center">
+                <div className="w-14 h-14 rounded-full bg-[#14382B]/10 text-[#14382B] flex items-center justify-center mx-auto">
+                  <Lock className="w-7 h-7" />
                 </div>
-              </div>
-
-              <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E5DFD5]">
-                <span className="text-[11px] text-[#7A7469] font-medium uppercase tracking-wider block">
-                  Sender.net Auto-Sync
-                </span>
-                <div className="flex items-center gap-1.5 mt-1">
-                  {senderConfigured ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 text-emerald-600" />
-                      <span className="text-xs font-semibold text-emerald-800">Connected & Active</span>
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle className="w-4 h-4 text-amber-600" />
-                      <span className="text-xs font-medium text-amber-800">Local CSV Mode</span>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleExportCsv}
-                  className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#14382B] hover:bg-[#0E281E] text-white text-xs font-semibold rounded-xl shadow-sm transition-colors text-center cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-4 h-4" />
-                  <span>Download CSV</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={fetchLeads}
-                  disabled={isLoading}
-                  className="p-2.5 bg-white hover:bg-[#F3EFE6] border border-[#D5CFC5] rounded-xl text-[#14382B] transition-colors"
-                  title="Refresh list"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                </button>
-              </div>
-            </div>
-
-            {/* Sender.net Info Box if not yet configured */}
-            {!senderConfigured && (
-              <div className="p-3.5 bg-amber-50/80 border border-amber-200/80 rounded-xl text-xs text-amber-900 flex items-start gap-3">
-                <KeyRound className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <span className="font-semibold text-amber-950">Sender.net Automatic Sync Ready:</span>
-                  <p className="text-[11px] leading-relaxed text-amber-900/90">
-                    All subscriber leads are automatically stored safely in your website's database. Whenever you are ready to auto-send welcome emails via Sender.net, simply set your <code className="bg-amber-100/80 px-1 py-0.5 rounded font-mono text-[10px]">SENDER_API_TOKEN</code> in your environment settings.
+                  <h4 className="font-serif font-bold text-xl text-[#14382B]">
+                    Administrator Access Protected
+                  </h4>
+                  <p className="text-xs text-[#635F57]">
+                    Please enter the administrator key to decrypt and manage subscriber data.
                   </p>
                 </div>
-              </div>
-            )}
 
-            {/* Subscribers Table / List */}
-            {subscribers.length === 0 ? (
-              <div className="text-center py-12 space-y-3">
-                <Mail className="w-10 h-10 text-[#C4BEB4] mx-auto" />
-                <h4 className="font-serif font-bold text-base text-[#14382B]">No subscribers captured yet</h4>
-                <p className="text-xs text-[#7A7469] max-w-sm mx-auto">
-                  When readers request "The 7-Day Gentle Gut Reset" eBook, their details will appear here automatically and can be exported as a CSV spreadsheet.
+                {authError && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-xs text-red-700 rounded-xl text-left flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                    <span>{authError}</span>
+                  </div>
+                )}
+
+                <form onSubmit={verifyAndSaveKey} className="space-y-3">
+                  <input
+                    type="password"
+                    placeholder="Enter Admin Access Key"
+                    value={adminKey}
+                    onChange={(e) => setAdminKey(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 bg-white border border-[#D5CFC5] rounded-xl text-sm text-[#14382B] focus:outline-none focus:ring-2 focus:ring-[#14382B]/20"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isVerifying}
+                    className="w-full py-2.5 bg-[#14382B] hover:bg-[#0E281E] text-white text-xs font-semibold uppercase tracking-wider rounded-xl transition-all shadow-sm cursor-pointer"
+                  >
+                    {isVerifying ? 'Verifying Credentials...' : 'Unlock Subscriber List'}
+                  </button>
+                </form>
+
+                <p className="text-[11px] text-[#8C877D]">
+                  Default key: <code className="bg-stone-100 px-1 py-0.5 rounded text-stone-700">gutwellness_admin_2026</code> (configurable via <code className="bg-stone-100 px-1 py-0.5 rounded text-stone-700">ADMIN_ACCESS_KEY</code> in environment settings).
                 </p>
               </div>
             ) : (
-              <div className="border border-[#E5DFD5] rounded-xl overflow-hidden bg-white shadow-sm">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#F8F5EE] border-b border-[#E5DFD5] text-[#4A463F] font-semibold">
-                    <tr>
-                      <th className="py-2.5 px-4">Name</th>
-                      <th className="py-2.5 px-4">Email</th>
-                      <th className="py-2.5 px-4">Date Joined</th>
-                      <th className="py-2.5 px-4">Sender.net Sync</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#E5DFD5] text-[#2C2A26]">
-                    {subscribers.map((sub) => (
-                      <tr key={sub.id} className="hover:bg-[#FAF8F5] transition-colors">
-                        <td className="py-3 px-4 font-medium text-[#14382B]">{sub.name || 'Reader'}</td>
-                        <td className="py-3 px-4 text-[#4A463F] font-mono text-[11px]">{sub.email}</td>
-                        <td className="py-3 px-4 text-[#7A7469]">
-                          {new Date(sub.date).toLocaleDateString(undefined, {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </td>
-                        <td className="py-3 px-4">
-                          {sub.senderSynced ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                              <CheckCircle className="w-3 h-3" /> Synced
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded-full border border-stone-200">
-                              Saved in CSV
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              /* Authenticated View */
+              <div className="space-y-6">
+                {/* Status Bar */}
+                <div className="p-5 border border-[#E5DFD5] bg-white rounded-2xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E5DFD5]">
+                    <span className="text-[11px] text-[#7A7469] font-medium uppercase tracking-wider block">
+                      Total Subscribers
+                    </span>
+                    <div className="text-2xl font-bold font-serif text-[#14382B] mt-0.5">
+                      {total}
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E5DFD5]">
+                    <span className="text-[11px] text-[#7A7469] font-medium uppercase tracking-wider block">
+                      Sender.net Auto-Sync
+                    </span>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      {senderConfigured ? (
+                        <>
+                          <CheckCircle className="w-4 h-4 text-emerald-600" />
+                          <span className="text-xs font-semibold text-emerald-800">Connected & Active</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="w-4 h-4 text-amber-600" />
+                          <span className="text-xs font-medium text-amber-800">Secure Database Mode</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleExportCsv}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#14382B] hover:bg-[#0E281E] text-white text-xs font-semibold rounded-xl shadow-sm transition-colors text-center cursor-pointer"
+                    >
+                      <FileSpreadsheet className="w-4 h-4" />
+                      <span>Download CSV</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => fetchLeads()}
+                      disabled={isLoading}
+                      className="p-2.5 bg-white hover:bg-[#F3EFE6] border border-[#D5CFC5] rounded-xl text-[#14382B] transition-colors"
+                      title="Refresh list"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Subscribers Table with Consent Status */}
+                {subscribers.length === 0 ? (
+                  <div className="text-center py-12 space-y-3">
+                    <Mail className="w-10 h-10 text-[#C4BEB4] mx-auto" />
+                    <h4 className="font-serif font-bold text-base text-[#14382B]">No subscribers captured yet</h4>
+                    <p className="text-xs text-[#7A7469] max-w-sm mx-auto">
+                      When readers request "The 7-Day Gentle Gut Reset" guide, their details and marketing consent choices will appear here automatically.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="border border-[#E5DFD5] rounded-xl overflow-hidden bg-white shadow-sm">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#F8F5EE] border-b border-[#E5DFD5] text-[#4A463F] font-semibold">
+                        <tr>
+                          <th className="py-2.5 px-4">Name</th>
+                          <th className="py-2.5 px-4">Email</th>
+                          <th className="py-2.5 px-4">Marketing Consent</th>
+                          <th className="py-2.5 px-4">Date Joined</th>
+                          <th className="py-2.5 px-4">Sync Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#E5DFD5] text-[#2C2A26]">
+                        {subscribers.map((sub) => (
+                          <tr key={sub.id} className="hover:bg-[#FAF8F5] transition-colors">
+                            <td className="py-3 px-4 font-medium text-[#14382B]">{sub.name || 'Reader'}</td>
+                            <td className="py-3 px-4 text-[#4A463F] font-mono text-[11px]">{sub.email}</td>
+                            <td className="py-3 px-4">
+                              {sub.marketingConsent ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                  <CheckCircle className="w-3 h-3" /> Opted In
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded-full border border-stone-200">
+                                  Free Guide Only
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3 px-4 text-[#7A7469]">
+                              {new Date(sub.date).toLocaleDateString(undefined, {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </td>
+                            <td className="py-3 px-4">
+                              {sub.senderSynced ? (
+                                <span className="text-[11px] font-medium text-emerald-700">Sender.net Synced</span>
+                              ) : (
+                                <span className="text-[11px] font-medium text-stone-500">Stored Locally</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -563,7 +722,7 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
 
         {/* Modal Footer */}
         <div className="px-6 py-3.5 bg-[#FAF8F5] border-t border-[#E5DFD5] flex items-center justify-between text-xs text-[#7A7469]">
-          <span>Everyday Gut Wellness · Creator Suite</span>
+          <span>Everyday Gut Wellness · Editorial Administration</span>
           <button
             type="button"
             onClick={onClose}
@@ -578,4 +737,3 @@ POST-PURCHASE THANK-YOU NOTE / AFFILIATE BRIDGE:
 };
 
 export default LeadAdminModal;
-
