@@ -38,7 +38,11 @@ export function isTrustedAdminRequest(event: HandlerEvent): boolean {
   const origin = header(event, "origin");
   if (!origin) return true; // Non-browser clients must still supply a valid credential.
   const origins = ["https://everyday-gut-wellness.netlify.app", process.env.DEPLOY_PRIME_URL].filter(Boolean);
-  return origins.some(value => { try { return new URL(value!).origin === origin; } catch { return false; } });
+  if (origins.some(value => { try { return new URL(value!).origin === origin; } catch { return false; } })) return true;
+  // Netlify build-time URL variables are not guaranteed in the Function runtime.
+  // Accept only this project's preview/permalink host, and only at that same host.
+  const host = header(event, "host").toLowerCase();
+  return origin === `https://${host}` && /^https:\/\/(?:deploy-preview-\d+|[a-f0-9]{24})--everyday-gut-wellness\.netlify\.app$/.test(origin);
 }
 
 function signSession(value: string, key: string): string {
@@ -114,3 +118,4 @@ export function jsonResponse(status: number, data: any): HandlerResponse {
     body: JSON.stringify(data),
   };
 }
+

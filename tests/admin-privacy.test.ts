@@ -61,6 +61,13 @@ describe('Admin session and subscriber privacy boundaries', () => {
     assert.equal((await invoke(admin,event('POST','/admin/logout',headers))).statusCode,403);
   });
 
+  it('permits only same-host previews owned by this project', () => {
+    const host='deploy-preview-4--everyday-gut-wellness.netlify.app';
+    assert.equal(verifyAdminAccess(event('GET','/api/leads',{'x-admin-key':KEY,host,origin:'https://'+host})).authorized,true);
+    assert.equal(verifyAdminAccess(event('GET','/api/leads',{'x-admin-key':KEY,host:'attacker.example',origin:'https://attacker.example'})).authorized,false);
+    assert.equal(verifyAdminAccess(event('GET','/api/leads',{'x-admin-key':KEY,host:'everyday-gut-wellness.netlify.app',origin:'https://'+host})).authorized,false);
+  });
+
   it('does not fetch subscriber data before the server authenticates the admin page', async () => {
     let reads=0;
     globalThis.fetch=(async()=>{reads++;return new Response('[]')}) as typeof fetch;
@@ -107,3 +114,4 @@ describe('Admin session and subscriber privacy boundaries', () => {
     }
   });
 });
+
