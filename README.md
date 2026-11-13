@@ -2,7 +2,7 @@
 
 An evidence-informed, practical digital wellness publication and digital product storefront dedicated to digestive health education, daily motility habits, gentle fiber diversity, and mindful routine tracking.
 
-Official Live Applet: [https://ai.studio/apps/bd172229-cd7a-4f89-877d-6c41ba6a4b4e](https://ai.studio/apps/bd172229-cd7a-4f89-877d-6c41ba6a4b4e)  
+Website: [https://everyday-gut-wellness.netlify.app](https://everyday-gut-wellness.netlify.app)  
 GitHub Repository: [https://github.com/Eiram824/everyday-gut-wellness](https://github.com/Eiram824/everyday-gut-wellness)
 
 ---
@@ -16,28 +16,29 @@ GitHub Repository: [https://github.com/Eiram824/everyday-gut-wellness](https://g
    - High-fidelity 8-page printable PDF automatically generated at build time using `pdf-lib`.
    - Fullscreen interactive in-app reader with page flipping, print mode, and direct PDF download.
    - Responsible lead capture requiring explicit voluntary consent for marketing communications.
-3. **Original Digital Product Showcase (The 30-Day Digestive Wellness Planner)**:
-   - 68-page printable and tablet-fillable habit workbook ($14.99).
-   - Direct Gumroad checkout integration via `VITE_GUMROAD_PRODUCT_URL`.
-   - Safe fallback: if the Gumroad URL is not yet configured, the button gracefully switches to a waitlist notification flow without 404 errors.
+3. **Original Digital Product (The 14-Day Gut Clarity Workbook)**:
+   - 26-page printable US Letter PDF with daily observation logs, a midpoint and final review, safety guidance, and clinician-prep pages.
+   - $25 USD through Gumroad checkout; the checkout URL is a public constant in `constants.ts` and is not a secret.
+   - Educational use only; it does not provide medical advice, diagnosis, or treatment.
 4. **Creator & Lead Management Hub**:
    - Protected admin modal (`Ctrl+Shift+L` or `#admin` URL hash).
    - Real-time subscriber stats and RFC-compliant CSV export (`/api/leads/export.csv`).
    - Optional Sender.net email marketing integration.
-5. **Robust CI/CD & Static Deployment**:
-   - Automated TypeScript type checking (`tsc --noEmit`).
-   - Built-in automated test suite (`npm test`).
-   - Seamless GitHub Pages deployment via `.github/workflows/deploy.yml`.
+5. **Netlify Deployment**:
+   - Static React/Vite site with serverless functions in `netlify/functions`.
+   - Subscriber records are stored in Supabase when production secrets are configured.
+   - GitHub Pages workflow remains available for the separate static docs build.
 
 ---
 
 ## Tech Stack
 
 - **Frontend**: React 19, TypeScript, Vite 6, Tailwind CSS, Lucide React icons.
-- **Backend / Dev Server**: Node.js 20+, Express 4, tsx.
+- **Backend / Dev Server**: Netlify Functions for production APIs; Node.js 20+, Express 4, tsx for local development.
+- **Data**: Supabase PostgREST with server-side-only secret key.
 - **PDF Generation Engine**: `pdf-lib` (pure JavaScript, zero system binary dependencies).
 - **Testing**: Node.js native test runner (`node --import tsx --test`).
-- **CI/CD**: GitHub Actions deploying to GitHub Pages.
+- **Hosting**: Netlify connected to the GitHub repository.
 
 ---
 
@@ -86,8 +87,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 Configure environment variables in `.env` (refer to `.env.example`):
 
-- `VITE_GUMROAD_PRODUCT_URL`: The public Gumroad checkout link for the 30-Day Planner.
-- `ADMIN_ACCESS_KEY`: Secret key required to access `/api/leads` and download CSV exports. Must be configured; administrative routes fail closed if unset.
+- Gumroad checkout URL and public product metadata: `constants.ts` (`GUT_CLARITY_PRODUCT`).
+- `ADMIN_ACCESS_KEY`: Secret key for the private lead dashboard and CSV export. Set it as a secret in Netlify for both Production and Deploy Preview; administrative routes fail closed if it is missing.
 - `SENDER_API_TOKEN`: Optional API token for Sender.net synchronization.
 - `SENDER_GROUP_ID`: Optional Sender.net subscriber group tag.
 - `GEMINI_API_KEY`: Required only for server-side Google GenAI proxy endpoints.

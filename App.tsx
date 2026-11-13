@@ -89,9 +89,10 @@ export function App() {
       'myth-vs-fact': 'myths',
       'medical-advice': 'medical-advice',
       'medical-signs': 'medical-advice',
-      'product-review': 'planner-product',
-      'product': 'planner-product',
-      'planner-product': 'planner-product',
+      'product-review': 'gut-clarity-workbook',
+      'product': 'gut-clarity-workbook',
+      'planner-product': 'gut-clarity-workbook',
+      'gut-clarity-workbook': 'gut-clarity-workbook',
     };
 
     const resolvedId = idMap[targetId] || targetId;
@@ -150,8 +151,8 @@ export function App() {
         {/* Section 6: When to Seek Medical Advice */}
         <MedicalAdvice />
 
-        {/* Section 7: Original Digital Product - The 30-Day Digestive Wellness Planner */}
-        <ProductSection onJoinWaitlist={() => setIsLeadCaptureOpen(true)} />
+        {/* Section 7: Paid digital product — checkout hosted by Gumroad. */}
+        <ProductSection />
       </main>
 
       {/* Section 8: Trust, Transparency & Footer */}

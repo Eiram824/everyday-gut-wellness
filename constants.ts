@@ -5,14 +5,13 @@
 
 import { HabitQuestion, FiberFood, MealUpgradeExample, DailyHabitItem, MythFactItem, WarningSign } from './types';
 
-export const PLANNER_PRODUCT_INFO = {
-  id: '30-day-digestive-wellness-planner',
-  title: 'The 30-Day Digestive Wellness Planner',
-  subtitle: 'A Practical Habit-Tracking Workbook for Everyday Digestive Rhythm',
-  defaultPrice: '$14.99',
-  format: 'Printable PDF & Interactive Digital Workbook',
-  pages: '68 Pages (8.5" x 11" Standard Print-Ready & Tablet Fillable)',
-};
+export const GUT_CLARITY_PRODUCT = {
+  id: '14-day-gut-clarity-workbook',
+  title: 'The 14-Day Gut Clarity Workbook',
+  priceUSD: 25,
+  url: 'https://eiram32.gumroad.com/l/14-day-gut-clarity-workbook',
+  checkoutEnabled: false,
+} as const;
 
 export const HABIT_QUESTIONS: HabitQuestion[] = [
   {

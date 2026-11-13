@@ -27,7 +27,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
               An independent, evidence-informed educational publication dedicated to helping adults understand digestive physiology, fiber variety, proactive hydration, and daily motility habits.
             </p>
             <div className="text-xs text-[#EAF1ED]/60 space-y-1">
-              <p>Publication ISSN: Registered Educational Resource</p>
+              <p>Independent educational resource · Not a medical provider</p>
               <p>United States Dietary Guidelines Reference Edition</p>
             </div>
           </div>
@@ -86,10 +86,10 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('planner-product')}
+                  onClick={() => onNavigate('gut-clarity-workbook')}
                   className="hover:text-white transition-colors text-[#EAD3C7] font-medium"
                 >
-                  The 30-Day Wellness Planner
+                  The 14-Day Gut Clarity Workbook
                 </button>
               </li>
             </ul>
@@ -133,7 +133,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
 
             <div className="pt-2 text-xs text-[#EAF1ED]/70 leading-relaxed bg-white/5 p-3 rounded-lg border border-white/10">
               <span className="font-semibold text-white block mb-0.5">Independent Educational Publishing:</span>
-              Everyday Gut Wellness is an independent digital health publisher. We create original educational guides, printables, and habit workbooks. Our digital products are fulfilled securely via Gumroad. We do not sell or promote third-party affiliate supplements.
+              Everyday Gut Wellness is an independent educational publishing project. The free guide is available now; checkout for the 14-Day Gut Clarity Workbook is being prepared and is not yet open. We do not sell or promote third-party affiliate supplements.
             </div>
           </div>
         </div>
@@ -201,7 +201,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                     <strong>Email Delivery & Marketing Consent:</strong> Requesting the free guide delivers the publication immediately. If you optionally choose to check the marketing consent box, you may receive educational articles and wellness newsletters. You may unsubscribe at any time with a single click using the link at the bottom of every email.
                   </p>
                   <p>
-                    <strong>Digital Product Purchases:</strong> Purchases of our digital workbooks (such as The 30-Day Digestive Wellness Planner) are securely processed and fulfilled by Gumroad. Gumroad handles billing, tax collection, and file delivery. We never receive or store your payment card numbers.
+                    <strong>Digital product purchases:</strong> Checkout for the 14-Day Gut Clarity Workbook is not open yet. If the workbook is offered for sale, Gumroad will handle payment and digital delivery under its own terms and privacy policy. This website does not collect payment card details.
                   </p>
                   <p>
                     <strong>Analytics:</strong> We use Google Analytics 4 (GA4) with IP anonymization to evaluate aggregate website traffic and usability. We do not pass health symptoms or personal medical data into analytics.
@@ -228,7 +228,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                     <strong>Educational Use Only:</strong> All content, checklists, planners, and articles provided on this website are for educational and self-reflection purposes only and are not a substitute for professional medical diagnosis or treatment.
                   </p>
                   <p>
-                    <strong>Digital Products & Payments:</strong> Original digital workbooks and planners offered on this website are sold and fulfilled via Gumroad. By initiating a purchase, you agree to Gumroad's terms and privacy policies. All downloadable materials are licensed for personal, non-commercial use.
+                    <strong>Digital Products & Payments:</strong> The 14-Day Gut Clarity Workbook is planned as an educational digital download for personal use. Checkout is not yet available; if offered for sale, Gumroad will display the final price and handle payment and file delivery. No medical outcome is promised; the workbook is not a substitute for individualized medical care.
                   </p>
                   <p>
                     <strong>Intellectual Property:</strong> The articles, graphics, habit trackers, and workbook designs on Everyday Gut Wellness are original intellectual property protected by copyright. You may not republish, resell, or distribute our materials without prior written consent.

@@ -1,8 +1,11 @@
 import type { HandlerEvent, HandlerResponse } from "@netlify/functions";
+import { timingSafeEqual } from "node:crypto";
 
 export const JSON_HEADERS = {
   "Content-Type": "application/json",
   "Cache-Control": "no-store, no-cache, must-revalidate",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "no-referrer",
 };
 
 export interface AuthResult {
@@ -13,6 +16,12 @@ export interface AuthResult {
 
 export function getAdminAccessKey(): string {
   return (process.env.ADMIN_ACCESS_KEY || "").trim();
+}
+
+export function safeSecretMatch(candidate: string, expected: string): boolean {
+  const candidateBytes = Buffer.from(candidate, "utf8");
+  const expectedBytes = Buffer.from(expected, "utf8");
+  return candidateBytes.length === expectedBytes.length && timingSafeEqual(candidateBytes, expectedBytes);
 }
 
 /**
@@ -38,7 +47,7 @@ export function verifyAdminAccess(event: HandlerEvent): AuthResult {
   const bearerKey = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
   const customHeaderKey = (headers["x-admin-key"] || headers["X-Admin-Key"] || "").trim();
 
-  if ((bearerKey && bearerKey === adminAccessKey) || (customHeaderKey && customHeaderKey === adminAccessKey)) {
+  if ((bearerKey && safeSecretMatch(bearerKey, adminAccessKey)) || (customHeaderKey && safeSecretMatch(customHeaderKey, adminAccessKey))) {
     return { authorized: true, status: 200 };
   }
 
