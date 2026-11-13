@@ -27,7 +27,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
               An independent, evidence-informed educational publication dedicated to helping adults understand digestive physiology, fiber variety, proactive hydration, and daily motility habits.
             </p>
             <div className="text-xs text-[#EAF1ED]/60 space-y-1">
-              <p>Publication ISSN: Registered Educational Resource</p>
+              <p>Independent educational resource · Not a medical provider</p>
               <p>United States Dietary Guidelines Reference Edition</p>
             </div>
           </div>
