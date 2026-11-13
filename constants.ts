@@ -14,6 +14,13 @@ export const PLANNER_PRODUCT_INFO = {
   pages: '68 Pages (8.5" x 11" Standard Print-Ready & Tablet Fillable)',
 };
 
+export const GUT_CLARITY_PRODUCT = {
+  id: '14-day-gut-clarity-workbook',
+  title: 'The 14-Day Gut Clarity Workbook',
+  priceUSD: 25,
+  url: 'https://eiram32.gumroad.com/l/14-day-gut-clarity-workbook',
+} as const;
+
 export const HABIT_QUESTIONS: HabitQuestion[] = [
   {
     id: 'fiber-variety',

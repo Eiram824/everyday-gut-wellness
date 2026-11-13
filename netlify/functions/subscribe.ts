@@ -1,24 +1,42 @@
-import type { Handler } from "@netlify/functions";
+import type { Config, Handler } from "@netlify/functions";
 import { jsonResponse, errorResponse } from "./lib/auth.js";
 import { isDatabaseConfigured, saveSubscriber, markSenderSync } from "./lib/db.js";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+const MAX_REQUEST_BYTES = 16_384;
+const ALLOWED_SOURCES = new Set(["ebook_lead_modal", "planner_interest_list"]);
+
+export const config: Config = {
+  path: "/api/subscribe",
+  rateLimit: { windowSize: 60, windowLimit: 5, aggregateBy: ["ip"] },
+};
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "POST") return errorResponse(405, "Method not allowed. Expected POST.");
-  if (!isDatabaseConfigured()) {
-    return errorResponse(503, "Email signup is temporarily unavailable while secure storage is being configured. Please try again shortly.");
+  if (!isDatabaseConfigured()) return errorResponse(503, "Email signup is temporarily unavailable. Please try again shortly.");
+
+  if (!event.body) return errorResponse(400, "A signup request is required.");
+  if (Buffer.byteLength(event.body, "utf8") > MAX_REQUEST_BYTES) return errorResponse(413, "The signup request is too large.");
+
+  let body: Record<string, unknown>;
+  try {
+    body = JSON.parse(event.body);
+    if (!body || typeof body !== "object" || Array.isArray(body)) return errorResponse(400, "Invalid JSON request payload.");
+  } catch {
+    return errorResponse(400, "Invalid JSON request payload.");
   }
 
+  if (typeof body.email !== "string") return errorResponse(400, "Please provide a valid email address.");
+  const email = body.email.trim().toLowerCase();
+  if (email.length > 254 || !EMAIL_REGEX.test(email)) return errorResponse(400, "Please provide a valid email address.");
+
+  const rawName = typeof body.name === "string" ? body.name : "Reader";
+  const name = rawName.replace(/[\u0000-\u001F\u007F]/g, " ").replace(/<[^>]*>?/gm, "").trim().slice(0, 80) || "Reader";
+  const requestedSource = typeof body.source === "string" ? body.source : "ebook_lead_modal";
+  const source = ALLOWED_SOURCES.has(requestedSource) ? requestedSource : "ebook_lead_modal";
+  const marketingConsent = body.marketingConsent === true;
+
   try {
-    const body = event.body ? JSON.parse(event.body) : {};
-    const email = String(body.email || "").trim().toLowerCase().slice(0, 254);
-    const name = String(body.name || "Reader").replace(/<[^>]*>?/gm, "").trim().slice(0, 80) || "Reader";
-    const source = String(body.source || "ebook_lead_magnet").replace(/<[^>]*>?/gm, "").trim().slice(0, 60);
-    const marketingConsent = body.marketingConsent === true;
-
-    if (!EMAIL_REGEX.test(email)) return errorResponse(400, "Please provide a valid email address.");
-
     // Persist first. The user only receives success after Supabase confirms the record.
     const subscriber = await saveSubscriber({ name, email, source, marketingConsent });
 
@@ -32,21 +50,21 @@ export const handler: Handler = async (event) => {
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
-        const senderResponse = await fetch("https://api.sender.net/v2/subscribers", {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            firstname: name,
-            ...(groupId ? { groups: [groupId] } : {}),
-          }),
-        });
-        clearTimeout(timeout);
+        let senderResponse: Response;
+        try {
+          senderResponse = await fetch("https://api.sender.net/v2/subscribers", {
+            method: "POST",
+            signal: controller.signal,
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ email, firstname: name, ...(groupId ? { groups: [groupId] } : {}) }),
+          });
+        } finally {
+          clearTimeout(timeout);
+        }
         senderSynced = senderResponse.ok;
         senderStatus = senderSynced ? "Saved and synced to the opted-in email list." : "Saved securely; email platform sync needs attention.";
         if (!senderSynced) await markSenderSync(subscriber.id, false, `Sender.net returned ${senderResponse.status}`);
@@ -64,7 +82,7 @@ export const handler: Handler = async (event) => {
 
     return jsonResponse(200, {
       success: true,
-      message: "Your free 7-Day Gentle Gut Reset Guide is ready.",
+      message: "Your free 7-Day Gentle Gut Reset Guide signup is ready.",
       subscriber: { name: subscriber.name, email: subscriber.email, marketingConsent: subscriber.marketingConsent },
       senderSynced,
       senderStatus,

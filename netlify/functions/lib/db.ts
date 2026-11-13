@@ -31,8 +31,8 @@ async function databaseRequest<T>(
   });
 
   if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    console.error("[Database] Supabase request failed:", response.status, detail.slice(0, 300));
+    // Do not log upstream response bodies; they can contain user data or schema details.
+    console.error("[Database] Supabase request failed:", response.status);
     throw new Error(`Persistent storage request failed (${response.status}).`);
   }
 

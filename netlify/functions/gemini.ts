@@ -1,4 +1,4 @@
-import type { Handler } from "@netlify/functions";
+import type { Config, Handler } from "@netlify/functions";
 import { GoogleGenAI } from "@google/genai";
 import { jsonResponse, errorResponse } from "./lib/auth.js";
 
@@ -25,22 +25,39 @@ const ALLOWED_VIDEO_HOSTS = [
   "lh3.googleusercontent.com",
 ];
 
+export const config: Config = {
+  path: [
+    "/api/generate-content",
+    "/api/chat-message",
+    "/api/generate-images",
+    "/api/generate-videos",
+    "/api/videos-operation",
+    "/api/video-download",
+  ],
+  rateLimit: { windowSize: 60, windowLimit: 10, aggregateBy: ["ip"] },
+};
+
 export const handler: Handler = async (event) => {
   const path = event.path.replace(/\/\.netlify\/functions\/gemini/, "").replace(/\/api/, "");
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
   const apiKey = getApiKey();
   if (!apiKey) {
-    return errorResponse(503, "API key is not configured. Please add your GEMINI_API_KEY in environment variables.");
+    return errorResponse(503, "This service is temporarily unavailable.");
   }
 
   const ai = new GoogleGenAI({ apiKey });
 
   try {
+    if (event.body && Buffer.byteLength(event.body, "utf8") > 1_048_576) {
+      return errorResponse(413, "The request is too large for this service.");
+    }
+
     // 1. Content Generation
     if (normalizedPath === "/generate-content") {
       if (event.httpMethod !== "POST") return errorResponse(405, "Method not allowed. Expected POST.");
-      const body = event.body ? JSON.parse(event.body) : {};
+      const body = parseJsonObject(event.body);
+      if (!body) return errorResponse(400, "Invalid JSON request payload.");
       const params = { ...body, model: resolveModel(body?.model) };
       const response = await ai.models.generateContent(params);
       return jsonResponse(200, response);
@@ -49,7 +66,8 @@ export const handler: Handler = async (event) => {
     // 2. Chat Message
     if (normalizedPath === "/chat-message") {
       if (event.httpMethod !== "POST") return errorResponse(405, "Method not allowed. Expected POST.");
-      const body = event.body ? JSON.parse(event.body) : {};
+      const body = parseJsonObject(event.body);
+      if (!body) return errorResponse(400, "Invalid JSON request payload.");
       const { model, config, history, message, msgConfig } = body;
       const chat = ai.chats.create({
         model: resolveModel(model),
@@ -63,7 +81,8 @@ export const handler: Handler = async (event) => {
     // 3. Image Generation
     if (normalizedPath === "/generate-images") {
       if (event.httpMethod !== "POST") return errorResponse(405, "Method not allowed. Expected POST.");
-      const body = event.body ? JSON.parse(event.body) : {};
+      const body = parseJsonObject(event.body);
+      if (!body) return errorResponse(400, "Invalid JSON request payload.");
       const response = await ai.models.generateImages(body);
       return jsonResponse(200, response);
     }
@@ -80,7 +99,7 @@ export const handler: Handler = async (event) => {
           (allowed) => parsedUrl.hostname === allowed || parsedUrl.hostname.endsWith(`.${allowed}`)
         );
 
-        if (!isAllowed) {
+        if (parsedUrl.protocol !== "https:" || parsedUrl.port || parsedUrl.username || parsedUrl.password || !isAllowed) {
           return errorResponse(403, "Untrusted destination host. Video downloads are restricted to authorized domains.");
         }
 
@@ -112,7 +131,16 @@ export const handler: Handler = async (event) => {
 
     return errorResponse(404, `Gemini endpoint '${normalizedPath}' is not supported.`);
   } catch (err: any) {
-    console.error("[Netlify Function] Gemini proxy error:", err);
-    return errorResponse(500, err?.message || "Internal serverless error processing AI request.");
+    console.error("[Netlify Function] Gemini proxy error:", err?.name || "request_error");
+    return errorResponse(500, "The AI request could not be completed. Please try again.");
   }
 };
+
+function parseJsonObject(value: string | null | undefined): Record<string, any> | null {
+  try {
+    const parsed = value ? JSON.parse(value) : {};
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}

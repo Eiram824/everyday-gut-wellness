@@ -21,7 +21,6 @@ import TrustAndFooter from './components/TrustAndFooter';
 export function App() {
   const [isEBookOpen, setIsEBookOpen] = useState(false);
   const [isLeadCaptureOpen, setIsLeadCaptureOpen] = useState(false);
-  const [leadCapturePurpose, setLeadCapturePurpose] = useState<'ebook' | 'planner-interest'>('ebook');
   const [isLeadAdminOpen, setIsLeadAdminOpen] = useState(false);
 
   // Discreet creator access (Ctrl+Shift+L or #admin in URL) without showing public footer button
@@ -61,7 +60,6 @@ export function App() {
       }
     } catch (err) {}
 
-    setLeadCapturePurpose('ebook');
     setIsLeadCaptureOpen(true);
   };
 
@@ -91,9 +89,10 @@ export function App() {
       'myth-vs-fact': 'myths',
       'medical-advice': 'medical-advice',
       'medical-signs': 'medical-advice',
-      'product-review': 'planner-product',
-      'product': 'planner-product',
-      'planner-product': 'planner-product',
+      'product-review': 'gut-clarity-workbook',
+      'product': 'gut-clarity-workbook',
+      'planner-product': 'gut-clarity-workbook',
+      'gut-clarity-workbook': 'gut-clarity-workbook',
     };
 
     const resolvedId = idMap[targetId] || targetId;
@@ -152,8 +151,8 @@ export function App() {
         {/* Section 6: When to Seek Medical Advice */}
         <MedicalAdvice />
 
-        {/* Section 7: Original Digital Product - The 30-Day Digestive Wellness Planner */}
-        <ProductSection onJoinWaitlist={() => { setLeadCapturePurpose('planner-interest'); setIsLeadCaptureOpen(true); }} />
+        {/* Section 7: Paid digital product — checkout hosted by Gumroad. */}
+        <ProductSection />
       </main>
 
       {/* Section 8: Trust, Transparency & Footer */}
@@ -164,11 +163,10 @@ export function App() {
       {/* High-Converting Lead Capture Modal */}
       <LeadCaptureModal
         isOpen={isLeadCaptureOpen}
-        purpose={leadCapturePurpose}
         onClose={() => setIsLeadCaptureOpen(false)}
-        onSuccess={(_subscriber, purpose) => {
+        onSuccess={(_subscriber) => {
           setIsLeadCaptureOpen(false);
-          if (purpose === 'ebook') setIsEBookOpen(true);
+          setIsEBookOpen(true);
         }}
       />
 
