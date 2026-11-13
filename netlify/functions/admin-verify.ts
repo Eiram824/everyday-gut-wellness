@@ -1,5 +1,5 @@
 import type { Config, Handler } from "@netlify/functions";
-import { getAdminAccessKey, jsonResponse, errorResponse, safeSecretMatch } from "./lib/auth.js";
+import { getAdminAccessKey, jsonResponse, errorResponse, safeSecretMatch, isTrustedAdminRequest, createAdminSessionCookie } from "./lib/auth.js";
 
 export const config: Config = {
   path: "/api/admin/verify",
@@ -7,6 +7,7 @@ export const config: Config = {
 };
 
 export const handler: Handler = async (event) => {
+  if (!isTrustedAdminRequest(event)) return errorResponse(403, "Forbidden.");
   if (event.httpMethod !== "POST") {
     return errorResponse(405, "Method not allowed. Expected POST.");
   }
@@ -20,16 +21,18 @@ export const handler: Handler = async (event) => {
 
   try {
     const body = event.body ? JSON.parse(event.body) : {};
-    if (!body || typeof body !== "object" || Array.isArray(body) || typeof body.key !== "string") {
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
       return errorResponse(400, "Invalid JSON request payload.");
     }
-    const key = body.key.trim();
+    const key = typeof body.key === "string" ? body.key.trim() : "";
 
     if (key && safeSecretMatch(key, configuredKey)) {
-      return jsonResponse(200, {
+      const response = jsonResponse(200, {
         success: true,
         message: "Admin authenticated.",
       });
+      response.headers = { ...response.headers, "Set-Cookie": createAdminSessionCookie(configuredKey) };
+      return response;
     }
 
     return errorResponse(401, "Invalid administrator key.");

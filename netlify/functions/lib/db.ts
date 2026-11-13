@@ -66,43 +66,25 @@ async function databaseRequest<T>(
 }
 
 export async function saveSubscriber(input: {
-  name: string;
-  email: string;
-  source: string;
-  marketingConsent: boolean;
-}): Promise<SubscriberRecord> {
-  const payload: Record<string, unknown> = {
-    name: input.name,
-    email: input.email,
-    source: input.source,
-  };
-
-  // Never overwrite a previous affirmative consent with a later no-checkbox signup.
-  if (input.marketingConsent) {
-    payload.marketing_consent = true;
-    payload.consent_date = new Date().toISOString();
-    payload.consent_withdrawn_at = null;
+  name: string; email: string; source: string; marketingConsent: boolean;
+}): Promise<{ id: string | null; created: boolean }> {
+  // Public requests cannot change another subscriber's name or consent.
+  // A duplicate receives the same public response without reading existing PII.
+  const rows = await databaseRequest<{ id: string }[]>(
+    "subscribers?on_conflict=email&select=id", {
+      method: "POST",
+      headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
+      body: JSON.stringify({
+        name: input.name, email: input.email, source: input.source,
+        marketing_consent: input.marketingConsent,
+        consent_date: input.marketingConsent ? new Date().toISOString() : null,
+      }),
+    },
+  );
+  if (!Array.isArray(rows) || (rows.length > 0 && !rows[0]?.id)) {
+    throw new Error("Database did not confirm the signup request.");
   }
-
-  const rows = await databaseRequest<any[]>("subscribers?on_conflict=email", {
-    method: "POST",
-    headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-    body: JSON.stringify(payload),
-  });
-
-  const row = rows?.[0];
-  if (!row?.id) throw new Error("Database did not confirm that the signup was saved.");
-
-  return {
-    id: String(row.id),
-    name: row.name || "Reader",
-    email: row.email,
-    date: row.signup_date || row.created_at || new Date().toISOString(),
-    source: row.source || input.source,
-    marketingConsent: Boolean(row.marketing_consent),
-    consentDate: row.consent_date || null,
-    senderSynced: Boolean(row.sender_synced),
-  };
+  return { id: rows[0]?.id || null, created: rows.length > 0 };
 }
 
 export async function listSubscribersFromDatabase(): Promise<SubscriberRecord[]> {

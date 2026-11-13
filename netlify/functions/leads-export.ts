@@ -1,5 +1,5 @@
 import type { Config, Handler } from "@netlify/functions";
-import { verifyAdminAccess, errorResponse } from "./lib/auth.js";
+import { verifyAdminAccess, errorResponse, JSON_HEADERS } from "./lib/auth.js";
 import { isDatabaseConfigured, listSubscribersFromDatabase } from "./lib/db.js";
 
 export const config: Config = {
@@ -31,6 +31,7 @@ export const handler: Handler = async (event) => {
     return {
       statusCode: 200,
       headers: {
+        ...JSON_HEADERS,
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": 'attachment; filename="everyday_gut_wellness_subscribers.csv"',
         "Cache-Control": "no-store, no-cache, must-revalidate",

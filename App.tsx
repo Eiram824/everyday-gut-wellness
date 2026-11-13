@@ -9,7 +9,7 @@ import Hero from './components/Hero';
 import EBookBanner from './components/EBookBanner';
 import EBookReader from './components/EBookReader';
 import LeadCaptureModal from './components/LeadCaptureModal';
-import LeadAdminModal from './components/LeadAdminModal';
+
 import DailyHabitCheck from './components/DailyHabitCheck';
 import FiberLesson from './components/FiberLesson';
 import RoutineReset from './components/RoutineReset';
@@ -22,28 +22,14 @@ import TrustAndFooter from './components/TrustAndFooter';
 export function App() {
   const [isEBookOpen, setIsEBookOpen] = useState(false);
   const [isLeadCaptureOpen, setIsLeadCaptureOpen] = useState(false);
-  const [isLeadAdminOpen, setIsLeadAdminOpen] = useState(false);
-
-  // Discreet creator access (Ctrl+Shift+L or #admin in URL) without showing public footer button
+  // Remove credentials left by the retired public admin modal.
   React.useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'L' || e.key === 'l')) {
-        e.preventDefault();
-        setIsLeadAdminOpen((prev) => !prev);
+    try { sessionStorage.removeItem('gut_admin_key'); } catch {}
+    try {
+      if (localStorage.getItem('gut_reset_subscriber')) {
+        localStorage.setItem('gut_reset_subscriber', JSON.stringify({ accessGranted: true }));
       }
-    };
-    const checkHash = () => {
-      if (window.location.hash === '#admin' || window.location.search.includes('admin=true')) {
-        setIsLeadAdminOpen(true);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('hashchange', checkHash);
-    checkHash();
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('hashchange', checkHash);
-    };
+    } catch {}
   }, []);
 
   // Checks whether the user is already subscribed before opening the lead modal
@@ -119,9 +105,9 @@ export function App() {
   return (
     <div className="min-h-screen bg-[#FBF9F5] font-sans text-[#2C2A26] selection:bg-[#EAD3C7] selection:text-[#14382B]">
       {/* Top Bar Navigation */}
-      <Navbar 
-        onNavigate={scrollToSection} 
-        onOpenEBook={() => handleOpenEBook()} 
+      <Navbar
+        onNavigate={scrollToSection}
+        onOpenEBook={() => handleOpenEBook()}
       />
 
       <main>
@@ -161,8 +147,8 @@ export function App() {
       </main>
 
       {/* Trust, transparency, and legal links */}
-      <TrustAndFooter 
-        onNavigate={scrollToSection} 
+      <TrustAndFooter
+        onNavigate={scrollToSection}
       />
 
       {/* High-Converting Lead Capture Modal */}
@@ -176,16 +162,11 @@ export function App() {
       />
 
       {/* Fullscreen Interactive & Printable eBook Reader */}
-      <EBookReader 
-        isOpen={isEBookOpen} 
-        onClose={() => setIsEBookOpen(false)} 
+      <EBookReader
+        isOpen={isEBookOpen}
+        onClose={() => setIsEBookOpen(false)}
       />
 
-      {/* Admin Lead Management & CSV Export Modal */}
-      <LeadAdminModal
-        isOpen={isLeadAdminOpen}
-        onClose={() => setIsLeadAdminOpen(false)}
-      />
     </div>
   );
 }

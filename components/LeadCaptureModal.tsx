@@ -4,16 +4,16 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { 
-  X, 
-  BookOpen, 
-  CheckCircle2, 
-  Sparkles, 
-  ShieldCheck, 
-  Mail, 
-  User, 
-  ArrowRight, 
-  FileText, 
+import {
+  X,
+  BookOpen,
+  CheckCircle2,
+  Sparkles,
+  ShieldCheck,
+  Mail,
+  User,
+  ArrowRight,
+  FileText,
   Loader2,
   Check,
   Download
@@ -76,10 +76,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
       try {
         localStorage.setItem('gut_reset_subscriber', JSON.stringify({
-          name: firstName.trim() || 'Reader',
-          email: trimmedEmail,
-          marketingConsent,
-          date: new Date().toISOString(),
+          accessGranted: true,
         }));
       } catch {}
 
@@ -106,7 +103,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div 
+      <div
         className="relative w-full max-w-2xl bg-[#FAF8F5] rounded-2xl shadow-2xl border border-[#E5DFD5] overflow-hidden flex flex-col max-h-[92vh]"
         role="dialog"
         aria-modal="true"
@@ -204,7 +201,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
             {/* Right Panel: Lead Capture Form (Mobile: Full width instant form, Desktop: 7 cols) */}
             <div className="col-span-1 md:col-span-7 p-6 sm:p-7 md:p-8 flex flex-col justify-between space-y-4 sm:space-y-5">
-              
+
               {/* Header - Exactly matches user's screenshot as the immediate top view */}
               <div className="space-y-2 pr-8 sm:pr-0">
                 <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#B85D36] font-bold">
