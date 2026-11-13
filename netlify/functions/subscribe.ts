@@ -2,7 +2,7 @@ import type { Handler } from "@netlify/functions";
 import { jsonResponse, errorResponse } from "./lib/auth.js";
 import { isDatabaseConfigured, saveSubscriber, markSenderSync } from "./lib/db.js";
 
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "POST") return errorResponse(405, "Method not allowed. Expected POST.");
