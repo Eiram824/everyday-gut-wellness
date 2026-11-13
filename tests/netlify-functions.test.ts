@@ -35,8 +35,35 @@ describe("Netlify Serverless Functions Integration Suite", () => {
 
   beforeEach(() => {
     process.env.ADMIN_ACCESS_KEY = TEST_ADMIN_KEY;
+    process.env.SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
     delete process.env.SENDER_API_TOKEN;
     delete process.env.GEMINI_API_KEY;
+
+    // Deterministic Supabase REST stub for isolated serverless function tests.
+    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/rest/v1/subscribers") && init?.method === "POST") {
+        const body = JSON.parse(String(init.body || "{}"));
+        return new Response(JSON.stringify([{
+          id: "00000000-0000-4000-8000-000000000001",
+          name: body.name || "Reader",
+          email: body.email,
+          signup_date: new Date().toISOString(),
+          source: body.source || "test_suite",
+          marketing_consent: Boolean(body.marketing_consent),
+          consent_date: body.consent_date || null,
+          sender_synced: false,
+        }]), { status: 201, headers: { "Content-Type": "application/json" } });
+      }
+      if (url.includes("/rest/v1/subscribers") && init?.method === "PATCH") {
+        return new Response(null, { status: 204 });
+      }
+      if (url.includes("/rest/v1/subscribers")) {
+        return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+      return new Response("Not found", { status: 404 });
+    }) as typeof fetch;
   });
 
   // 1. Health Function

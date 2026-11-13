@@ -1,5 +1,6 @@
 import type { Handler } from "@netlify/functions";
-import { jsonResponse } from "./lib/auth.js";
+import { errorResponse, jsonResponse } from "./lib/auth.js";
+import { checkDatabaseConnection } from "./lib/db.js";
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "GET") {
@@ -10,9 +11,15 @@ export const handler: Handler = async (event) => {
     };
   }
 
-  return jsonResponse(200, {
-    status: "ok",
-    runtime: "netlify-serverless",
-    timestamp: new Date().toISOString(),
-  });
+  try {
+    await checkDatabaseConnection();
+    return jsonResponse(200, {
+      status: "ok",
+      runtime: "netlify-serverless",
+      database: "connected",
+      timestamp: new Date().toISOString(),
+    });
+  } catch {
+    return errorResponse(503, "Service dependencies are temporarily unavailable.");
+  }
 };

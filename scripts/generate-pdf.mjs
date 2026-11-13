@@ -168,7 +168,7 @@ async function generatePDF() {
       font: helveticaBold,
       color: colorWhite,
     });
-    coverPage.drawText('Clinically reviewed guidelines aligned with gastroenterology fundamentals.', {
+    coverPage.drawText('Educational information for general use; not a clinical review or personal medical advice.', {
       x: 50,
       y: height - 362,
       size: 9,
@@ -407,7 +407,7 @@ async function generatePDF() {
 
     y = drawParagraph(
       page,
-      'When increasing dietary fiber, many people make the mistake of adding large amounts of raw cruciferous vegetables or coarse wheat bran all at once. This triggers sudden bacterial fermentation, resulting in painful gas and distension. Use these clinically proven gentle swaps instead:',
+      'Some people find a gradual change easier to tolerate than adding a large amount of fiber all at once. Individual responses vary. Consider these gentle food examples as optional ideas, not a treatment plan:',
       50, y, 495, helvetica, 9.5, 15, colorText
     );
     y -= 15;
@@ -589,10 +589,9 @@ async function generatePDF() {
     page.drawText('LOOKING FOR STRUCTURED DAILY TRACKING? THE 30-DAY WELLNESS PLANNER', { x: 65, y: y - 22, size: 8.5, font: helveticaBold, color: colorForest });
     drawParagraph(
       page,
-      'Ready to turn these 7 days into lasting, month-long consistency? Explore our original companion workbook: The 30-Day Digestive Wellness Planner.\n\n' +
-      'Featuring 68 pages of structured daily food & hydration journals, gentle fiber addition worksheets, post-meal movement logs, Bristol Stool consistency records, and weekly progress reflections.\n\n' +
-      'Available as an instant printable and tablet-fillable digital workbook download via Gumroad at:\n' +
-      'https://everydaygutwellness.org/#planner-product',
+      'If you would like a separate planning tool, The 30-Day Gut Routine Planner is a 31-page printable workbook for choosing one routine, fitting it to your schedule, and adjusting it across changing weeks.\n\n' +
+      'Current price: $30 USD. Gumroad handles checkout and delivery:\n' +
+      'https://eiram32.gumroad.com/l/ynisjl',
       65, y - 42, 465, helvetica, 8.5, 14, colorText
     );
     y -= 175;
@@ -605,8 +604,8 @@ async function generatePDF() {
     drawParagraph(
       page,
       'Everyday Gut Wellness is dedicated to providing evidence-informed, transparent, and hype-free digestive health education. Share this free guide with family and friends who could benefit from a gentle, physiological approach to gut comfort.\n\n' +
-      'Official Website: https://everyday-gut-wellness.netlify.app\n' +
-      'Support & Feedback: juggler.laurence1020@gmail.com',
+      'Website: https://everyday-gut-wellness.netlify.app\n' +
+      'For paid-product order or delivery support, use the contact link in your Gumroad receipt.',
       65, y - 48, 465, helvetica, 9, 15, colorWhite
     );
   }

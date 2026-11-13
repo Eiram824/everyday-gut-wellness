@@ -43,7 +43,7 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAF1ED] text-[#14382B] text-xs font-semibold uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5 text-[#B85D36]" />
-                Exclusive Free Downloadable eBook
+                Free Educational Guide
               </div>
 
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#14382B] leading-tight">
@@ -51,7 +51,7 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
               </h2>
 
               <p className="text-[#4A463F] text-sm sm:text-base leading-relaxed font-light">
-                A clinically grounded, step-by-step masterclass to soothe chronic bloating, stimulate natural peristalsis, and re-establish regular bowel habits without extreme cleanses or artificial stimulants.
+                A practical introduction to everyday digestive routines, including fiber variety, fluids, movement, and unhurried habits. It is educational content; it cannot diagnose a condition or promise symptom relief.
               </p>
 
               {/* What's Inside Checklist */}
@@ -62,15 +62,15 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#14382B] shrink-0 mt-0.5" />
-                  <span><strong>Chapter 2:</strong> The 5 Daily Habits That Heal Digestion</span>
+                  <span><strong>Chapter 2:</strong> Everyday Habits and Digestive Routines</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#14382B] shrink-0 mt-0.5" />
-                  <span><strong>Chapter 3:</strong> Day 1 to Day 7 Actionable Reset Protocol</span>
+                  <span><strong>Chapter 3:</strong> A 7-Day Routine Reflection Plan</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#14382B] shrink-0 mt-0.5" />
-                  <span><strong>Chapter 4 & 5:</strong> Bloat Swaps & Printable Daily Tracker</span>
+                  <span><strong>Chapter 4 & 5:</strong> Food Examples & Printable Habit Tracker</span>
                 </div>
               </div>
 

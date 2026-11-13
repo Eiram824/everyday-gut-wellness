@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   X, 
   BookOpen, 
@@ -37,6 +37,13 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      setIsSuccess(false);
+      setErrorMessage(null);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,111 +58,42 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
     }
 
     setIsLoading(true);
-
     try {
-      const payload = {
-        name: firstName.trim() || 'Reader',
-        email: trimmedEmail,
-        source: 'ebook_lead_modal',
-        marketingConsent: Boolean(marketingConsent),
-        consentDate: marketingConsent ? new Date().toISOString() : null,
-      };
-
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit. Please try again.');
-      }
-
-      // Save to localStorage so future visits recognize subscriber & admin can export
-      try {
-        const subscriberObj = {
+        body: JSON.stringify({
           name: firstName.trim() || 'Reader',
           email: trimmedEmail,
-          date: new Date().toISOString(),
           source: 'ebook_lead_modal',
-          marketingConsent: Boolean(marketingConsent),
-          consentDate: marketingConsent ? new Date().toISOString() : null,
-        };
-        localStorage.setItem('gut_reset_subscriber', JSON.stringify(subscriberObj));
-
-        // Maintain full list of all subscribers in local storage as reliable backup
-        const existingListRaw = localStorage.getItem('all_gut_subscribers');
-        const existingList = existingListRaw ? JSON.parse(existingListRaw) : [];
-        if (!existingList.some((s: any) => s.email === trimmedEmail)) {
-          existingList.unshift(subscriberObj);
-          localStorage.setItem('all_gut_subscribers', JSON.stringify(existingList));
-        }
-      } catch (err) {
-        // localStorage ignore in sandbox
+          marketingConsent,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success !== true) {
+        throw new Error(data.error || 'We could not save your signup. Please try again.');
       }
 
-      setIsSuccess(true);
+      try {
+        localStorage.setItem('gut_reset_subscriber', JSON.stringify({
+          name: firstName.trim() || 'Reader',
+          email: trimmedEmail,
+          marketingConsent,
+          date: new Date().toISOString(),
+        }));
+      } catch {}
 
-      // Track conversion in Google Analytics 4
+      setIsSuccess(true);
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'generate_lead', {
           event_category: 'Lead Capture',
           event_label: '7-Day Gentle Gut Reset Guide',
-          value: 1.0,
           currency: 'USD',
         });
-        (window as any).gtag('event', 'file_download', {
-          file_name: 'The-7-Day-Gentle-Gut-Reset-Guide.pdf',
-          file_extension: 'pdf',
-          link_text: 'Download Free PDF',
-        });
-      }
-
-      // Auto-trigger PDF download for instant gratification
-      try {
-        const autoLink = document.createElement('a');
-        autoLink.href = '/The-7-Day-Gentle-Gut-Reset-Guide.pdf';
-        autoLink.download = 'The-7-Day-Gentle-Gut-Reset-Guide.pdf';
-        document.body.appendChild(autoLink);
-        autoLink.click();
-        document.body.removeChild(autoLink);
-      } catch (dlErr) {
-        // Fallback handled by manual download button
       }
     } catch (err: any) {
-      console.error('Subscription error:', err);
-      // Fallback: even if server network hiccups (e.g. static hosting on Netlify), save locally and grant access
-      try {
-        const subscriberObj = {
-          name: firstName.trim() || 'Reader',
-          email: trimmedEmail,
-          date: new Date().toISOString(),
-          source: 'ebook_lead_modal (offline/static)',
-          marketingConsent: Boolean(marketingConsent),
-          consentDate: marketingConsent ? new Date().toISOString() : null,
-          offlineFallback: true,
-        };
-        localStorage.setItem('gut_reset_subscriber', JSON.stringify(subscriberObj));
-        const existingListRaw = localStorage.getItem('all_gut_subscribers');
-        const existingList = existingListRaw ? JSON.parse(existingListRaw) : [];
-        if (!existingList.some((s: any) => s.email === trimmedEmail)) {
-          existingList.unshift(subscriberObj);
-          localStorage.setItem('all_gut_subscribers', JSON.stringify(existingList));
-        }
-        setIsSuccess(true);
-
-        // Auto-trigger PDF download
-        const autoLink = document.createElement('a');
-        autoLink.href = '/The-7-Day-Gentle-Gut-Reset-Guide.pdf';
-        autoLink.download = 'The-7-Day-Gentle-Gut-Reset-Guide.pdf';
-        document.body.appendChild(autoLink);
-        autoLink.click();
-        document.body.removeChild(autoLink);
-      } catch (storageErr) {
-        setErrorMessage(err.message || 'Something went wrong. Please try again.');
-      }
+      console.error('Subscription request failed:', err?.message || 'unknown_error');
+      setErrorMessage(err?.message || 'We could not save your signup. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
@@ -195,10 +133,10 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 Access Granted · PDF Ready
               </span>
               <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-[#14382B]">
-                Welcome aboard, {firstName.trim() || 'friend'}!
+                {`Welcome aboard, ${firstName.trim() || 'friend'}!`}
               </h3>
               <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
-                Your complimentary copy of <strong className="text-[#14382B]">The 7-Day Gentle Gut Reset Guide</strong> is ready. Your download should begin automatically.
+                <>Your complimentary copy of <strong className="text-[#14382B">The 7-Day Gentle Gut Reset Guide</strong> is ready. Your download should begin automatically.</>
               </p>
             </div>
 
@@ -226,7 +164,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
             <div className="pt-1 flex items-center gap-1.5 text-[11px] sm:text-xs text-[#8C877D]">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Free lifetime access. No spam. 1–click unsubscribe anytime.</span>
+              <span>Free guide access. Optional email updates can be unsubscribed anytime.</span>
             </div>
           </div>
         ) : (
@@ -240,35 +178,27 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                   Complimentary eBook
                 </div>
 
-                <div className="relative rounded-lg overflow-hidden shadow-lg border border-[#DCD5C9] group">
-                  <img
-                    src="/assets/images/ebook_cover_guide_1793359029909.jpg"
-                    alt="The 7-Day Gentle Gut Reset eBook Cover"
-                    className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-3 text-white">
-                    <span className="text-[11px] font-serif font-medium">5 Chapters · 7-Day Reset Tracker Included</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-1 text-xs text-[#4A463F]">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" />
-                    <span>The Gut-Brain connection & bowel motility biology</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" />
-                    <span>Soluble vs. insoluble fiber meal planning guide</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" />
-                    <span>Printable 7-Day Habit Tracker & symptom diary</span>
-                  </div>
-                </div>
+                <>
+                    <div className="relative rounded-lg overflow-hidden shadow-lg border border-[#DCD5C9] group">
+                      <img
+                        src="/assets/images/ebook_cover_guide_1793359029909.jpg"
+                        alt="The 7-Day Gentle Gut Reset eBook Cover"
+                        className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-3 text-white">
+                        <span className="text-[11px] font-serif font-medium">5 Chapters · 7-Day Reset Tracker Included</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2 pt-1 text-xs text-[#4A463F]">
+                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>The Gut-Brain connection & bowel motility biology</span></div>
+                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Soluble vs. insoluble fiber meal planning guide</span></div>
+                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Printable 7-Day Habit Tracker & symptom diary</span></div>
+                    </div>
+                </>
               </div>
 
               <div className="pt-4 border-t border-[#DCD5C9]/80 text-[11px] text-[#7A7469] italic">
-                Clinically referenced with USDA & Gastroenterology guidelines.
+                Educational content for general information; not medical advice.
               </div>
             </div>
 
@@ -373,7 +303,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 <div className="flex items-center justify-center gap-2 sm:gap-3 text-[11px] text-[#8C877D]">
                   <span className="flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    100% Privacy Protected
+                    Your email is used for this guide request
                   </span>
                   <span>·</span>
                   <span>Instant Browser Access</span>

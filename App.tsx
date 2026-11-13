@@ -15,6 +15,7 @@ import FiberLesson from './components/FiberLesson';
 import RoutineReset from './components/RoutineReset';
 import MythVsFact from './components/MythVsFact';
 import MedicalAdvice from './components/MedicalAdvice';
+import ResearchAndFaq from './components/ResearchAndFaq';
 import ProductSection from './components/ProductSection';
 import TrustAndFooter from './components/TrustAndFooter';
 
@@ -123,18 +124,18 @@ export function App() {
         onOpenEBook={() => handleOpenEBook()} 
       />
 
-      {/* Hero Section */}
-      <Hero
-        onExplore={() => scrollToSection('educational-guide')}
-        onJumpToReset={() => scrollToSection('routine-reset')}
-        onOpenEBook={() => handleOpenEBook()}
-      />
+      <main>
+        <article id="educational-guide" className="scroll-mt-24" itemScope itemType="https://schema.org/Article">
+          {/* Hero Section */}
+          <Hero
+            onExplore={() => scrollToSection('educational-guide')}
+            onJumpToReset={() => scrollToSection('routine-reset')}
+            onOpenEBook={() => handleOpenEBook()}
+          />
 
-      {/* eBook Feature Spotlight Banner */}
-      <EBookBanner onOpenEBook={() => handleOpenEBook()} />
+          {/* eBook Feature Spotlight Banner */}
+          <EBookBanner onOpenEBook={() => handleOpenEBook()} />
 
-      {/* Main Educational Guide Landmark */}
-      <main id="educational-guide" className="scroll-mt-24">
         {/* Section 2: The Daily Habit Check */}
         <DailyHabitCheck />
 
@@ -150,11 +151,16 @@ export function App() {
         {/* Section 6: When to Seek Medical Advice */}
         <MedicalAdvice />
 
-        {/* Section 7: Original Digital Product - The 30-Day Digestive Wellness Planner */}
+        {/* Evidence notes and reader FAQs, available in the initial HTML response. */}
+        <ResearchAndFaq />
+
+        </article>
+
+        {/* Paid products are intentionally outside the educational article. */}
         <ProductSection onJoinWaitlist={() => setIsLeadCaptureOpen(true)} />
       </main>
 
-      {/* Section 8: Trust, Transparency & Footer */}
+      {/* Trust, transparency, and legal links */}
       <TrustAndFooter 
         onNavigate={scrollToSection} 
       />

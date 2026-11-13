@@ -4,6 +4,7 @@
 !.env.example
 
 # Production & Build outputs
+.netlify
 dist
 dist-ssr
 build
