@@ -136,7 +136,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 {`Welcome aboard, ${firstName.trim() || 'friend'}!`}
               </h3>
               <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
-                <>Your complimentary copy of <strong className="text-[#14382B">The 7-Day Gentle Gut Reset Guide</strong> is ready. Your download should begin automatically.</>
+                <>Your complimentary copy of <strong className="text-[#14382B">The 7-Day Gentle Gut Reset Guide</strong> is ready. Use the download button below to save your PDF.</>
               </p>
             </div>
 
@@ -320,3 +320,4 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 };
 
 export default LeadCaptureModal;
+
