@@ -16,6 +16,8 @@ function html(status: number, content: string): HandlerResponse {
     statusCode: status,
     headers: {
       ...JSON_HEADERS, "Content-Type": "text/html; charset=utf-8", "X-Frame-Options": "DENY",
+      // Preserve the Origin on same-origin form POSTs; no-referrer can make it null.
+      "Referrer-Policy": "same-origin",
       "Content-Security-Policy": `default-src 'none'; style-src 'nonce-${nonce}'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`,
     },
     body: `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow, noarchive"><title>Private administration | Everyday Gut Wellness</title><style nonce="${nonce}">body{margin:0;background:#fbf9f5;color:#14382b;font:16px/1.6 system-ui,sans-serif}main{max-width:1100px;margin:auto;padding:40px 24px}form{margin:20px 0}label{display:block}input,button,a{font:inherit}input{display:block;padding:12px;margin:8px 0;max-width:100%;box-sizing:border-box}button{padding:12px 20px;background:#14382b;color:white;border:0;cursor:pointer}a{color:#14382b}table{width:100%;border-collapse:collapse;text-align:left}td,th{padding:12px;border-bottom:1px solid #ddd;overflow-wrap:anywhere}.records{overflow:auto}.notice{color:#9b321b}</style></head><body><main>${content}</main></body></html>`,
@@ -55,3 +57,4 @@ export const handler: Handler = async event => {
     return html(503, "<h1>Subscriber administration</h1><p>Records are temporarily unavailable. Please try again later.</p>");
   }
 };
+

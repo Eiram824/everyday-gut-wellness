@@ -75,6 +75,7 @@ describe('Admin session and subscriber privacy boundaries', () => {
     assert.equal(result.statusCode,401); assert.equal(reads,0);
     assert.match(result.body, /name="robots" content="noindex, nofollow, noarchive"/);
     assert.match(result.headers['Content-Security-Policy'], /frame-ancestors 'none'/);
+    assert.equal(result.headers['Referrer-Policy'], 'same-origin');
     assert.ok(!result.body.includes('<script'));
   });
 
