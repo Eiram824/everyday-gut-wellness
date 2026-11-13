@@ -16,6 +16,11 @@
 
 # 1. API Route Redirects to Netlify Serverless Functions
 [[redirects]]
+  from = "/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
+[[redirects]]
   from = "/api/health"
   to = "/.netlify/functions/health"
   status = 200
@@ -81,3 +86,4 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
