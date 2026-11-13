@@ -22,14 +22,12 @@ import {
 interface LeadCaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
-  purpose?: 'ebook' | 'planner-interest';
-  onSuccess: (subscriber: { name: string; email: string }, purpose: 'ebook' | 'planner-interest') => void;
+  onSuccess: (subscriber: { name: string; email: string }) => void;
 }
 
 export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
   isOpen,
   onClose,
-  purpose = 'ebook',
   onSuccess,
 }) => {
   const [firstName, setFirstName] = useState('');
@@ -44,7 +42,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
       setIsSuccess(false);
       setErrorMessage(null);
     }
-  }, [isOpen, purpose]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -67,7 +65,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
         body: JSON.stringify({
           name: firstName.trim() || 'Reader',
           email: trimmedEmail,
-          source: purpose === 'planner-interest' ? 'planner_interest_list' : 'ebook_lead_modal',
+          source: 'ebook_lead_modal',
           marketingConsent,
         }),
       });
@@ -76,22 +74,20 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
         throw new Error(data.error || 'We could not save your signup. Please try again.');
       }
 
-      if (purpose === 'ebook') {
-        try {
-          localStorage.setItem('gut_reset_subscriber', JSON.stringify({
-            name: firstName.trim() || 'Reader',
-            email: trimmedEmail,
-            marketingConsent,
-            date: new Date().toISOString(),
-          }));
-        } catch {}
-      }
+      try {
+        localStorage.setItem('gut_reset_subscriber', JSON.stringify({
+          name: firstName.trim() || 'Reader',
+          email: trimmedEmail,
+          marketingConsent,
+          date: new Date().toISOString(),
+        }));
+      } catch {}
 
       setIsSuccess(true);
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'generate_lead', {
           event_category: 'Lead Capture',
-          event_label: purpose === 'planner-interest' ? 'Planner Interest' : '7-Day Gentle Gut Reset Guide',
+          event_label: '7-Day Gentle Gut Reset Guide',
           currency: 'USD',
         });
       }
@@ -105,7 +101,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
   const handleOpenReaderFromSuccess = () => {
     setIsSuccess(false);
-    onSuccess({ name: firstName.trim() || 'Reader', email: email.trim().toLowerCase() }, purpose);
+    onSuccess({ name: firstName.trim() || 'Reader', email: email.trim().toLowerCase() });
   };
 
   return (
@@ -134,18 +130,18 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
             <div className="space-y-1.5 sm:space-y-2 max-w-md">
               <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#B85D36]">
-                {purpose === 'ebook' ? 'Access Granted · PDF Ready' : 'Interest Registered'}
+                Access Granted · PDF Ready
               </span>
               <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-[#14382B]">
-                {purpose === 'ebook' ? `Welcome aboard, ${firstName.trim() || 'friend'}!` : 'Thanks for your interest.'}
+                {`Welcome aboard, ${firstName.trim() || 'friend'}!`}
               </h3>
               <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
-                {purpose === 'ebook' ? <>Your complimentary copy of <strong className="text-[#14382B]">The 7-Day Gentle Gut Reset Guide</strong> is ready. Your download should begin automatically.</> : 'Your planner interest has been recorded. There is no product for sale yet, and this request does not place an order. We will only send updates if you checked the optional email updates box.'}
+                <>Your complimentary copy of <strong className="text-[#14382B">The 7-Day Gentle Gut Reset Guide</strong> is ready. Your download should begin automatically.</>
               </p>
             </div>
 
             {/* Quick Access CTAs */}
-            {purpose === 'ebook' && <div className="w-full max-w-sm space-y-2.5 sm:space-y-3 pt-1 sm:pt-2">
+            <div className="w-full max-w-sm space-y-2.5 sm:space-y-3 pt-1 sm:pt-2">
               <a
                 href="/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
                 download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
@@ -164,13 +160,12 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 <span>Open Full Interactive Reader</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
-            </div>}
+            </div>
 
             <div className="pt-1 flex items-center gap-1.5 text-[11px] sm:text-xs text-[#8C877D]">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>{purpose === 'ebook' ? 'Free guide access. Optional email updates can be unsubscribed anytime.' : 'Your interest is recorded. Marketing updates are optional.'}</span>
+              <span>Free guide access. Optional email updates can be unsubscribed anytime.</span>
             </div>
-            {purpose === 'planner-interest' && <button type="button" onClick={onClose} className="px-6 py-2.5 bg-[#14382B] hover:bg-[#0E281E] text-white rounded-xl text-sm font-semibold">Close</button>}
           </div>
         ) : (
           /* Form View */
@@ -180,11 +175,10 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#14382B] text-white text-[10px] font-semibold tracking-wider uppercase">
                   <Sparkles className="w-3 h-3 text-[#EAD3C7]" />
-                  {purpose === 'ebook' ? 'Complimentary eBook' : 'Planner Interest List'}
+                  Complimentary eBook
                 </div>
 
-                {purpose === 'ebook' ? (
-                  <>
+                <>
                     <div className="relative rounded-lg overflow-hidden shadow-lg border border-[#DCD5C9] group">
                       <img
                         src="/assets/images/ebook_cover_guide_1793359029909.jpg"
@@ -200,18 +194,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                       <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Soluble vs. insoluble fiber meal planning guide</span></div>
                       <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Printable 7-Day Habit Tracker & symptom diary</span></div>
                     </div>
-                  </>
-                ) : (
-                  <div className="rounded-xl border border-[#DCD5C9] bg-white p-5 shadow-sm space-y-4">
-                    <span className="inline-flex rounded-full bg-[#F3EFE6] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#14382B]">Concept · Not for sale</span>
-                    <h4 className="font-serif text-xl font-bold leading-tight text-[#14382B]">The 30-Day Digestive Wellness Planner</h4>
-                    <ul className="space-y-2 text-xs text-[#4A463F]">
-                      <li>• Daily routines and habit notes</li>
-                      <li>• Food and hydration observations</li>
-                      <li>• Weekly reflection prompts</li>
-                    </ul>
-                  </div>
-                )}
+                </>
               </div>
 
               <div className="pt-4 border-t border-[#DCD5C9]/80 text-[11px] text-[#7A7469] italic">
@@ -225,13 +208,13 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
               {/* Header - Exactly matches user's screenshot as the immediate top view */}
               <div className="space-y-2 pr-8 sm:pr-0">
                 <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#B85D36] font-bold">
-                  {purpose === 'ebook' ? 'Instant Download & In-Browser Access' : 'No purchase or payment required'}
+                  Instant Download & In-Browser Access
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#14382B] leading-tight">
-                  {purpose === 'ebook' ? 'Get The 7-Day Gentle Gut Reset eBook' : 'Register Planner Interest'}
+                  Get The 7-Day Gentle Gut Reset eBook
                 </h3>
                 <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
-                  {purpose === 'ebook' ? 'Enter your email below to unlock the complete eBook reader and printable daily action tracker immediately.' : 'Leave your email to register interest in the planner. Email updates are optional and require your separate consent.'}
+                  Enter your email below to unlock the complete eBook reader and printable daily action tracker immediately.
                 </p>
               </div>
 

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ArrowUpRight, BookOpenCheck, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, BookOpenCheck, CheckCircle2, Clock3, ShieldCheck } from 'lucide-react';
 import { GUT_CLARITY_PRODUCT } from '../constants';
 
 const workbookIncludes = [
@@ -86,17 +86,28 @@ export const ProductSection: React.FC = () => {
             </div>
 
             <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <a
-                href={GUT_CLARITY_PRODUCT.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={trackCheckout}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#B85D36] px-6 py-3 font-semibold text-white shadow-md transition-colors hover:bg-[#A04E2B] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#B85D36]/30"
-              >
-                Get the workbook · $25
-                <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
-              </a>
-              <span className="text-xs leading-relaxed text-[#8C877D]">Secure checkout and instant file delivery by Gumroad.</span>
+              {GUT_CLARITY_PRODUCT.checkoutEnabled ? (
+                <a
+                  href={GUT_CLARITY_PRODUCT.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={trackCheckout}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#B85D36] px-6 py-3 font-semibold text-white shadow-md transition-colors hover:bg-[#A04E2B] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#B85D36]/30"
+                >
+                  Get the workbook · ${GUT_CLARITY_PRODUCT.priceUSD}
+                  <ArrowUpRight aria-hidden="true" className="h-4 w-4" />
+                </a>
+              ) : (
+                <div className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#14382B]/15 bg-[#F8F6F0] px-5 py-3 font-semibold text-[#14382B]" aria-live="polite">
+                  <Clock3 aria-hidden="true" className="h-4 w-4 text-[#B85D36]" />
+                  Checkout being prepared
+                </div>
+              )}
+              <span className="text-xs leading-relaxed text-[#8C877D]">
+                {GUT_CLARITY_PRODUCT.checkoutEnabled
+                  ? 'Checkout and file delivery are handled by Gumroad.'
+                  : 'We are preparing the product listing and delivery before taking orders.'}
+              </span>
             </div>
             <p className="mt-4 text-[11px] leading-relaxed text-[#8C877D]">
               Educational use for adults only; not medical advice, diagnosis, or treatment. The workbook is not clinician-reviewed. For urgent, severe, or worsening symptoms, seek medical care.
