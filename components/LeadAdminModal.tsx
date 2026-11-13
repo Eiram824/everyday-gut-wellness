@@ -112,70 +112,30 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
   const fetchLeads = async (customKey?: string) => {
     const keyToUse = customKey ?? adminKey;
     setIsLoading(true);
-    let apiSuccess = false;
-
     try {
-      const res = await fetch('/api/leads', {
-        headers: {
-          'x-admin-key': keyToUse,
-        },
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.subscribers) {
-          setSubscribers(data.subscribers);
-          setTotal(data.total ?? data.subscribers.length);
-          setSenderConfigured(Boolean(data.senderConfigured));
-          apiSuccess = true;
+      const res = await fetch('/api/leads', { headers: { 'x-admin-key': keyToUse } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        if (res.status === 401) {
+          setIsAuthenticated(false);
+          setAuthError('Session expired or invalid key. Please enter your administrator key.');
+        } else {
+          setAuthError(data.error || 'Unable to load live subscriber records. Check database configuration.');
         }
-      } else if (res.status === 401) {
-        setIsAuthenticated(false);
-        setAuthError('Session expired or invalid key. Please enter your administrator key.');
+        setSubscribers([]);
+        setTotal(0);
+        return;
       }
-    } catch (err) {
-      console.warn('Backend leads API unavailable, attempting local storage fallback:', err);
+      setSubscribers(Array.isArray(data.subscribers) ? data.subscribers : []);
+      setTotal(data.total ?? data.subscribers?.length ?? 0);
+      setSenderConfigured(Boolean(data.senderConfigured));
+    } catch {
+      setAuthError('Could not connect to the secure subscriber database. No browser-only records are shown.');
+      setSubscribers([]);
+      setTotal(0);
+    } finally {
+      setIsLoading(false);
     }
-
-    if (!apiSuccess && isAuthenticated) {
-      try {
-        const localListRaw = localStorage.getItem('all_gut_subscribers');
-        const singleSubRaw = localStorage.getItem('gut_reset_subscriber');
-        let localSubs: Subscriber[] = [];
-
-        if (localListRaw) {
-          const parsed = JSON.parse(localListRaw);
-          localSubs = parsed.map((item: any, i: number) => ({
-            id: item.id || `loc_${i + 1}`,
-            name: item.name || 'Reader',
-            email: item.email,
-            date: item.date || new Date().toISOString(),
-            source: item.source || 'ebook_lead_modal',
-            marketingConsent: Boolean(item.marketingConsent),
-            consentDate: item.consentDate || null,
-            senderSynced: false,
-          }));
-        } else if (singleSubRaw) {
-          const parsed = JSON.parse(singleSubRaw);
-          localSubs = [{
-            id: 'loc_1',
-            name: parsed.name || 'Reader',
-            email: parsed.email,
-            date: parsed.date || new Date().toISOString(),
-            source: 'ebook_lead_modal',
-            marketingConsent: Boolean(parsed.marketingConsent),
-            consentDate: parsed.consentDate || null,
-            senderSynced: false,
-          }];
-        }
-
-        setSubscribers(localSubs);
-        setTotal(localSubs.length);
-      } catch (e) {
-        console.error('Local fallback read error:', e);
-      }
-    }
-    setIsLoading(false);
   };
 
   const handleExportCsv = async () => {
