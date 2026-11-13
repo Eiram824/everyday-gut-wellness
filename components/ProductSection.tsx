@@ -55,7 +55,7 @@ interface ProductSectionProps {
 }
 
 export const ProductSection: React.FC<ProductSectionProps> = () => (
-  <section id="gut-clarity-workbook" aria-labelledby="workbooks-title" className="scroll-mt-24 border-b border-[#E5DFD5] bg-[#F3EFE6] py-20 md:py-28">
+  <section id="planner-product" aria-labelledby="workbooks-title" className="scroll-mt-24 border-b border-[#E5DFD5] bg-[#F3EFE6] py-20 md:py-28">
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       <div className="mx-auto mb-12 max-w-3xl space-y-4 text-center">
         <span className="inline-flex items-center gap-2 rounded-full bg-[#14382B]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#14382B]">
