@@ -13,7 +13,8 @@
     "build:client": "node scripts/generate-pdf.mjs && vite build && node scripts/prerender.mjs && node scripts/validate-static-output.mjs && node scripts/validate-public-privacy.mjs",
     "validate:seo": "node scripts/validate-static-output.mjs",
     "start": "node server-dist/server.cjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pretest": "node scripts/generate-pdf.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
