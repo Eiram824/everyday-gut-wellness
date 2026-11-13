@@ -183,31 +183,35 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                   {purpose === 'ebook' ? 'Complimentary eBook' : 'Planner Interest List'}
                 </div>
 
-                <div className="relative rounded-lg overflow-hidden shadow-lg border border-[#DCD5C9] group">
-                  <img
-                    src="/assets/images/ebook_cover_guide_1793359029909.jpg"
-                    alt="The 7-Day Gentle Gut Reset eBook Cover"
-                    className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-3 text-white">
-                    <span className="text-[11px] font-serif font-medium">5 Chapters · 7-Day Reset Tracker Included</span>
+                {purpose === 'ebook' ? (
+                  <>
+                    <div className="relative rounded-lg overflow-hidden shadow-lg border border-[#DCD5C9] group">
+                      <img
+                        src="/assets/images/ebook_cover_guide_1793359029909.jpg"
+                        alt="The 7-Day Gentle Gut Reset eBook Cover"
+                        className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-3 text-white">
+                        <span className="text-[11px] font-serif font-medium">5 Chapters · 7-Day Reset Tracker Included</span>
+                      </div>
+                    </div>
+                    <div className="space-y-2 pt-1 text-xs text-[#4A463F]">
+                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>The Gut-Brain connection & bowel motility biology</span></div>
+                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Soluble vs. insoluble fiber meal planning guide</span></div>
+                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Printable 7-Day Habit Tracker & symptom diary</span></div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="rounded-xl border border-[#DCD5C9] bg-white p-5 shadow-sm space-y-4">
+                    <span className="inline-flex rounded-full bg-[#F3EFE6] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#14382B]">Concept · Not for sale</span>
+                    <h4 className="font-serif text-xl font-bold leading-tight text-[#14382B]">The 30-Day Digestive Wellness Planner</h4>
+                    <ul className="space-y-2 text-xs text-[#4A463F]">
+                      <li>• Daily routines and habit notes</li>
+                      <li>• Food and hydration observations</li>
+                      <li>• Weekly reflection prompts</li>
+                    </ul>
                   </div>
-                </div>
-
-                <div className="space-y-2 pt-1 text-xs text-[#4A463F]">
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" />
-                    <span>The Gut-Brain connection & bowel motility biology</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" />
-                    <span>Soluble vs. insoluble fiber meal planning guide</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" />
-                    <span>Printable 7-Day Habit Tracker & symptom diary</span>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="pt-4 border-t border-[#DCD5C9]/80 text-[11px] text-[#7A7469] italic">
