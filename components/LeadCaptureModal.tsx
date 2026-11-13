@@ -44,7 +44,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
     setErrorMessage(null);
 
     const trimmedEmail = email.trim().toLowerCase();
-    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
       setErrorMessage('Please enter a valid email address.');
       return;
