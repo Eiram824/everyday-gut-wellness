@@ -5,7 +5,7 @@ import { isDatabaseConfigured, listSubscribersFromDatabase } from "./lib/db.js";
 function csvCell(value: unknown): string {
   let text = String(value ?? "");
   // Spreadsheet formula injection defense.
-  if (/^\s*[=+\-@]/.test(text) || /^[\t\r]/.test(text)) text = `'\${text}`;
+  if (/^\s*[=+\-@]/.test(text) || /^[\t\r]/.test(text)) text = "'" + text;
   return `"${text.replace(/"/g, '""')}"`;
 }
 
