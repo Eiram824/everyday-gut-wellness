@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/admin/
+Disallow: /api/leads
+Disallow: /.netlify/functions/
 
 Sitemap: https://everyday-gut-wellness.netlify.app/sitemap.xml

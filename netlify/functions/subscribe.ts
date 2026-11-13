@@ -46,7 +46,7 @@ export const handler: Handler = async (event) => {
     const token = (process.env.SENDER_API_TOKEN || "").trim();
     const groupId = (process.env.SENDER_GROUP_ID || "").trim();
 
-    if (marketingConsent && token) {
+    if (marketingConsent && token && subscriber.created && subscriber.id) {
       try {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
@@ -83,9 +83,7 @@ export const handler: Handler = async (event) => {
     return jsonResponse(200, {
       success: true,
       message: "Your free 7-Day Gentle Gut Reset Guide signup is ready.",
-      subscriber: { name: subscriber.name, email: subscriber.email, marketingConsent: subscriber.marketingConsent },
-      senderSynced,
-      senderStatus,
+      subscriber: { name, email, marketingConsent },
     });
   } catch (error: any) {
     console.error("[Netlify Function] Lead capture failed:", error?.message || "unknown_error");

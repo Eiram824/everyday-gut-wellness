@@ -8,6 +8,13 @@ import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 
+import { handler as healthHandler } from './netlify/functions/health.js';
+import { handler as subscribeHandler } from './netlify/functions/subscribe.js';
+import { handler as adminVerifyHandler } from './netlify/functions/admin-verify.js';
+import { handler as adminHandler } from './netlify/functions/admin.js';
+import { handler as leadsHandler } from './netlify/functions/leads.js';
+import { handler as exportHandler } from './netlify/functions/leads-export.js';
+
 const MODEL_UPGRADES: Record<string, string> = {
   "gemini-2.5-flash": "gemini-3-flash-preview",
   "gemini-2.5-pro": "gemini-3.1-pro-preview",
@@ -53,288 +60,28 @@ async function startServer() {
     }
   }
 
-  app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok" });
-  });
-
-  // Subscriber Lead Management & Sender.net Integration
-  const DATA_DIR = path.join(process.cwd(), "data");
-  const SUBSCRIBERS_FILE = path.join(DATA_DIR, "subscribers.json");
-
-  // Admin access key configuration (strictly from environment variable)
-  // If not configured, all administrative endpoints fail closed and reject requests.
-  const ADMIN_ACCESS_KEY = (process.env.ADMIN_ACCESS_KEY || "").trim();
-
-  function verifyAdminAccess(req: express.Request): { authorized: boolean; status: number; error?: string } {
-    if (!ADMIN_ACCESS_KEY) {
-      return {
-        authorized: false,
-        status: 503,
-        error: "Server configuration error: ADMIN_ACCESS_KEY is not configured on the server. Administrative access is locked.",
-      };
-    }
-
-    const authHeader = req.headers["authorization"] || "";
-    const bearerKey = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
-    const customHeaderKey = ((req.headers["x-admin-key"] as string) || "").trim();
-
-    // Query parameters are strictly disallowed to prevent token leakage in server logs, referrers, and browser histories.
-    if ((bearerKey && bearerKey === ADMIN_ACCESS_KEY) || (customHeaderKey && customHeaderKey === ADMIN_ACCESS_KEY)) {
-      return { authorized: true, status: 200 };
-    }
-
-    return {
-      authorized: false,
-      status: 401,
-      error: "Unauthorized access. Valid administrator key required in Authorization or X-Admin-Key header.",
-    };
-  }
-
-  interface SubscriberRecord {
-    id: string;
-    name: string;
-    email: string;
-    date: string;
-    source: string;
-    marketingConsent: boolean;
-    consentDate: string | null;
-    senderSynced: boolean;
-  }
-
-  function getSubscribers(): SubscriberRecord[] {
+  // Local Express uses the same auth/database handlers as production.
+  const adapt = (handler: any) => async (req: express.Request, res: express.Response) => {
     try {
-      if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-      }
-      if (!fs.existsSync(SUBSCRIBERS_FILE)) {
-        fs.writeFileSync(SUBSCRIBERS_FILE, JSON.stringify([], null, 2), "utf8");
-        return [];
-      }
-      const data = fs.readFileSync(SUBSCRIBERS_FILE, "utf8");
-      const list = JSON.parse(data) || [];
-      // Normalize older records if missing marketingConsent
-      return list.map((item: any) => ({
-        id: item.id || `sub_${Date.now()}`,
-        name: item.name || "Reader",
-        email: item.email || "",
-        date: item.date || new Date().toISOString(),
-        source: item.source || "ebook_lead_magnet",
-        marketingConsent: Boolean(item.marketingConsent),
-        consentDate: item.consentDate || null,
-        senderSynced: Boolean(item.senderSynced),
-      }));
-    } catch (err) {
-      console.error("[Backend] Error reading subscribers file:", err);
-      return [];
-    }
-  }
-
-  function saveSubscribers(subscribers: SubscriberRecord[]) {
-    try {
-      if (!fs.existsSync(DATA_DIR)) {
-        fs.mkdirSync(DATA_DIR, { recursive: true });
-      }
-      // Safe atomic write to avoid data corruption
-      const tempFile = `${SUBSCRIBERS_FILE}.tmp`;
-      fs.writeFileSync(tempFile, JSON.stringify(subscribers, null, 2), "utf8");
-      fs.renameSync(tempFile, SUBSCRIBERS_FILE);
-    } catch (err) {
-      console.error("[Backend] Error saving subscribers file:", err);
-    }
-  }
-
-  // Sender.net Configuration Helper
-  const SENDER_CONFIG_FILE = path.join(DATA_DIR, "sender_config.json");
-  function getSenderConfig(): { apiToken?: string; groupId?: string; groupTitle?: string } {
-    try {
-      if (fs.existsSync(SENDER_CONFIG_FILE)) {
-        const raw = fs.readFileSync(SENDER_CONFIG_FILE, "utf8");
-        return JSON.parse(raw);
-      }
-    } catch (e) {
-      console.warn("[Backend] Error reading sender_config.json:", e);
-    }
-    return {
-      apiToken: process.env.SENDER_API_TOKEN,
-      groupId: process.env.SENDER_GROUP_ID,
-    };
-  }
-
-  // Admin key verification endpoint
-  app.post("/api/admin/verify", (req, res): any => {
-    if (!ADMIN_ACCESS_KEY) {
-      return res.status(503).json({
-        success: false,
-        error: "Server configuration error: ADMIN_ACCESS_KEY is not configured on the server. Administrative access is locked.",
-      });
-    }
-    const key = (req.body?.key || "").trim();
-    if (key && key === ADMIN_ACCESS_KEY) {
-      return res.json({ success: true, message: "Admin authenticated." });
-    }
-    return res.status(401).json({ success: false, error: "Invalid administrator key." });
-  });
-
-  app.post("/api/subscribe", async (req, res): Promise<any> => {
-    try {
-      const { name, email, source = "ebook_lead_magnet", marketingConsent = false } = req.body || {};
-      
-      // Input sanitization
-      const trimmedEmail = (email || "").trim().toLowerCase().slice(0, 254);
-      const cleanName = (name || "").replace(/<[^>]*>?/gm, "").trim().slice(0, 80) || "Reader";
-      const cleanSource = String(source).replace(/<[^>]*>?/gm, "").trim().slice(0, 50);
-      const hasMarketingConsent = Boolean(marketingConsent);
-      const consentDate = hasMarketingConsent ? new Date().toISOString() : null;
-
-      // Strict email format validation
-      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-      if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
-        return res.status(400).json({ error: "Please provide a valid email address." });
-      }
-
-      const subscribers = getSubscribers();
-      const existingIndex = subscribers.findIndex((s) => s.email === trimmedEmail);
-
-      let senderSynced = false;
-      let senderMessage = "";
-
-      // Sender.net API integration (v2) - respect marketing consent
-      const senderCfg = getSenderConfig();
-      const senderToken = process.env.SENDER_API_TOKEN || senderCfg.apiToken;
-      const senderGroupId = process.env.SENDER_GROUP_ID || senderCfg.groupId;
-
-      if (senderToken) {
-        try {
-          const senderPayload: any = {
-            email: trimmedEmail,
-            firstname: cleanName,
-          };
-          
-          // Only add to promotional marketing group if user voluntarily opted in
-          if (hasMarketingConsent && senderGroupId) {
-            senderPayload.groups = [senderGroupId];
-          }
-
-          const senderRes = await fetch("https://api.sender.net/v2/subscribers", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${senderToken}`,
-              "Content-Type": "application/json",
-              "Accept": "application/json",
-            },
-            body: JSON.stringify(senderPayload),
-          });
-
-          if (senderRes.ok) {
-            senderSynced = true;
-            senderMessage = hasMarketingConsent 
-              ? "Successfully synced with Sender.net list." 
-              : "Registered with Sender.net (Transactional guide delivery only).";
-          } else {
-            const errData = await senderRes.json().catch(() => ({}));
-            console.warn("[Backend] Sender.net API non-OK response:", senderRes.status, errData);
-            senderMessage = `Sender.net status ${senderRes.status}. Saved to local subscriber list.`;
-          }
-        } catch (senderErr: any) {
-          console.error("[Backend] Sender.net API error:", senderErr.message);
-          senderMessage = "Saved locally; Sender.net sync will retry.";
-        }
-      } else {
-        senderMessage = "Saved to local subscriber list (Sender.net token not configured).";
-      }
-
-      const subscriberRecord: SubscriberRecord = {
-        id: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        name: cleanName,
-        email: trimmedEmail,
-        date: new Date().toISOString(),
-        source: cleanSource,
-        marketingConsent: hasMarketingConsent,
-        consentDate,
-        senderSynced,
-      };
-
-      if (existingIndex >= 0) {
-        subscribers[existingIndex] = {
-          ...subscribers[existingIndex],
-          name: cleanName,
-          date: new Date().toISOString(),
-          marketingConsent: hasMarketingConsent || subscribers[existingIndex].marketingConsent,
-          consentDate: consentDate || subscribers[existingIndex].consentDate,
-          senderSynced: senderSynced || subscribers[existingIndex].senderSynced,
-        };
-      } else {
-        subscribers.unshift(subscriberRecord);
-      }
-
-      saveSubscribers(subscribers);
-
-      return res.json({
-        success: true,
-        message: "Your free 7-Day Gentle Gut Reset Guide is ready for instant download.",
-        subscriber: { name: cleanName, email: trimmedEmail, marketingConsent: hasMarketingConsent },
-        senderSynced,
-        senderStatus: senderMessage,
-      });
-    } catch (error: any) {
-      console.error("[Backend] /api/subscribe error:", error);
-      return res.status(500).json({ error: error.message || "Failed to process subscription." });
-    }
-  });
-
-  // Protected Admin Route: Fetch subscriber list
-  app.get("/api/leads", (req, res): any => {
-    const auth = verifyAdminAccess(req);
-    if (!auth.authorized) {
-      return res.status(auth.status).json({ error: auth.error || "Unauthorized access. Valid administrator key required." });
-    }
-
-    const subscribers = getSubscribers();
-    const senderCfg = getSenderConfig();
-    const isConfigured = Boolean(process.env.SENDER_API_TOKEN || senderCfg.apiToken);
-    res.json({
-      total: subscribers.length,
-      senderConfigured: isConfigured,
-      senderGroupTitle: senderCfg.groupTitle || "Gut Wellness - Lead Magnet",
-      subscribers,
-    });
-  });
-
-  // Protected Admin Route: Export subscriber list as CSV file
-  app.get("/api/leads/export.csv", (req, res): any => {
-    const auth = verifyAdminAccess(req);
-    if (!auth.authorized) {
-      return res.status(auth.status).send(auth.error || "Unauthorized. Administrator authentication required.");
-    }
-
-    const subscribers = getSubscribers();
-    
-    // RFC-compliant CSV escaping
-    const escapeCsv = (val: any) => {
-      if (val === null || val === undefined) return '""';
-      const str = String(val).replace(/"/g, '""');
-      return `"${str}"`;
-    };
-
-    const header = ["ID", "Name", "Email", "Date Requested", "Source", "Marketing Consent", "Consent Date", "Sender Synced"];
-    const rows = subscribers.map((sub) => [
-      escapeCsv(sub.id),
-      escapeCsv(sub.name),
-      escapeCsv(sub.email),
-      escapeCsv(sub.date),
-      escapeCsv(sub.source),
-      escapeCsv(sub.marketingConsent ? "Yes" : "No"),
-      escapeCsv(sub.consentDate || "N/A"),
-      escapeCsv(sub.senderSynced ? "Yes" : "No"),
-    ]);
-
-    const csvContent = [header.join(","), ...rows.map((r) => r.join(","))].join("\n") + "\n";
-
-    res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    res.setHeader("Content-Disposition", 'attachment; filename="everyday_gut_wellness_subscribers.csv"');
-    res.status(200).send(csvContent);
-  });
-
+      const result = await handler({
+        rawUrl: req.protocol + '://' + req.get('host') + req.originalUrl,
+        rawQuery: req.originalUrl.split('?')[1] || '', path: req.path, httpMethod: req.method,
+        headers: Object.fromEntries(Object.entries(req.headers).map(([key, value]) => [key, Array.isArray(value) ? value.join(',') : value])),
+        multiValueHeaders: {}, queryStringParameters: req.query, multiValueQueryStringParameters: null,
+        body: req.method === 'GET' ? null : (req.is('application/x-www-form-urlencoded') ? new URLSearchParams(req.body).toString() : JSON.stringify(req.body)),
+        isBase64Encoded: false,
+      }, {});
+      res.status(result.statusCode);
+      for (const [key, value] of Object.entries(result.headers || {})) res.setHeader(key, String(value));
+      res.send(result.body || '');
+    } catch { res.status(503).json({ success: false, error: 'Service temporarily unavailable.' }); }
+  };
+  app.all(['/health', '/api/health'], adapt(healthHandler));
+  app.all('/api/subscribe', adapt(subscribeHandler));
+  app.all('/api/admin/verify', adapt(adminVerifyHandler));
+  app.all(['/admin', '/admin/', '/admin/logout'], adapt(adminHandler));
+  app.all('/api/leads', adapt(leadsHandler));
+  app.all('/api/leads/export.csv', adapt(exportHandler));
 
   app.post("/api/generate-content", async (req, res): Promise<any> => {
     try {
