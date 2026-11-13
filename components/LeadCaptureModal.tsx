@@ -44,118 +44,50 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
     setErrorMessage(null);
 
     const trimmedEmail = email.trim().toLowerCase();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
     if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
       setErrorMessage('Please enter a valid email address.');
       return;
     }
 
     setIsLoading(true);
-
     try {
-      const payload = {
-        name: firstName.trim() || 'Reader',
-        email: trimmedEmail,
-        source: 'ebook_lead_modal',
-        marketingConsent: Boolean(marketingConsent),
-        consentDate: marketingConsent ? new Date().toISOString() : null,
-      };
-
       const response = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit. Please try again.');
-      }
-
-      // Save to localStorage so future visits recognize subscriber & admin can export
-      try {
-        const subscriberObj = {
+        body: JSON.stringify({
           name: firstName.trim() || 'Reader',
           email: trimmedEmail,
-          date: new Date().toISOString(),
           source: 'ebook_lead_modal',
-          marketingConsent: Boolean(marketingConsent),
-          consentDate: marketingConsent ? new Date().toISOString() : null,
-        };
-        localStorage.setItem('gut_reset_subscriber', JSON.stringify(subscriberObj));
-
-        // Maintain full list of all subscribers in local storage as reliable backup
-        const existingListRaw = localStorage.getItem('all_gut_subscribers');
-        const existingList = existingListRaw ? JSON.parse(existingListRaw) : [];
-        if (!existingList.some((s: any) => s.email === trimmedEmail)) {
-          existingList.unshift(subscriberObj);
-          localStorage.setItem('all_gut_subscribers', JSON.stringify(existingList));
-        }
-      } catch (err) {
-        // localStorage ignore in sandbox
+          marketingConsent,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data.success !== true) {
+        throw new Error(data.error || 'We could not save your signup. Please try again.');
       }
 
-      setIsSuccess(true);
+      // Store only a convenience marker; the authoritative subscriber record is on the server.
+      try {
+        localStorage.setItem('gut_reset_subscriber', JSON.stringify({
+          name: firstName.trim() || 'Reader',
+          email: trimmedEmail,
+          marketingConsent,
+          date: new Date().toISOString(),
+        }));
+      } catch {}
 
-      // Track conversion in Google Analytics 4
+      setIsSuccess(true);
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'generate_lead', {
           event_category: 'Lead Capture',
           event_label: '7-Day Gentle Gut Reset Guide',
-          value: 1.0,
           currency: 'USD',
         });
-        (window as any).gtag('event', 'file_download', {
-          file_name: 'The-7-Day-Gentle-Gut-Reset-Guide.pdf',
-          file_extension: 'pdf',
-          link_text: 'Download Free PDF',
-        });
-      }
-
-      // Auto-trigger PDF download for instant gratification
-      try {
-        const autoLink = document.createElement('a');
-        autoLink.href = '/The-7-Day-Gentle-Gut-Reset-Guide.pdf';
-        autoLink.download = 'The-7-Day-Gentle-Gut-Reset-Guide.pdf';
-        document.body.appendChild(autoLink);
-        autoLink.click();
-        document.body.removeChild(autoLink);
-      } catch (dlErr) {
-        // Fallback handled by manual download button
       }
     } catch (err: any) {
-      console.error('Subscription error:', err);
-      // Fallback: even if server network hiccups (e.g. static hosting on Netlify), save locally and grant access
-      try {
-        const subscriberObj = {
-          name: firstName.trim() || 'Reader',
-          email: trimmedEmail,
-          date: new Date().toISOString(),
-          source: 'ebook_lead_modal (offline/static)',
-          marketingConsent: Boolean(marketingConsent),
-          consentDate: marketingConsent ? new Date().toISOString() : null,
-          offlineFallback: true,
-        };
-        localStorage.setItem('gut_reset_subscriber', JSON.stringify(subscriberObj));
-        const existingListRaw = localStorage.getItem('all_gut_subscribers');
-        const existingList = existingListRaw ? JSON.parse(existingListRaw) : [];
-        if (!existingList.some((s: any) => s.email === trimmedEmail)) {
-          existingList.unshift(subscriberObj);
-          localStorage.setItem('all_gut_subscribers', JSON.stringify(existingList));
-        }
-        setIsSuccess(true);
-
-        // Auto-trigger PDF download
-        const autoLink = document.createElement('a');
-        autoLink.href = '/The-7-Day-Gentle-Gut-Reset-Guide.pdf';
-        autoLink.download = 'The-7-Day-Gentle-Gut-Reset-Guide.pdf';
-        document.body.appendChild(autoLink);
-        autoLink.click();
-        document.body.removeChild(autoLink);
-      } catch (storageErr) {
-        setErrorMessage(err.message || 'Something went wrong. Please try again.');
-      }
+      console.error('Subscription request failed:', err?.message || 'unknown_error');
+      setErrorMessage(err?.message || 'We could not save your signup. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }
