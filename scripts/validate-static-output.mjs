@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile, access } from 'node:fs/promises';
 import path from 'node:path';
+import { readEditorialSchema } from './lib/editorial-schema.mjs';
 
 const root = process.cwd();
 const dist = path.join(root, 'dist');
@@ -49,19 +50,33 @@ for (const [label, regex] of [
 
 assert.doesNotMatch(html, /everydaygutwellness\.org/i, 'No unowned-domain references may remain.');
 
-const jsonLdBlocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)];
-assert.equal(jsonLdBlocks.length, 1, 'Expected one parseable JSON-LD graph.');
-const structuredData = JSON.parse(jsonLdBlocks[0][1]);
-assert.equal(structuredData['@context'], 'https://schema.org');
+const structuredData = readEditorialSchema(html);
 const graph = structuredData['@graph'];
-const types = graph.map((entry) => entry['@type']);
-for (const requiredType of ['Article', 'FAQPage', 'WebSite']) assert.ok(types.includes(requiredType), `Missing ${requiredType} structured data.`);
+const visibleHtml = html.replace(/<!--[\s\S]*?-->/g, '');
+const bodyHtml = visibleHtml.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1] || '';
+const visibleFaqItems = [...bodyHtml.matchAll(/<details\b[^>]*>([\s\S]*?)<\/details>/gi)].map(match => match[1]);
 
 const faq = graph.find((entry) => entry['@type'] === 'FAQPage');
-assert.ok(faq.mainEntity.length >= 4, 'FAQ schema must describe visible FAQ items.');
+assert.equal(faq.mainEntity.length, 4, 'FAQ schema must describe all four visible FAQ items.');
+assert.equal(visibleFaqItems.length, 4, 'All four FAQ answers must be rendered in the body.');
 for (const question of faq.mainEntity) {
-  assert.ok(html.includes(question.name), `FAQ question is missing from visible HTML: ${question.name}`);
-  assert.ok(html.includes(question.acceptedAnswer.text), `FAQ answer is missing from visible HTML: ${question.name}`);
+  assert.ok(visibleFaqItems.some(item => item.includes(question.name) && item.includes(question.acceptedAnswer.text)), `FAQ question/answer is missing from the visible body: ${question.name}`);
+}
+
+// Commercial information must remain readable in the initial body HTML,
+// independently of the editorial-only structured data.
+const productSection = bodyHtml.match(/<section\b[^>]*\bid="planner-product"[^>]*>([\s\S]*?)<\/section>/i)?.[1];
+assert.ok(productSection, 'The rendered product section must remain in the initial HTML.');
+const productCards = [...productSection.matchAll(/<article\b[^>]*>([\s\S]*?)<\/article>/gi)].map(match => match[1]);
+for (const product of [
+  { title: 'The 14-Day Gut Clarity Workbook', price: '$25', url: 'https://eiram32.gumroad.com/l/14-day-gut-clarity-workbook', detail: '14 short daily observation logs' },
+  { title: 'The 30-Day Gut Routine Planner', price: '$30', url: 'https://eiram32.gumroad.com/l/ynisjl', detail: 'A 30-day check-off calendar with short check-ins' },
+]) {
+  const card = productCards.find(item => item.includes(product.title));
+  assert.ok(card, `Missing visible product title: ${product.title}`);
+  assert.ok(card.includes(product.price), `Missing visible price: ${product.title}`);
+  assert.ok(card.includes(`href="${product.url}"`), `Missing Gumroad CTA: ${product.title}`);
+  assert.ok(card.includes(product.detail), `Missing visible product details: ${product.title}`);
 }
 
 const localUrls = new Set([...html.matchAll(/\b(?:href|src)="(\/[^"]+)"/g)].map((match) => match[1].split(/[?#]/)[0]));

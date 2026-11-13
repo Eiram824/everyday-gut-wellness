@@ -3,10 +3,12 @@ import path from 'node:path';
 import { createElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { createServer } from 'vite';
+import { readEditorialSchema } from './lib/editorial-schema.mjs';
 
 const projectRoot = process.cwd();
 const outputPath = path.join(projectRoot, 'dist', 'index.html');
 const template = await readFile(outputPath, 'utf8');
+readEditorialSchema(template);
 
 if (!template.includes('<div id="root"></div>')) {
   throw new Error('Expected an empty #root in dist/index.html before pre-rendering.');
@@ -34,6 +36,7 @@ try {
   }
 
   const html = template.replace('<div id="root"></div>', `<div id="root">${markup}</div>`);
+  readEditorialSchema(html);
   await writeFile(outputPath, html, 'utf8');
   console.log(`Pre-rendered ${markup.length.toLocaleString()} characters into dist/index.html.`);
 } finally {
