@@ -6,7 +6,20 @@
 [functions]
   node_bundler = "esbuild"
 
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), geolocation=(), microphone=()"
+    Strict-Transport-Security = "max-age=31536000"
+
 # 1. API Route Redirects to Netlify Serverless Functions
+[[redirects]]
+  from = "/health"
+  to = "/api/health"
+  status = 200
+
 [[redirects]]
   from = "/api/health"
   to = "/.netlify/functions/health"
@@ -73,3 +86,4 @@
   from = "/*"
   to = "/index.html"
   status = 200
+

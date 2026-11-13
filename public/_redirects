@@ -1,3 +1,4 @@
+/health /.netlify/functions/health 200
 # Netlify Redirects Configuration
 # 1. API routes redirected to Netlify Functions
 /api/health            /.netlify/functions/health          200

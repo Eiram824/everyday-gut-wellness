@@ -4,7 +4,7 @@
 */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { hydrateRoot } from 'react-dom/client';
 import App from './App';
 
 function mount() {
@@ -13,11 +13,10 @@ function mount() {
     console.error('Root element #root not found during mount');
     return;
   }
-  const root = createRoot(rootElement);
-  root.render(
+  hydrateRoot(rootElement,
     <React.StrictMode>
       <App />
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 }
 

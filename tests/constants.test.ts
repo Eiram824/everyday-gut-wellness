@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { PLANNER_PRODUCT_INFO, HABIT_QUESTIONS, FIBER_FOODS, MEAL_UPGRADE_EXAMPLES } from '../constants.js';
 
 describe('Everyday Gut Wellness - Constants & Business Rules', () => {
-  it('should define the 30-Day Digestive Wellness Planner product accurately', () => {
-    assert.equal(PLANNER_PRODUCT_INFO.id, '30-day-digestive-wellness-planner');
-    assert.equal(PLANNER_PRODUCT_INFO.title, 'The 30-Day Digestive Wellness Planner');
-    assert.equal(PLANNER_PRODUCT_INFO.defaultPrice, '$14.99');
-    assert.ok(PLANNER_PRODUCT_INFO.pages.includes('68 Pages'));
+  it('defines the live 30-Day Gut Routine Planner listing accurately', () => {
+    assert.equal(PLANNER_PRODUCT_INFO.id, '30-day-gut-routine-planner');
+    assert.equal(PLANNER_PRODUCT_INFO.title, 'The 30-Day Gut Routine Planner');
+    assert.equal(PLANNER_PRODUCT_INFO.defaultPrice, '$30');
+    assert.ok(PLANNER_PRODUCT_INFO.pages.includes('31-page'));
   });
 
   it('should have 3 foundational habit diagnostic questions with options and guidance', () => {
