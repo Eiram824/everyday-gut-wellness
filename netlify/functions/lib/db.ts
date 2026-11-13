@@ -1,6 +1,7 @@
 import type { SubscriberRecord } from "./subscribers.js";
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || "").trim().replace(/\/$/, "");
+// This variable stores the Supabase server-only secret key (sb_secret_...). Keep it in Netlify Functions only.
 const SUPABASE_SERVICE_ROLE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
 
 export function isDatabaseConfigured(): boolean {
@@ -12,8 +13,8 @@ function databaseHeaders(extra: Record<string, string> = {}): Record<string, str
     throw new Error("Persistent subscriber storage is not configured.");
   }
   return {
+    // Supabase sb_secret_* keys are opaque API keys, not JWTs. Send only via apikey.
     apikey: SUPABASE_SERVICE_ROLE_KEY,
-    Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
     "Content-Type": "application/json",
     Accept: "application/json",
     ...extra,
