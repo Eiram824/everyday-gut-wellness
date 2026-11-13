@@ -1,117 +1,76 @@
 import type { Handler } from "@netlify/functions";
 import { jsonResponse, errorResponse } from "./lib/auth.js";
-import { getSubscribers, saveSubscribers, SubscriberRecord } from "./lib/subscribers.js";
+import { isDatabaseConfigured, saveSubscriber, markSenderSync } from "./lib/db.js";
 
-const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
 export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return errorResponse(405, "Method not allowed. Expected POST.");
+  if (event.httpMethod !== "POST") return errorResponse(405, "Method not allowed. Expected POST.");
+  if (!isDatabaseConfigured()) {
+    return errorResponse(503, "Email signup is temporarily unavailable while secure storage is being configured. Please try again shortly.");
   }
 
   try {
     const body = event.body ? JSON.parse(event.body) : {};
-    const { name, email, source = "ebook_lead_magnet", marketingConsent = false } = body;
+    const email = String(body.email || "").trim().toLowerCase().slice(0, 254);
+    const name = String(body.name || "Reader").replace(/<[^>]*>?/gm, "").trim().slice(0, 80) || "Reader";
+    const source = String(body.source || "ebook_lead_magnet").replace(/<[^>]*>?/gm, "").trim().slice(0, 60);
+    const marketingConsent = body.marketingConsent === true;
 
-    // Input sanitization & normalization
-    const trimmedEmail = (email || "").trim().toLowerCase().slice(0, 254);
-    const cleanName = (name || "").replace(/<[^>]*>?/gm, "").trim().slice(0, 80) || "Reader";
-    const cleanSource = String(source).replace(/<[^>]*>?/gm, "").trim().slice(0, 50);
-    const hasMarketingConsent = Boolean(marketingConsent);
-    const consentDate = hasMarketingConsent ? new Date().toISOString() : null;
+    if (!EMAIL_REGEX.test(email)) return errorResponse(400, "Please provide a valid email address.");
 
-    if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
-      return errorResponse(400, "Please provide a valid email address.");
-    }
+    // Persist first. The user only receives success after Supabase confirms the record.
+    const subscriber = await saveSubscriber({ name, email, source, marketingConsent });
 
-    const subscribers = getSubscribers();
-    const existingIndex = subscribers.findIndex((s) => s.email === trimmedEmail);
-
+    // Marketing sync is optional and must never block delivery of the free guide.
     let senderSynced = false;
-    let senderMessage = "";
+    let senderStatus = "Saved securely. Email marketing sync is not configured.";
+    const token = (process.env.SENDER_API_TOKEN || "").trim();
+    const groupId = (process.env.SENDER_GROUP_ID || "").trim();
 
-    // Sender.net API integration (v2) - respect marketing consent
-    const senderToken = (process.env.SENDER_API_TOKEN || "").trim();
-    const senderGroupId = (process.env.SENDER_GROUP_ID || "").trim();
-
-    if (senderToken) {
+    if (marketingConsent && token) {
       try {
-        const senderPayload: any = {
-          email: trimmedEmail,
-          firstname: cleanName,
-        };
-
-        // Only add to promotional marketing group if user voluntarily opted in
-        if (hasMarketingConsent && senderGroupId) {
-          senderPayload.groups = [senderGroupId];
-        }
-
-        const senderRes = await fetch("https://api.sender.net/v2/subscribers", {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const senderResponse = await fetch("https://api.sender.net/v2/subscribers", {
           method: "POST",
+          signal: controller.signal,
           headers: {
-            Authorization: `Bearer ${senderToken}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify(senderPayload),
+          body: JSON.stringify({
+            email,
+            firstname: name,
+            ...(groupId ? { groups: [groupId] } : {}),
+          }),
         });
-
-        if (senderRes.ok) {
-          senderSynced = true;
-          senderMessage = hasMarketingConsent
-            ? "Successfully synced with Sender.net marketing list."
-            : "Registered with Sender.net (Transactional guide delivery only).";
-        } else {
-          console.warn("[Netlify Function] Sender.net non-OK response:", senderRes.status);
-          senderMessage = `Sender.net status ${senderRes.status}. Saved to subscriber list.`;
-        }
-      } catch (senderErr: any) {
-        console.error("[Netlify Function] Sender.net network error:", senderErr?.message);
-        senderMessage = "Saved to subscriber list; Sender.net sync will retry.";
+        clearTimeout(timeout);
+        senderSynced = senderResponse.ok;
+        senderStatus = senderSynced ? "Saved and synced to the opted-in email list." : "Saved securely; email platform sync needs attention.";
+        if (!senderSynced) await markSenderSync(subscriber.id, false, `Sender.net returned ${senderResponse.status}`);
+        else await markSenderSync(subscriber.id, true);
+      } catch (error: any) {
+        senderStatus = "Saved securely; email platform sync will need a retry.";
+        try { await markSenderSync(subscriber.id, false, "Sender.net request failed or timed out"); } catch {}
+        console.warn("[Lead capture] Sender.net sync failed:", error?.name || "request_error");
       }
+    } else if (marketingConsent && !token) {
+      senderStatus = "Saved securely; email marketing is awaiting platform configuration.";
     } else {
-      senderMessage = "Saved to subscriber list (Sender.net token not configured).";
+      senderStatus = "Saved securely. Marketing emails were not requested.";
     }
-
-    const subscriberRecord: SubscriberRecord = {
-      id: `sub_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      name: cleanName,
-      email: trimmedEmail,
-      date: new Date().toISOString(),
-      source: cleanSource,
-      marketingConsent: hasMarketingConsent,
-      consentDate,
-      senderSynced,
-    };
-
-    if (existingIndex >= 0) {
-      subscribers[existingIndex] = {
-        ...subscribers[existingIndex],
-        name: cleanName,
-        date: new Date().toISOString(),
-        marketingConsent: hasMarketingConsent || subscribers[existingIndex].marketingConsent,
-        consentDate: consentDate || subscribers[existingIndex].consentDate,
-        senderSynced: senderSynced || subscribers[existingIndex].senderSynced,
-      };
-    } else {
-      subscribers.unshift(subscriberRecord);
-    }
-
-    saveSubscribers(subscribers);
 
     return jsonResponse(200, {
       success: true,
-      message: "Your free 7-Day Gentle Gut Reset Guide is ready for instant download.",
-      subscriber: {
-        name: cleanName,
-        email: trimmedEmail,
-        marketingConsent: hasMarketingConsent,
-      },
+      message: "Your free 7-Day Gentle Gut Reset Guide is ready.",
+      subscriber: { name: subscriber.name, email: subscriber.email, marketingConsent: subscriber.marketingConsent },
       senderSynced,
-      senderStatus: senderMessage,
+      senderStatus,
     });
   } catch (error: any) {
-    console.error("[Netlify Function] /api/subscribe error:", error);
-    return errorResponse(500, error.message || "Failed to process subscription.");
+    console.error("[Netlify Function] Lead capture failed:", error?.message || "unknown_error");
+    return errorResponse(503, "We couldn't securely save your signup just yet. Your email has not been added. Please try again.");
   }
 };
