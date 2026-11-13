@@ -21,6 +21,7 @@ import TrustAndFooter from './components/TrustAndFooter';
 export function App() {
   const [isEBookOpen, setIsEBookOpen] = useState(false);
   const [isLeadCaptureOpen, setIsLeadCaptureOpen] = useState(false);
+  const [leadCapturePurpose, setLeadCapturePurpose] = useState<'ebook' | 'planner-interest'>('ebook');
   const [isLeadAdminOpen, setIsLeadAdminOpen] = useState(false);
 
   // Discreet creator access (Ctrl+Shift+L or #admin in URL) without showing public footer button
@@ -60,6 +61,7 @@ export function App() {
       }
     } catch (err) {}
 
+    setLeadCapturePurpose('ebook');
     setIsLeadCaptureOpen(true);
   };
 
@@ -151,7 +153,7 @@ export function App() {
         <MedicalAdvice />
 
         {/* Section 7: Original Digital Product - The 30-Day Digestive Wellness Planner */}
-        <ProductSection onJoinWaitlist={() => setIsLeadCaptureOpen(true)} />
+        <ProductSection onJoinWaitlist={() => { setLeadCapturePurpose('planner-interest'); setIsLeadCaptureOpen(true); }} />
       </main>
 
       {/* Section 8: Trust, Transparency & Footer */}
@@ -162,10 +164,11 @@ export function App() {
       {/* High-Converting Lead Capture Modal */}
       <LeadCaptureModal
         isOpen={isLeadCaptureOpen}
+        purpose={leadCapturePurpose}
         onClose={() => setIsLeadCaptureOpen(false)}
-        onSuccess={(_subscriber) => {
+        onSuccess={(_subscriber, purpose) => {
           setIsLeadCaptureOpen(false);
-          setIsEBookOpen(true);
+          if (purpose === 'ebook') setIsEBookOpen(true);
         }}
       />
 

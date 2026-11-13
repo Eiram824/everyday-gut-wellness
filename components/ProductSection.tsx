@@ -5,23 +5,16 @@
 
 import React, { useState } from 'react';
 import { 
-  BookOpen, 
   CheckCircle2, 
-  Download, 
   ShieldCheck, 
   AlertCircle, 
   Sparkles, 
   Calendar, 
-  Layers, 
   FileText, 
-  HelpCircle, 
   ChevronDown, 
   ChevronUp,
-  ExternalLink,
   Smartphone,
-  Printer,
-  HeartPulse,
-  Eye
+  Printer
 } from 'lucide-react';
 import { PLANNER_PRODUCT_INFO } from '../constants';
 
@@ -33,31 +26,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ onJoinWaitlist }
   const [activePreviewTab, setActivePreviewTab] = useState<'daily' | 'fiber' | 'bristol' | 'weekly'>('daily');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
-  // Gumroad purchase URL configured via environment variable
-  const gumroadUrl = (import.meta.env.VITE_GUMROAD_PRODUCT_URL || '').trim();
-  const isGumroadConfigured = Boolean(gumroadUrl && gumroadUrl.startsWith('http'));
-
-  const handlePurchaseClick = () => {
+  const handleInterestClick = () => {
     if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'begin_checkout', {
-        currency: 'USD',
-        value: 14.99,
-        items: [
-          {
-            item_id: PLANNER_PRODUCT_INFO.id,
-            item_name: PLANNER_PRODUCT_INFO.title,
-            price: 14.99,
-            quantity: 1,
-          },
-        ],
-      });
+      (window as any).gtag('event', 'planner_interest_click');
     }
-
-    if (isGumroadConfigured) {
-      window.open(gumroadUrl, '_blank', 'noopener,noreferrer');
-    } else if (onJoinWaitlist) {
-      onJoinWaitlist();
-    }
+    onJoinWaitlist?.();
   };
 
   const plannerModules = [
@@ -80,12 +53,12 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ onJoinWaitlist }
       a: 'No. The 30-Day Digestive Wellness Planner is strictly an educational workbook and personal habit-tracking tool. It does not treat, cure, or diagnose any medical condition, nor does it prescribe restrictive diets, laxatives, or supplements. It is designed to help you organize daily hydration, fiber intake, and gentle lifestyle habits.',
     },
     {
-      q: 'How do I receive the planner after purchasing?',
-      a: 'Your purchase is handled securely via Gumroad. Immediately after checkout, you receive instant digital access to download the high-resolution PDF package. You can also re-download your files anytime from your Gumroad customer library.',
+      q: 'Can I buy or download the planner now?',
+      a: 'Not yet. The planner is still being prepared, and there is no checkout or download available. You can register interest here; doing so does not place an order or charge you.',
     },
     {
       q: 'Can I print it or use it on my tablet / iPad?',
-      a: 'Yes, both formats are included! You receive a print-ready US Letter (8.5" x 11") PDF for home printing or ring binders, as well as an interactive fillable PDF that works with iPad annotation apps like GoodNotes, Notability, or standard PDF viewers on any computer or mobile device.',
+      a: 'Those formats are being considered, but the final planner and its file formats are not ready yet. We will publish the confirmed contents before any product becomes available.',
     },
     {
       q: 'Does this product recommend specific supplements or laxatives?',
@@ -111,7 +84,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ onJoinWaitlist }
             {PLANNER_PRODUCT_INFO.title}
           </h2>
           <p className="text-base sm:text-lg text-[#635F57] leading-relaxed max-w-2xl mx-auto">
-            A comprehensive 68-page practical workbook and habit-tracking system designed to help you organize daily hydration, diverse plant fiber, gentle movement, and unhurried bathroom routines.
+            A practical workbook concept for organizing daily hydration, varied plant foods, gentle movement, and unhurried routines. Join the interest list while we prepare the finished edition.
           </p>
         </div>
 
@@ -122,13 +95,13 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ onJoinWaitlist }
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-[#EAD3C7]" />
               <span className="text-xs sm:text-sm font-semibold tracking-wide uppercase">
-                First-Party Original Digital Workbook · Delivered via Gumroad
+                In Development · Join the Interest List
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs text-[#EAD3C7]">
-              <span className="bg-white/10 px-2.5 py-0.5 rounded font-mono font-semibold text-white">68 Pages</span>
+              <span className="bg-white/10 px-2.5 py-0.5 rounded font-mono font-semibold text-white">In Development</span>
               <span>·</span>
-              <span>Printable & Tablet-Ready</span>
+              <span>Planned print & tablet formats</span>
             </div>
           </div>
 
@@ -141,7 +114,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ onJoinWaitlist }
               <div className="lg:col-span-5 space-y-4">
                 <div className="relative rounded-2xl bg-[#F8F6F0] p-6 border border-[#E5DFD5] shadow-inner text-center">
                   <div className="inline-block px-3 py-1 rounded bg-[#B85D36] text-white text-[11px] font-bold uppercase tracking-wider mb-4">
-                    Digital Workbook Edition
+                    Planner Concept Preview
                   </div>
                   
                   {/* Book Mockup Preview Card */}
@@ -160,20 +133,20 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ onJoinWaitlist }
                       </p>
                     </div>
                     <div className="pt-2 border-t border-[#E5DFD5] flex items-center justify-between text-xs text-[#14382B]">
-                      <span className="font-semibold">{PLANNER_PRODUCT_INFO.defaultPrice} USD</span>
-                      <span className="text-[11px] text-[#8C877D]">Instant Download</span>
+                      <span className="font-semibold">Preview concept</span>
+                      <span className="text-[11px] text-[#8C877D]">Not for sale yet</span>
                     </div>
                   </div>
 
                   <div className="mt-4 flex items-center justify-center gap-4 text-xs text-[#635F57]">
                     <span className="flex items-center gap-1">
                       <Printer className="w-3.5 h-3.5 text-[#14382B]" />
-                      Print at Home
+                      Planned print format
                     </span>
                     <span>·</span>
                     <span className="flex items-center gap-1">
                       <Smartphone className="w-3.5 h-3.5 text-[#14382B]" />
-                      Tablet / iPad Fillable
+                      Planned tablet format
                     </span>
                   </div>
                 </div>
@@ -196,7 +169,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ onJoinWaitlist }
                 {/* Who It Is For */}
                 <div className="space-y-2.5 pt-2">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#14382B]">
-                    Who This Planner Is Intended For:
+                    Who This Planner Is Being Designed For:
                   </h4>
                   <ul className="text-xs sm:text-sm text-[#4A463F] space-y-2">
                     <li className="flex items-start gap-2">
@@ -217,59 +190,48 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ onJoinWaitlist }
                 {/* What Customers Will Receive */}
                 <div className="p-4 bg-[#F8F6F0] rounded-xl border border-[#E5DFD5] space-y-2">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#14382B]">
-                    What You Will Receive Upon Download:
+                    Planned Workbook Sections:
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[#635F57]">
                     <div className="flex items-center gap-1.5">
                       <FileText className="w-3.5 h-3.5 text-[#B85D36] shrink-0" />
-                      <span>68-page US Letter PDF (Print Ready)</span>
+                      <span>Daily habit and routine logs</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <FileText className="w-3.5 h-3.5 text-[#B85D36] shrink-0" />
-                      <span>A4 Print-Ready PDF Edition</span>
+                      <span>Food and hydration journal</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <FileText className="w-3.5 h-3.5 text-[#B85D36] shrink-0" />
-                      <span>Interactive Tablet Fillable PDF</span>
+                      <span>Fiber and movement awareness worksheets</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <FileText className="w-3.5 h-3.5 text-[#B85D36] shrink-0" />
-                      <span>Lifetime updates on Gumroad</span>
+                      <span>Weekly reflection pages</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Purchase CTA */}
+                {/* Interest-list CTA */}
                 <div className="pt-3 space-y-3">
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                     <button
                       type="button"
-                      onClick={handlePurchaseClick}
+                      onClick={handleInterestClick}
                       className="inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-[#B85D36] hover:bg-[#A04E2B] active:scale-[0.99] text-white font-serif font-bold text-base rounded-xl shadow-lg transition-all focus:outline-none focus-visible:ring-4 focus-visible:ring-[#B85D36]/30 group cursor-pointer"
                     >
-                      {isGumroadConfigured ? (
-                        <>
-                          <span>Get The Planner on Gumroad · {PLANNER_PRODUCT_INFO.defaultPrice}</span>
-                          <ExternalLink className="w-4 h-4 text-white/90 group-hover:translate-x-0.5 transition-transform" />
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-4 h-4 text-[#EAD3C7]" />
-                          <span>Coming Soon to Gumroad · Join Notification List</span>
-                        </>
-                      )}
+                      <Sparkles className="w-4 h-4 text-[#EAD3C7]" />
+                      <span>Register Planner Interest</span>
                     </button>
                     
                     <span className="text-xs text-[#8C877D] text-center sm:text-left">
-                      {isGumroadConfigured 
-                        ? 'Instant PDF download delivered securely by Gumroad.' 
-                        : 'Currently in final formatting. Click to register interest!'}
+                      No purchase or payment. We will share updates only if you opt in.
                     </span>
                   </div>
 
                   <div className="text-[11px] text-[#8C877D] flex items-center gap-2">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span>Secure 256-bit checkout on Gumroad. No credit cards stored on our servers.</span>
+                    <span>Registering interest does not place an order or subscribe you to marketing.</span>
                   </div>
                 </div>
               </div>
@@ -280,7 +242,7 @@ export const ProductSection: React.FC<ProductSectionProps> = ({ onJoinWaitlist }
               <div className="text-center space-y-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#B85D36]">Inside the Workbook</span>
                 <h4 className="text-2xl font-serif font-bold text-[#14382B]">
-                  Complete 11-Section Product Structure
+                  Proposed 11-Section Planner Outline
                 </h4>
                 <p className="text-xs sm:text-sm text-[#635F57] max-w-xl mx-auto">
                   Every section is carefully organized for daily clarity, evidence-informed guidance, and sustainable habit formation.

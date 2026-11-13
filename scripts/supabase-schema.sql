@@ -17,6 +17,13 @@ CREATE TABLE IF NOT EXISTS public.subscribers (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Keep existing installations in sync when the table predates these fields.
+-- CREATE TABLE IF NOT EXISTS does not add columns to an existing table.
+ALTER TABLE public.subscribers
+  ADD COLUMN IF NOT EXISTS sender_sync_error text,
+  ADD COLUMN IF NOT EXISTS created_at timestamptz NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+
 UPDATE public.subscribers SET email = lower(trim(email)) WHERE email <> lower(trim(email));
 
 DO $$
