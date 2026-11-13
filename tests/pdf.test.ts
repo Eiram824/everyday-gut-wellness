@@ -17,5 +17,7 @@ describe('PDF Lead Magnet Asset Generation', () => {
     fs.readSync(fd, buffer, 0, 5, 0);
     fs.closeSync(fd);
     assert.equal(buffer.toString('utf-8'), '%PDF-');
+    const lowercaseAlias = path.join(process.cwd(), 'public', 'the-7-day-gentle-gut-reset-guide.pdf');
+    assert.deepEqual(fs.readFileSync(lowercaseAlias), fs.readFileSync(pdfPath), 'Both download aliases must deliver the same generated PDF.');
   });
 });
