@@ -8,7 +8,7 @@ import { handler as subscribe } from '../netlify/functions/subscribe.js';
 import { safeSecretMatch, createAdminSessionCookie, verifyAdminAccess } from '../netlify/functions/lib/auth.js';
 
 const KEY = 'test-only-admin-key-with-enough-entropy';
-const ORIGIN = 'https://everyday-gut-wellness.netlify.app';
+const ORIGIN = 'https://everydaygutwellness.com';
 const event = (method = 'GET', path = '/api/leads', headers: Record<string,string> = {}, body: string | null = null): any => ({ httpMethod: method, path, headers, body, isBase64Encoded: false, queryStringParameters: null });
 const invoke = async (handler: any, request: any): Promise<any> => handler(request, {});
 
@@ -66,6 +66,12 @@ describe('Admin session and subscriber privacy boundaries', () => {
     assert.equal(verifyAdminAccess(event('GET','/api/leads',{'x-admin-key':KEY,host,origin:'https://'+host})).authorized,true);
     assert.equal(verifyAdminAccess(event('GET','/api/leads',{'x-admin-key':KEY,host:'attacker.example',origin:'https://attacker.example'})).authorized,false);
     assert.equal(verifyAdminAccess(event('GET','/api/leads',{'x-admin-key':KEY,host:'everyday-gut-wellness.netlify.app',origin:'https://'+host})).authorized,false);
+  });
+
+  it('accepts the custom-domain origin without allowing cross-host admin requests', () => {
+    assert.equal(verifyAdminAccess(event('GET','/api/leads',{'x-admin-key':KEY,host:'everydaygutwellness.com',origin:ORIGIN})).authorized,true);
+    assert.equal(verifyAdminAccess(event('GET','/api/leads',{'x-admin-key':KEY,host:'attacker.example',origin:ORIGIN})).authorized,false);
+    assert.equal(verifyAdminAccess(event('GET','/api/leads',{'x-admin-key':KEY,host:'everyday-gut-wellness.netlify.app',origin:'https://everyday-gut-wellness.netlify.app'})).authorized,true);
   });
 
   it('does not fetch subscriber data before the server authenticates the admin page', async () => {

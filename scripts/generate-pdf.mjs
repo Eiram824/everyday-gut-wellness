@@ -70,7 +70,7 @@ async function generatePDF() {
       color: colorBorder,
     });
 
-    page.drawText('Free Educational Guide  |  www.everyday-gut-wellness.netlify.app', {
+    page.drawText('Free Educational Guide  |  everydaygutwellness.com', {
       x: 40,
       y: 26,
       size: 7.5,
@@ -604,7 +604,7 @@ async function generatePDF() {
     drawParagraph(
       page,
       'Everyday Gut Wellness is dedicated to providing evidence-informed, transparent, and hype-free digestive health education. Share this free guide with family and friends who could benefit from a gentle, physiological approach to gut comfort.\n\n' +
-      'Website: https://everyday-gut-wellness.netlify.app\n' +
+      'Website: https://everydaygutwellness.com\n' +
       'For paid-product order or delivery support, use the contact link in your Gumroad receipt.',
       65, y - 48, 465, helvetica, 9, 15, colorWhite
     );

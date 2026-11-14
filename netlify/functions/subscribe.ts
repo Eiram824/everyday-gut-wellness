@@ -1,6 +1,8 @@
 import type { Config, Handler } from "@netlify/functions";
 import { jsonResponse, errorResponse } from "./lib/auth.js";
-import { isDatabaseConfigured, saveSubscriber, markSenderSync } from "./lib/db.js";
+import { isDatabaseConfigured, saveSubscriber, captureSystemeGuideRequest } from "./lib/db.js";
+import { systemeConfig, systemePublicConfig } from "./lib/systeme.js";
+import { processSystemeQueue } from "./lib/systeme-queue.js";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 const MAX_REQUEST_BYTES = 16_384;
@@ -12,7 +14,8 @@ export const config: Config = {
 };
 
 export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") return errorResponse(405, "Method not allowed. Expected POST.");
+  if (event.httpMethod === "GET") return jsonResponse(200, systemePublicConfig());
+  if (event.httpMethod !== "POST") return errorResponse(405, "Method not allowed. Expected GET or POST.");
   if (!isDatabaseConfigured()) return errorResponse(503, "Email signup is temporarily unavailable. Please try again shortly.");
 
   if (!event.body) return errorResponse(400, "A signup request is required.");
@@ -35,58 +38,44 @@ export const handler: Handler = async (event) => {
   const requestedSource = typeof body.source === "string" ? body.source : "ebook_lead_modal";
   const source = ALLOWED_SOURCES.has(requestedSource) ? requestedSource : "ebook_lead_modal";
   const marketingConsent = body.marketingConsent === true;
+  const emailGuideRequested = source === "ebook_lead_modal" && body.emailGuideRequested === true;
 
   try {
-    // Persist first. The user only receives success after Supabase confirms the record.
-    const subscriber = await saveSubscriber({ name, email, source, marketingConsent });
-
-    // Marketing sync is optional and must never block delivery of the free guide.
-    let senderSynced = false;
-    let senderStatus = "Saved securely. Email marketing sync is not configured.";
-    const token = (process.env.SENDER_API_TOKEN || "").trim();
-    const groupId = (process.env.SENDER_GROUP_ID || "").trim();
-
-    if (marketingConsent && token && subscriber.created && subscriber.id) {
+    const provider = systemeConfig();
+    let emailDeliveryStatus = emailGuideRequested ? "not_configured" : "not_requested";
+    if (emailGuideRequested && provider.ready) {
+      let jobId: string | null = null;
       try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-        let senderResponse: Response;
-        try {
-          senderResponse = await fetch("https://api.sender.net/v2/subscribers", {
-            method: "POST",
-            signal: controller.signal,
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-              Accept: "application/json",
-            },
-            body: JSON.stringify({ email, firstname: name, ...(groupId ? { groups: [groupId] } : {}) }),
-          });
-        } finally {
-          clearTimeout(timeout);
-        }
-        senderSynced = senderResponse.ok;
-        senderStatus = senderSynced ? "Saved and synced to the opted-in email list." : "Saved securely; email platform sync needs attention.";
-        if (!senderSynced) await markSenderSync(subscriber.id, false, `Sender.net returned ${senderResponse.status}`);
-        else await markSenderSync(subscriber.id, true);
-      } catch (error: any) {
-        senderStatus = "Saved securely; email platform sync will need a retry.";
-        try { await markSenderSync(subscriber.id, false, "Sender.net request failed or timed out"); } catch {}
-        console.warn("[Lead capture] Sender.net sync failed:", error?.name || "request_error");
+        // Atomically preserve consent and enqueue exactly one guide-version job.
+        jobId = await captureSystemeGuideRequest({ name, email, source, marketingConsent, tagId: provider.tagId });
+        emailDeliveryStatus = "queued";
+      } catch {
+        // Missing migration/provider setup must not take away the instant PDF.
+        // A timeout can be uncertain; save is duplicate-safe and never requeues.
+        await saveSubscriber({ name, email, source, marketingConsent });
+        emailDeliveryStatus = "unavailable";
+        console.warn("[Lead capture] guide-email queue requires operator attention");
       }
-    } else if (marketingConsent && !token) {
-      senderStatus = "Saved securely; email marketing is awaiting platform configuration.";
+      if (jobId) {
+        try { await processSystemeQueue(jobId); } catch {
+          // Intent remains durable. Scheduled retries reconcile uncertain results.
+          console.warn("[Lead capture] guide-email sync will be reconciled");
+        }
+      }
     } else {
-      senderStatus = "Saved securely. Marketing emails were not requested.";
+      // This path remains compatible with the existing schema while disabled.
+      await saveSubscriber({ name, email, source, marketingConsent });
     }
 
     return jsonResponse(200, {
       success: true,
       message: "Your free 7-Day Gentle Gut Reset Guide signup is ready.",
+      emailDeliveryStatus,
+      marketingSignupUrl: systemePublicConfig().marketingSignupUrl,
       subscriber: { name, email, marketingConsent },
     });
-  } catch (error: any) {
-    console.error("[Netlify Function] Lead capture failed:", error?.message || "unknown_error");
+  } catch {
+    console.error("[Netlify Function] Lead capture persistence failed");
     return errorResponse(503, "We couldn't securely save your signup just yet. Your email has not been added. Please try again.");
   }
 };

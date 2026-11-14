@@ -10,9 +10,12 @@ describe('Editorial-only structured data', () => {
     const data = readEditorialSchema(html);
     assert.deepEqual(data['@graph'].map(node => node['@type']), ['Article', 'FAQPage']);
     const article = data['@graph'][0];
-    assert.equal(article.mainEntityOfPage, 'https://everyday-gut-wellness.netlify.app/');
+    assert.equal(article.mainEntityOfPage, 'https://everydaygutwellness.com/');
     assert.equal(article.author.name, 'Everyday Gut Wellness');
+    assert.equal(article.author.url, 'https://everydaygutwellness.com/');
     assert.equal(article.publisher.name, 'Everyday Gut Wellness');
+    assert.equal(article.publisher.url, 'https://everydaygutwellness.com/');
+    assert.equal(new URL(article.image).origin, 'https://everydaygutwellness.com');
     assert.doesNotMatch(JSON.stringify(data), /#website|#organization|#webpage/);
   });
 

@@ -6,7 +6,7 @@ import { readEditorialSchema } from './lib/editorial-schema.mjs';
 const root = process.cwd();
 const dist = path.join(root, 'dist');
 const html = await readFile(path.join(dist, 'index.html'), 'utf8');
-const canonical = 'https://everyday-gut-wellness.netlify.app/';
+const canonical = 'https://everydaygutwellness.com/';
 const expectedTitle = 'Everyday Gut Wellness: Practical Microbiome Nutrition, Digestion Habits & Bloating Relief';
 const expectedDescription = 'Improve daily digestion naturally with structured microbiome nutrition, gut-friendly meal habits, and evidence-informed wellness guides for bloating relief and digestive balance.';
 const expectedKeywords = 'everyday gut wellness, digestive health habits, gut microbiome balance, natural bloating relief, gut-friendly foods, prebiotic fiber guide, gut-brain connection, daily digestion routine';
@@ -45,10 +45,17 @@ for (const [label, regex] of [
   ['Twitter URL', /<meta name="twitter:url" content="([^"]+)"/],
 ]) {
   const url = html.match(regex)?.[1];
-  assert.equal(url, canonical, `${label} must use the live Netlify URL.`);
+  assert.equal(url, canonical, `${label} must use the canonical custom-domain URL.`);
 }
 
 assert.doesNotMatch(html, /everydaygutwellness\.org/i, 'No unowned-domain references may remain.');
+assert.doesNotMatch(html, /everyday-gut-wellness\.netlify\.app/i, 'Published HTML must use the custom domain rather than the previous hosting URL.');
+for (const regex of [
+  /<meta property="og:image" content="([^"]+)"/,
+  /<meta name="twitter:image" content="([^"]+)"/,
+]) {
+  assert.equal(new URL(html.match(regex)?.[1] || '').origin, new URL(canonical).origin, 'Social images must use the canonical custom domain.');
+}
 
 const structuredData = readEditorialSchema(html);
 const graph = structuredData['@graph'];
@@ -98,10 +105,11 @@ assert.ok(robots.includes(`${canonical.replace(/\/$/, '')}/sitemap.xml`));
 
 const sitemap = await readFile(path.join(dist, 'sitemap.xml'), 'utf8');
 assert.match(sitemap, /<urlset\b[\s\S]*<\/urlset>/);
-assert.match(sitemap, /<lastmod>2026-11-13<\/lastmod>/);
+assert.match(sitemap, /<lastmod>2026-11-14<\/lastmod>/);
 const sitemapRoutes = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => new URL(match[1]));
 assert.ok(sitemapRoutes.some((url) => url.href === canonical));
 for (const url of sitemapRoutes) {
+  assert.equal(url.origin, new URL(canonical).origin, 'Every sitemap entry must use the canonical custom domain.');
   const pathname = url.pathname === '/' ? '/index.html' : url.pathname;
   try {
     await access(path.join(dist, decodeURIComponent(pathname.slice(1))));

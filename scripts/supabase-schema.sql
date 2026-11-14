@@ -44,7 +44,7 @@ CREATE INDEX IF NOT EXISTS idx_subscribers_signup_date
   ON public.subscribers (signup_date DESC);
 
 CREATE OR REPLACE FUNCTION public.update_subscribers_updated_at()
-RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $
+RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN
   NEW.updated_at = now();
   RETURN NEW;
@@ -107,3 +107,7 @@ BEGIN
   END IF;
 END;
 $security$;
+
+-- Optional Systeme.io fulfillment outbox: after this base schema, run
+-- scripts/systeme-io-migration.sql before enabling the server-side integration.
+-- Existing subscribers are NOT enrolled or migrated automatically.

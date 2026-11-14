@@ -1,4 +1,5 @@
 import type { SubscriberRecord } from "./subscribers.js";
+import type { SystemeSyncResult } from "./systeme.js";
 
 function databaseConfig() {
   return {
@@ -52,6 +53,7 @@ async function databaseRequest<T>(
   }
   const response = await fetch(`${config.url}/rest/v1/${tablePath}`, {
     ...init,
+    signal: init.signal || AbortSignal.timeout(4500),
     headers: databaseHeaders((init.headers || {}) as Record<string, string>),
   });
 
@@ -63,6 +65,34 @@ async function databaseRequest<T>(
 
   if (response.status === 204) return undefined as T;
   return response.json() as Promise<T>;
+}
+
+export async function captureSystemeGuideRequest(input: {
+  name: string; email: string; source: string; marketingConsent: boolean; tagId: number;
+}): Promise<string> {
+  const rows = await databaseRequest<{ job_id: string }[]>("rpc/capture_systeme_guide_request", {
+    method: "POST",
+    body: JSON.stringify({ p_name: input.name, p_email: input.email, p_source: input.source, p_marketing_consent: input.marketingConsent, p_tag_id: input.tagId }),
+  });
+  if (!Array.isArray(rows) || rows.length !== 1 || typeof rows[0]?.job_id !== "string" || !/^[0-9a-f-]{36}$/i.test(rows[0].job_id)) throw new Error("Guide request persistence was not confirmed.");
+  return rows[0].job_id;
+}
+
+export type SystemeJob = { job_id: string; email: string; tag_id: number; lease_token: string; attempts: number; reconcile_only: boolean };
+
+export async function claimSystemeJobs(jobId?: string): Promise<SystemeJob[]> {
+  const rows = await databaseRequest<SystemeJob[]>("rpc/claim_systeme_guide_job", {
+    method: "POST", body: JSON.stringify({ p_job_id: jobId || null }),
+  });
+  if (!Array.isArray(rows) || rows.length > 1 || rows.some(row => typeof row.job_id !== "string" || typeof row.email !== "string" || typeof row.lease_token !== "string" || !Number.isInteger(row.attempts) || typeof row.reconcile_only !== "boolean")) throw new Error("Invalid queue claim response.");
+  return rows;
+}
+
+export async function finishSystemeJob(job: SystemeJob, result: SystemeSyncResult, delaySeconds: number): Promise<void> {
+  await databaseRequest("rpc/finish_systeme_guide_job", {
+    method: "POST",
+    body: JSON.stringify({ p_job_id: job.job_id, p_lease_token: job.lease_token, p_status: result.status, p_error_code: result.code || null, p_contact_id: result.contactId || null, p_retry_seconds: delaySeconds, p_reconcile_only: result.reconcileOnly || false }),
+  });
 }
 
 export async function saveSubscriber(input: {
