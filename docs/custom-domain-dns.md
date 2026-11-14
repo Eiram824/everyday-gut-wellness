@@ -1,10 +1,12 @@
 # Everyday Gut Wellness: DNS and production verification
 
-Prepared: November 14, 2026. Domain: `everydaygutwellness.com`. Registrar and intended authoritative DNS: Porkbun. Website: the existing Netlify project `everyday-gut-wellness`.
+Prepared: November 14, 2026. DMARC correction recorded November 15, 2026 (Asia/Singapore). Domain: `everydaygutwellness.com`. Registrar and intended authoritative DNS: Porkbun. Website: the existing Netlify project `everyday-gut-wellness`.
 
 This is the configuration checklist. It does not establish that DNS, HTTPS, forwarding, sender authentication, API credentials, or automated email delivery have already been activated. Record actual results in the verification table below.
 
-## Observed state in this task
+## Historical baseline — November 14, 2026
+
+The table below preserves the earlier observations. Its report-free DMARC value and pending launch steps are historical; use the November 15 correction and the current instructions in section 3 for email authentication.
 
 | Item | Observed state on November 14, 2026 |
 | --- | --- |
@@ -21,6 +23,18 @@ This is the configuration checklist. It does not establish that DNS, HTTPS, forw
 | Code migration | Custom-domain metadata prepared on the working branch; not reported as live production |
 | Porkbun DNS changes | Edited the one malformed Systeme.io CNAME; added one root Google verification TXT with owner approval. Preserved web, mail, DKIM, DMARC and ACME records. |
 | Search Console | Custom-domain DNS ownership verified on November 14. Keep the generated Google TXT. Sitemap submission and custom-domain crawl inspection must follow publication of the custom-domain build. |
+
+## DMARC correction — November 15, 2026 (Asia/Singapore)
+
+Systeme.io support identified the missing DMARC reporting address as the remaining account-specific authentication requirement. The existing single `_dmarc` TXT record was edited in Porkbun to this exact value:
+
+    v=DMARC1; p=none; rua=mailto:hello@everydaygutwellness.com
+
+The existing TTL of **600 seconds** was preserved, and the zone still contained **12 records** after the edit. The `p=none` policy is unchanged. The working web, MX, SPF, DKIM, CNAME and other verification records were preserved.
+
+Initial public verification returned the corrected value through Cloudflare DNS-over-HTTPS while Google still served its cached earlier value. At **04:37:41 on November 15 (Asia/Singapore; November 14, 20:37:41 UTC)**, both Google and Cloudflare DNS-over-HTTPS returned exactly one DMARC TXT answer matching the corrected value. All three existing Systeme.io CNAME targets also matched on both resolvers.
+
+The Systeme.io dashboard still showed **Pending**, while its DNS details now showed **Homepage Detected**. This is not yet a confirmed authenticated domain. Keep email automation disabled until the platform accepts the domain and the sender/delivery checks pass.
 
 Keep the working Porkbun nameservers and existing web/mail records. The earlier parking state has been superseded by the actual Netlify HTTPS response.
 
@@ -79,24 +93,24 @@ If these exact records already exist, do not create duplicates. Keep one root SP
 
 ## 3. Systeme.io domain authentication
 
-The domain is in the correct Systeme.io account under **Settings → Products & Marketing → Emails → Domains**. Its last observed dashboard status was **Pending** before the CNAME correction. The following three account-generated CNAMEs now resolve publicly; do not add duplicates. Recheck the platform's authentication status separately. [Systeme.io domain authentication](https://help.systeme.io/article/316-how-to-authenticate-your-personal-domain-name)
+The domain is in the correct Systeme.io account under **Settings → Products & Marketing → Emails → Domains**. The November 15 dashboard check still showed **Pending**, with **Homepage Detected** in its DNS details. The following three account-generated CNAMEs already resolve publicly. Preserve them and recheck authentication after the corrected DMARC value is visible to the provider. [Systeme.io domain authentication](https://help.systeme.io/article/316-how-to-authenticate-your-personal-domain-name)
 
 | Purpose | Type | Porkbun Host | Answer / Value |
 | --- | --- | --- | --- |
 | Provider return-path / authentication | CNAME | `si3504776` | `inbound.systeme.io` |
 | DKIM 1 | CNAME | `systemeio1._domainkey` | `key1.systeme.io` |
 | DKIM 2 | CNAME | `systemeio2._domainkey` | `key2.systeme.io` |
-| Initial report-free DMARC option, only if no policy already exists | TXT | `_dmarc` | `v=DMARC1; p=none;` |
+| DMARC value required by Systeme.io support for this account | TXT | `_dmarc` | `v=DMARC1; p=none; rua=mailto:hello@everydaygutwellness.com` |
 
 The complete CNAME owner names are `si3504776.everydaygutwellness.com`, `systemeio1._domainkey.everydaygutwellness.com`, and `systemeio2._domainkey.everydaygutwellness.com`. In Porkbun, use only the relative Host labels shown in the table. Do not duplicate the domain suffix. A DMARC record is TXT, not a fourth CNAME.
 
-**Deliberate privacy option:** the report-free DMARC value above omits the personal reporting address shown by the account. It requests no aggregate reports; `rua` is optional under [RFC 7489 section 6.3](https://www.rfc-editor.org/rfc/rfc7489.html#section-6.3). Recheck DNS first. Never replace an existing `quarantine`/`reject` policy or otherwise weaken an existing policy to use this initial option. Keep one DMARC policy at `_dmarc`. After forwarding is verified, the owner may choose a monitored report destination such as `hello@everydaygutwellness.com`; no personal Gmail address is stored in this public document. The initial `p=none` policy is not enforcement and does not guarantee delivery.
+**Account-specific DMARC requirement:** Systeme.io support explicitly required the reporting address above for this account, consistent with its [domain authentication instructions](https://help.systeme.io/article/316-how-to-authenticate-your-personal-domain-name). Keep the existing single `_dmarc` TXT record with that exact value; do not restore the earlier report-free value or add a second policy. Reports are addressed to the owned business mailbox `hello@everydaygutwellness.com`. This edit retains the existing `p=none` policy, which is monitoring rather than enforcement and does not guarantee inbox delivery. A future change to `quarantine` or `reject` requires a separate alignment review. Registrar credentials and changes to 2FA are not required for this DNS edit.
 
 No additional root SPF include for Systeme.io is guessed here. Add only records that this account supplies, and reconcile them with the existing Porkbun setup.
 
 ## 4. Verify the sender address separately
 
-Once forwarding works, use **Settings → Emails → Verified email addresses → Add new email address** to submit `hello@everydaygutwellness.com`. Open the confirmation arriving through the forward and finish the platform confirmation. Confirm that the sender status becomes **Verified**, that the owned domain is authenticated, and that the campaign sender dropdown offers the address. Domain authentication and address confirmation are separate checks. [Systeme.io sender verification](https://help.systeme.io/article/2070-how-to-confirm-your-email-sender-address)
+The November 15 dashboard already shows `hello@everydaygutwellness.com` as **Verified** after the owner's completed confirmation. Reuse that address; do not add or confirm it again. The remaining checks are that the owned domain becomes authenticated and the campaign sender dropdown offers the address. For a genuinely new sender address, use **Settings → Emails → Verified email addresses → Add new email address** and complete its own confirmation. Domain authentication and address confirmation are separate checks. [Systeme.io sender verification](https://help.systeme.io/article/2070-how-to-confirm-your-email-sender-address)
 
 Use **Everyday Gut Wellness** as the recognizable display name. Test both a real delivered message and a reply. Check original-message headers for the expected SPF/DKIM results and DMARC alignment; do not infer inbox delivery solely from a green DNS check. No live send is established by this checklist.
 
@@ -105,7 +119,7 @@ Use **Everyday Gut Wellness** as the recognizable display name. Test both a real
 Send the following **DNS configuration fields only**:
 
 1. From Netlify: the domain is already attached and its standard DNS values are captured above. After the Porkbun edit, provide the updated **DNS verification** and **HTTPS certificate** status; no repeated domain addition is needed. Copy any new ownership TXT prompt only if one actually appears.
-2. From Systeme.io **Domains**: the three CNAME rows are already captured above. Paste their updated verification status and confirm they match. For DMARC, paste the public DNS policy you actually chose; the personal Gmail reporting address is not needed in chat or Git.
+2. From Systeme.io **Domains**: the three CNAME rows are already captured above. Record their verification status and confirm they match. For DMARC, verify one `_dmarc` TXT with the exact support-required value `v=DMARC1; p=none; rua=mailto:hello@everydaygutwellness.com`, then record the platform's authentication result separately. The private Gmail forwarding destination is not needed in chat or Git.
 3. From Porkbun: the current web records, MX, root SPF TXT, and `_dmarc` records after the edit. DNS values are public; the Gmail forwarding destination can remain private.
 4. Status text such as **Pending**, **Verified**, **Authenticated**, or **HTTPS certificate provisioned**, without credentials or unrelated account details.
 
