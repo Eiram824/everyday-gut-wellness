@@ -248,12 +248,49 @@ describe("Netlify Serverless Functions Integration Suite", () => {
 
   // 6. Gemini Function Security & SSRF Protection
   describe("Gemini Serverless Function (gemini.ts)", () => {
+    it("rejects anonymous AI requests before any provider call", async () => {
+      process.env.GEMINI_API_KEY = "dummy_key";
+      let calls = 0;
+      globalThis.fetch = (async () => { calls++; throw new Error("must not call provider"); }) as typeof fetch;
+      const res = await geminiHandler(createMockEvent({ httpMethod: "POST", path: "/api/generate-content", body: "{}" }), {} as any) as any;
+      assert.equal(res.statusCode, 401);
+      assert.equal(calls, 0);
+      assert.equal(res.headers["Cache-Control"], "no-store, no-cache, must-revalidate");
+    });
+
+    it("prevents credential forwarding to non-HTTPS, alternate hosts and non-file paths", async () => {
+      process.env.GEMINI_API_KEY = "dummy_key";
+      let calls = 0;
+      globalThis.fetch = (async () => { calls++; throw new Error("must not call provider"); }) as typeof fetch;
+      for (const uri of ["http://generativelanguage.googleapis.com/v1beta/files/example", "https://storage.googleapis.com/video.mp4", "https://child.generativelanguage.googleapis.com/v1beta/files/example", "https://user:password@generativelanguage.googleapis.com/v1beta/files/example", "https://generativelanguage.googleapis.com/v1beta/models", "https://generativelanguage.googleapis.com:444/v1beta/files/example"]) {
+        const res = await geminiHandler(createMockEvent({ path: "/api/video-download", headers: { "x-admin-key": TEST_ADMIN_KEY }, queryStringParameters: { uri } }), {} as any) as any;
+        assert.equal(res.statusCode, 403);
+      }
+      assert.equal(calls, 0);
+    });
+
+    it("disables redirects and uses one private credential for an authorized file download", async () => {
+      process.env.GEMINI_API_KEY = "dummy_key";
+      globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = new URL(String(input));
+        assert.deepEqual(url.searchParams.getAll("key"), ["dummy_key"]);
+        assert.equal(init?.redirect, "error");
+        assert.ok(init?.signal);
+        return new Response("file", { headers: { "content-type": "video/mp4" } });
+      }) as typeof fetch;
+      const res = await geminiHandler(createMockEvent({ path: "/api/video-download", headers: { "x-admin-key": TEST_ADMIN_KEY }, queryStringParameters: { uri: "https://generativelanguage.googleapis.com/v1beta/files/example:download?key=old&alt=media" } }), {} as any) as any;
+      assert.equal(res.statusCode, 200);
+      assert.equal(res.headers["Cache-Control"], "private, no-store");
+      assert.equal(Buffer.from(res.body, "base64").toString(), "file");
+    });
+
     it("fails closed with 503 if GEMINI_API_KEY is not configured", async () => {
       delete process.env.GEMINI_API_KEY;
       delete process.env.API_KEY;
       const event = createMockEvent({
         httpMethod: "POST",
         path: "/api/generate-content",
+        headers: { "x-admin-key": TEST_ADMIN_KEY },
         body: JSON.stringify({ contents: "test" }),
       });
       const res = await geminiHandler(event, {} as any) as any;
@@ -265,6 +302,7 @@ describe("Netlify Serverless Functions Integration Suite", () => {
       const event = createMockEvent({
         httpMethod: "GET",
         path: "/api/video-download",
+        headers: { "x-admin-key": TEST_ADMIN_KEY },
         queryStringParameters: { uri: "https://evil-attacker-site.com/video.mp4" },
       });
       const res = await geminiHandler(event, {} as any) as any;

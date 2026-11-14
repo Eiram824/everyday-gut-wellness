@@ -91,9 +91,5 @@
   to = "/.netlify/functions/api-not-found"
   status = 404
 
-# 3. Standard Single Page Application Fallback for Frontend Pages
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# The guide uses hash navigation; unknown paths must return the public 404 page.
 

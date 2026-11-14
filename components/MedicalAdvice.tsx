@@ -37,11 +37,11 @@ export const MedicalAdvice: React.FC = () => {
             </div>
 
             <h3 className="text-xl sm:text-2xl font-serif font-bold text-[#14382B] mb-4">
-              Symptoms Requiring Immediate Medical Attention
+              Symptoms That Need Prompt Medical Advice
             </h3>
 
             <p className="text-sm text-[#4A463F] leading-relaxed mb-6">
-              If you experience any of the following symptoms, do not attempt to self-manage with lifestyle adjustments, supplements, or home remedies. Seek immediate emergency medical care, call local emergency services, or visit an urgent care facility:
+              Contact a healthcare professional promptly for the warning signs below. Severe or sudden abdominal pain, inability to pass gas with bowel stoppage, or persistent vomiting may need urgent or emergency care. Do not use this guide or a workbook to explain away concerning symptoms.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
@@ -89,7 +89,7 @@ export const MedicalAdvice: React.FC = () => {
             </h3>
 
             <p className="text-sm text-[#4A463F] leading-relaxed mb-6">
-              Occasional mild shifts in digestion following travel, temporary stress, or dietary changes are common. However, persistent symptoms lasting more than 2 to 3 weeks deserve comprehensive evaluation by a primary care doctor or gastroenterologist:
+              Persistent or recurring digestive changes deserve advice from a healthcare professional, especially when self-care does not help. You do not need to wait a fixed number of weeks if symptoms worry you or worsen. Use the warning signs above to seek care sooner when needed.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">

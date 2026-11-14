@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: /
 
-Sitemap: https://everyday-gut-wellness.netlify.app/sitemap.xml
+Sitemap: https://everydaygutwellness.com/sitemap.xml

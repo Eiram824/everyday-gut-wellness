@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { guideDeliveryNotice, parseEmailDeliveryStatus, parseMarketingSignupUrl, type EmailDeliveryStatus } from '../lib/lead-delivery';
 import {
   X,
   BookOpen,
@@ -32,15 +33,51 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 }) => {
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
-  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [guideEmailAvailable, setGuideEmailAvailable] = useState(false);
+  const [isConfigLoading, setIsConfigLoading] = useState(false);
+  const [marketingSignupUrl, setMarketingSignupUrl] = useState<string | null>(null);
+  const [emailDeliveryStatus, setEmailDeliveryStatus] = useState<EmailDeliveryStatus>('not_requested');
+  const submitting = useRef(false);
+  const submissionController = useRef<AbortController | null>(null);
+  const requestGeneration = useRef(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
+    requestGeneration.current += 1;
+    submissionController.current?.abort();
+    submissionController.current = null;
+    submitting.current = false;
+    setIsLoading(false);
     if (isOpen) {
       setIsSuccess(false);
       setErrorMessage(null);
+      setGuideEmailAvailable(false);
+      setMarketingSignupUrl(null);
+      setEmailDeliveryStatus('not_requested');
+      setIsConfigLoading(true);
+      let active = true;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      fetch('/api/subscribe', { signal: controller.signal })
+        .then(response => response.ok ? response.json() : null)
+        .then(data => {
+          if (!active || controller.signal.aborted || !data) return;
+          setGuideEmailAvailable(data.guideEmailAvailable === true);
+          setMarketingSignupUrl(parseMarketingSignupUrl(data.marketingSignupUrl));
+        })
+        .catch(() => { /* Instant download remains available when email configuration cannot be read. */ })
+        .finally(() => { clearTimeout(timeout); if (active) setIsConfigLoading(false); });
+      return () => {
+        active = false;
+        clearTimeout(timeout);
+        controller.abort();
+        requestGeneration.current += 1;
+        submissionController.current?.abort();
+        submissionController.current = null;
+        submitting.current = false;
+      };
     }
   }, [isOpen]);
 
@@ -48,6 +85,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting.current || isConfigLoading) return;
     setErrorMessage(null);
 
     const trimmedEmail = email.trim().toLowerCase();
@@ -57,19 +95,27 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
       return;
     }
 
+    submitting.current = true;
     setIsLoading(true);
+    const generation = requestGeneration.current;
+    const controller = new AbortController();
+    submissionController.current = controller;
+    const timeout = setTimeout(() => controller.abort(), 25000);
     try {
       const response = await fetch('/api/subscribe', {
         method: 'POST',
+        signal: controller.signal,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: firstName.trim() || 'Reader',
           email: trimmedEmail,
           source: 'ebook_lead_modal',
-          marketingConsent,
+          emailGuideRequested: guideEmailAvailable,
+          marketingConsent: false,
         }),
       });
       const data = await response.json().catch(() => ({}));
+      if (generation !== requestGeneration.current) return;
       if (!response.ok || data.success !== true) {
         throw new Error(data.error || 'We could not save your signup. Please try again.');
       }
@@ -80,6 +126,8 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
         }));
       } catch {}
 
+      setEmailDeliveryStatus(parseEmailDeliveryStatus(data.emailDeliveryStatus));
+      setMarketingSignupUrl(parseMarketingSignupUrl(data.marketingSignupUrl));
       setIsSuccess(true);
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'generate_lead', {
@@ -89,10 +137,17 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
         });
       }
     } catch (err: any) {
-      console.error('Subscription request failed:', err?.message || 'unknown_error');
-      setErrorMessage(err?.message || 'We could not save your signup. Please check your connection and try again.');
+      if (generation !== requestGeneration.current) return;
+      setErrorMessage(controller.signal.aborted
+        ? 'The connection timed out. Please try again; repeating a request will not restart guide-email delivery.'
+        : err?.message || 'We could not save your signup. Please check your connection and try again.');
     } finally {
-      setIsLoading(false);
+      clearTimeout(timeout);
+      if (generation === requestGeneration.current) {
+        submissionController.current = null;
+        submitting.current = false;
+        setIsLoading(false);
+      }
     }
   };
 
@@ -133,9 +188,18 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 {`Welcome aboard, ${firstName.trim() || 'friend'}!`}
               </h3>
               <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
-                <>Your complimentary copy of <strong className="text-[#14382B">The 7-Day Gentle Gut Reset Guide</strong> is ready. Use the download button below to save your PDF.</>
+                {guideDeliveryNotice(emailDeliveryStatus)}
               </p>
             </div>
+
+            {marketingSignupUrl && (
+              <div className="max-w-sm space-y-2 pt-2 text-sm text-[#4A463F]">
+                <a href={marketingSignupUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-[#14382B] underline underline-offset-4">
+                  Join the optional seven-email series
+                </a>
+                <p className="text-xs leading-relaxed">Practical notes and routine-planning ideas over about 16 days, including occasional paid PDF offers. Separate signup and email confirmation required. Your guide is already yours.</p>
+              </div>
+            )}
 
             {/* Quick Access CTAs */}
             <div className="w-full max-w-sm space-y-2.5 sm:space-y-3 pt-1 sm:pt-2">
@@ -154,14 +218,14 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 className="w-full flex items-center justify-center gap-2.5 py-3 sm:py-3.5 px-6 bg-[#14382B] hover:bg-[#0E281E] text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md transition-all group cursor-pointer"
               >
                 <BookOpen className="w-4 h-4 text-emerald-300" />
-                <span>Open Full Interactive Reader</span>
+                <span>Open the Full Guide</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
             </div>
 
             <div className="pt-1 flex items-center gap-1.5 text-[11px] sm:text-xs text-[#8C877D]">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Free guide access. Optional email updates can be unsubscribed anytime.</span>
+              <span>Guide access does not enroll you in marketing emails.</span>
             </div>
           </div>
         ) : (
@@ -188,7 +252,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                     </div>
                     <div className="space-y-2 pt-1 text-xs text-[#4A463F]">
                       <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>The Gut-Brain connection & bowel motility biology</span></div>
-                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Soluble vs. insoluble fiber meal planning guide</span></div>
+                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Gradual food choices without blanket restrictions</span></div>
                       <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Printable 7-Day Habit Tracker & symptom diary</span></div>
                     </div>
                 </>
@@ -211,7 +275,9 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                   Get The 7-Day Gentle Gut Reset eBook
                 </h3>
                 <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
-                  Enter your email below to unlock the complete eBook reader and printable daily action tracker immediately.
+                  {guideEmailAvailable
+                    ? 'Request an email copy of the free guide and unlock the reader and printable tracker immediately. No purchase or marketing signup required.'
+                    : 'Enter your email to unlock the reader and printable tracker immediately. Save your PDF from the download button after your request.'}
                 </p>
               </div>
 
@@ -235,6 +301,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                       type="text"
                       placeholder="e.g. Maria"
                       value={firstName}
+                      disabled={isLoading}
                       onChange={(e) => setFirstName(e.target.value)}
                       className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#D5CFC5] rounded-xl text-sm text-[#14382B] placeholder-[#A49F96] focus:outline-none focus:ring-2 focus:ring-[#14382B]/20 focus:border-[#14382B]"
                     />
@@ -254,40 +321,31 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                       required
                       placeholder="your.email@example.com"
                       value={email}
+                      disabled={isLoading}
                       onChange={(e) => setEmail(e.target.value)}
                       className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#D5CFC5] rounded-xl text-sm text-[#14382B] placeholder-[#A49F96] focus:outline-none focus:ring-2 focus:ring-[#14382B]/20 focus:border-[#14382B]"
                     />
                   </div>
                 </div>
 
-                {/* Optional Marketing Consent Checkbox */}
-                <div className="flex items-start gap-2.5 pt-1 bg-[#F8F6F0] p-3 rounded-xl border border-[#E5DFD5]">
-                  <input
-                    id="lead-marketing-consent"
-                    type="checkbox"
-                    checked={marketingConsent}
-                    onChange={(e) => setMarketingConsent(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-[#D5CFC5] text-[#14382B] focus:ring-[#14382B] accent-[#14382B] cursor-pointer"
-                  />
-                  <label htmlFor="lead-marketing-consent" className="text-xs text-[#4A463F] leading-snug select-none cursor-pointer">
-                    <span className="font-semibold text-[#14382B]">(Optional)</span> Yes, I would also like to receive future educational wellness articles, daily habit tips, and digital product updates. You can unsubscribe at any time with 1 click.
-                  </label>
+                <div className="text-xs text-[#4A463F] leading-relaxed bg-[#F8F6F0] p-3 rounded-xl border border-[#E5DFD5]">
+                  This request is for the free guide. The optional follow-up email series has a separate signup and confirmation step. <a href="/privacy.html" className="underline underline-offset-2">Privacy policy</a>
                 </div>
 
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || isConfigLoading}
                   className="w-full py-3.5 px-6 bg-[#14382B] hover:bg-[#0E281E] disabled:bg-[#14382B]/60 text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group cursor-pointer"
                 >
-                  {isLoading ? (
+                  {isLoading || isConfigLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Unlocking Your Guide...</span>
+                      <span>{isConfigLoading ? 'Preparing your guide...' : 'Saving your request...'}</span>
                     </>
                   ) : (
                     <>
-                      <span>Get Instant Access & Free eBook</span>
+                      <span>{guideEmailAvailable ? 'Email My Guide & Unlock Download' : 'Get Instant Access & Free eBook'}</span>
                       <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </>
                   )}

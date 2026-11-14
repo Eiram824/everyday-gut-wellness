@@ -5,10 +5,10 @@ const root = path.resolve('dist');
 const checks = [
   /sb_secret_[a-z0-9_]{10,}/i,
   /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/,
-  /ADMIN_ACCESS_KEY|SUPABASE_SERVICE_ROLE_KEY|SENDER_API_TOKEN/,
+  /ADMIN_ACCESS_KEY|SUPABASE_SERVICE_ROLE_KEY|SENDER_API_TOKEN|SYSTEME_IO_API_KEY|GEMINI_API_KEY/,
   /\/api\/(?:admin|leads)|#admin|admin=true/,
 ];
-const secrets = ['ADMIN_ACCESS_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SENDER_API_TOKEN'].map(key => process.env[key]).filter(value => value && value.length > 8);
+const secrets = ['ADMIN_ACCESS_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SENDER_API_TOKEN', 'SYSTEME_IO_API_KEY', 'GEMINI_API_KEY'].map(key => process.env[key]).filter(value => value && value.length > 8);
 let checked = 0;
 async function scan(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {

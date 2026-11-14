@@ -138,13 +138,14 @@ export const RoutineReset: React.FC = () => {
         <div className="mt-12 bg-white rounded-2xl border border-[#E5DFD5] p-6 sm:p-8 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#14382B]">
             <Footprints className="w-4 h-4 text-[#B85D36]" />
-            <span>Ergonomics Note: The Squatting Angle</span>
+            <span>Ergonomics Note: Comfortable Positioning</span>
           </div>
           <h4 className="text-lg font-serif font-bold text-[#14382B]">
-            Why Elevating Your Knees Assists Elimination
+            A Footrest May Help You Feel More Comfortable
           </h4>
           <p className="text-sm text-[#4A463F] leading-relaxed">
-            In standard Western seated toilets, the puborectalis muscle remains partially hooked around the lower rectum, creating a kink that acts as a natural continence valve. Placing a small footstool beneath your feet elevates your knees slightly above hip level (~35° angle). This relaxes the puborectalis sling, straightening the anorectal canal and allowing stool to pass smoothly with zero straining.
+            NIDDK suggests relaxing your muscles and considering a footstool for comfort. Choose a stable setup that is safe for your mobility; an exact angle is not required, and a footrest does not guarantee relief from pain or straining. Persistent difficulty deserves individualized advice from a healthcare professional.{' '}
+            <a href="https://www.niddk.nih.gov/health-information/digestive-diseases/constipation/treatment" target="_blank" rel="noopener noreferrer" className="font-medium text-[#14382B] underline underline-offset-2">Read the NIDDK guidance.</a>
           </p>
         </div>
       </div>

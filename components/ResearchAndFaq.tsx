@@ -2,6 +2,21 @@ import React from 'react';
 
 const references = [
   {
+    label: 'NIDDK. Symptoms & Causes of Constipation.',
+    url: 'https://www.niddk.nih.gov/health-information/digestive-diseases/constipation/symptoms-causes',
+    note: 'Warning signs that warrant prompt medical advice, including fever or unintended weight loss with constipation.',
+  },
+  {
+    label: 'NIDDK. Treatment for Constipation.',
+    url: 'https://www.niddk.nih.gov/health-information/digestive-diseases/constipation/treatment',
+    note: 'General guidance on bathroom routines, comfortable positioning and seeking professional support.',
+  },
+  {
+    label: 'MedlinePlus Medical Encyclopedia. Fatigue.',
+    url: 'https://medlineplus.gov/ency/article/003088.htm',
+    note: 'When ongoing or unexplained fatigue needs assessment; a symptom can have many causes.',
+  },
+  {
     label: 'National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK). Eating, Diet, & Nutrition for Constipation.',
     url: 'https://www.niddk.nih.gov/health-information/digestive-diseases/constipation/eating-diet-nutrition',
     note: 'General information on dietary fiber, adding fiber gradually, and fluids. Individual needs vary.',
