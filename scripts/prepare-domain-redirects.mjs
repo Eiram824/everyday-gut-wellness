@@ -6,7 +6,17 @@ export function customDomainRedirects(environment) {
   // Enable only after both custom-domain names have valid DNS and HTTPS.
   // The platform hostname remains an infrastructure reference, never a canonical.
   if (environment.CONTEXT !== 'production' || environment.CUSTOM_DOMAIN_REDIRECTS_ENABLED !== 'true') return '';
-  return 'https://everyday-gut-wellness.netlify.app/* https://everydaygutwellness.com/:splat 301!\n';
+  const old = 'https://everyday-gut-wellness.netlify.app';
+  // Cached pages can still POST to the old origin. Serve these same-origin
+  // handlers instead of converting their POST to GET with a host-level 301.
+  const handlers = [
+    ['/api/subscribe', 'subscribe'], ['/api/admin/verify', 'admin-verify'],
+    ['/api/leads/export.csv', 'leads-export'], ['/api/leads', 'leads'],
+    ['/api/health', 'health'], ['/health', 'health'],
+    ['/admin', 'admin'], ['/admin/*', 'admin'],
+  ];
+  return handlers.map(([route, name]) => `${old}${route} /.netlify/functions/${name} 200!`).join('\n') +
+    `\n${old}/* https://everydaygutwellness.com/:splat 301!\n`;
 }
 
 export async function writeDomainRedirects(directory, environment = process.env) {

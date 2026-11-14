@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "packageManager": "bun@1.2.4",
+  "packageManager": "npm@10.9.2",
   "scripts": {
     "dev": "tsx server.ts",
     "lint": "tsc --noEmit",
@@ -31,7 +31,10 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.6.2",
     "esbuild": "^0.25.0",
+    "postcss": "^8.5.33",
+    "tailwindcss": "^3.4.19",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"

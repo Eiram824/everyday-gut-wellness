@@ -14,6 +14,8 @@ import { handler as adminVerifyHandler } from './netlify/functions/admin-verify.
 import { handler as adminHandler } from './netlify/functions/admin.js';
 import { handler as leadsHandler } from './netlify/functions/leads.js';
 import { handler as exportHandler } from './netlify/functions/leads-export.js';
+import { verifyAdminAccess } from './netlify/functions/lib/auth.js';
+import { handler as geminiHandler } from './netlify/functions/gemini.js';
 
 const MODEL_UPGRADES: Record<string, string> = {
   "gemini-2.5-flash": "gemini-3-flash-preview",
@@ -73,7 +75,7 @@ async function startServer() {
       }, {});
       res.status(result.statusCode);
       for (const [key, value] of Object.entries(result.headers || {})) res.setHeader(key, String(value));
-      res.send(result.body || '');
+      res.send(result.isBase64Encoded ? Buffer.from(result.body || '', 'base64') : (result.body || ''));
     } catch { res.status(503).json({ success: false, error: 'Service temporarily unavailable.' }); }
   };
   app.all(['/health', '/api/health'], adapt(healthHandler));
@@ -82,6 +84,13 @@ async function startServer() {
   app.all(['/admin', '/admin/', '/admin/logout'], adapt(adminHandler));
   app.all('/api/leads', adapt(leadsHandler));
   app.all('/api/leads/export.csv', adapt(exportHandler));
+
+  // Authoring-only AI routes must never become an anonymous paid-provider proxy.
+  app.use(['/api/generate-content', '/api/generate-content-stream', '/api/chat-message', '/api/chat-stream', '/api/generate-images', '/api/generate-videos', '/api/videos-operation', '/api/video-download'], (req, res, next) => {
+    const auth = verifyAdminAccess({ headers: req.headers } as any);
+    if (!auth.authorized) { res.status(auth.status).json({ success: false, error: auth.error || 'Unauthorized.' }); return; }
+    next();
+  });
 
   app.post("/api/generate-content", async (req, res): Promise<any> => {
     try {
@@ -96,8 +105,8 @@ async function startServer() {
       const response = await ai.models.generateContent(params);
       return res.json(serializeGenerateContentResponse(response));
     } catch (error: any) {
-      console.error("[Backend] /api/generate-content error:", error);
-      return res.status(500).json({ error: error.message || "Failed to generate content." });
+      console.error("[Backend] /api/generate-content request failed");
+      return res.status(500).json({ error: "The requested service is temporarily unavailable." });
     }
   });
 
@@ -120,9 +129,9 @@ async function startServer() {
       }
       res.end();
     } catch (error: any) {
-      console.error("[Backend] /api/generate-content-stream error:", error);
+      console.error("[Backend] /api/generate-content-stream request failed");
       if (!res.headersSent) {
-        return res.status(500).json({ error: error.message || "Failed to stream content." });
+        return res.status(500).json({ error: "The requested service is temporarily unavailable." });
       }
       res.end();
     }
@@ -150,8 +159,8 @@ async function startServer() {
       const response = await chat.sendMessage({ message, config: msgConfig });
       return res.json(serializeGenerateContentResponse(response));
     } catch (error: any) {
-      console.error("[Backend] /api/chat-message error:", error);
-      return res.status(500).json({ error: error.message || "Failed to send chat message." });
+      console.error("[Backend] /api/chat-message request failed");
+      return res.status(500).json({ error: "The requested service is temporarily unavailable." });
     }
   });
 
@@ -183,9 +192,9 @@ async function startServer() {
       }
       res.end();
     } catch (error: any) {
-      console.error("[Backend] /api/chat-stream error:", error);
+      console.error("[Backend] /api/chat-stream request failed");
       if (!res.headersSent) {
-        return res.status(500).json({ error: error.message || "Failed to stream chat message." });
+        return res.status(500).json({ error: "The requested service is temporarily unavailable." });
       }
       res.end();
     }
@@ -203,8 +212,8 @@ async function startServer() {
       const response = await ai.models.generateImages(req.body);
       return res.json(response);
     } catch (error: any) {
-      console.error("[Backend] /api/generate-images error:", error);
-      return res.status(500).json({ error: error.message || "Failed to generate images." });
+      console.error("[Backend] /api/generate-images request failed");
+      return res.status(500).json({ error: "The requested service is temporarily unavailable." });
     }
   });
 
@@ -229,8 +238,8 @@ async function startServer() {
         response: op.response,
       });
     } catch (error: any) {
-      console.error("[Backend] /api/generate-videos error:", error);
-      return res.status(500).json({ error: error.message || "Failed to start video generation." });
+      console.error("[Backend] /api/generate-videos request failed");
+      return res.status(500).json({ error: "The requested service is temporarily unavailable." });
     }
   });
 
@@ -268,36 +277,12 @@ async function startServer() {
         response: responseCopy,
       });
     } catch (error: any) {
-      console.error("[Backend] /api/videos-operation error:", error);
-      return res.status(500).json({ error: error.message || "Failed to poll video operation." });
+      console.error("[Backend] /api/videos-operation request failed");
+      return res.status(500).json({ error: "The requested service is temporarily unavailable." });
     }
   });
 
-  app.get("/api/video-download", async (req, res): Promise<any> => {
-    try {
-      const apiKey = (process.env.GEMINI_API_KEY || process.env.API_KEY || "").trim();
-      if (!apiKey) {
-        return res.status(503).json({ error: "API key is not configured." });
-      }
-      const rawUri = String(req.query.uri || "").split("&key=")[0];
-      if (!rawUri) {
-        return res.status(400).json({ error: "Missing uri parameter." });
-      }
-      const sep = rawUri.includes("?") ? "&" : "?";
-      const downloadUrl = `${rawUri}${sep}key=${apiKey}`;
-      const upstream = await fetch(downloadUrl);
-      if (!upstream.ok) {
-        const errText = await upstream.text().catch(() => "");
-        return res.status(upstream.status).send(errText || upstream.statusText);
-      }
-      res.setHeader("Content-Type", upstream.headers.get("content-type") || "video/mp4");
-      const arrayBuf = await upstream.arrayBuffer();
-      return res.send(Buffer.from(arrayBuf));
-    } catch (error: any) {
-      console.error("[Backend] /api/video-download error:", error);
-      return res.status(500).json({ error: error.message || "Failed to download video." });
-    }
-  });
+  app.all("/api/video-download", adapt(geminiHandler));
 
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
@@ -309,7 +294,7 @@ async function startServer() {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.use((_req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+      res.status(404).sendFile(path.join(distPath, "404.html"));
     });
   }
 

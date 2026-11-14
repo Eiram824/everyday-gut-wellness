@@ -20,8 +20,12 @@ test('a production cutover preserves the old URL path without a custom-domain lo
   try {
     await writeDomainRedirects(directory, {CONTEXT:'production',CUSTOM_DOMAIN_REDIRECTS_ENABLED:'true'});
     const rules = (await readFile(join(directory,'_redirects'),'utf8')).trim().split('\n');
-    assert.equal(rules.length,1);
-    const [from,to,status] = rules[0].split(/\s+/);
+    assert.equal(rules.length,9);
+    const subscribe = rules[0].split(/\s+/);
+    assert.equal(subscribe[0],'https://everyday-gut-wellness.netlify.app/api/subscribe');
+    assert.equal(subscribe[1],'/.netlify/functions/subscribe');
+    assert.equal(subscribe[2],'200!');
+    const [from,to,status] = rules.at(-1).split(/\s+/);
     assert.equal(new URL(from).hostname,'everyday-gut-wellness.netlify.app');
     assert.equal(new URL(to).hostname,'everydaygutwellness.com');
     assert.ok(from.endsWith('/*') && to.endsWith('/:splat'));

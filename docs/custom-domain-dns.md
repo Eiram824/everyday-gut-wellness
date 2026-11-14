@@ -9,19 +9,20 @@ This is the configuration checklist. It does not establish that DNS, HTTPS, forw
 | Item | Observed state on November 14, 2026 |
 | --- | --- |
 | Authoritative nameservers | `curitiba.ns.porkbun.com`, `maceio.ns.porkbun.com`, `fortaleza.ns.porkbun.com`, `salvador.ns.porkbun.com` |
-| Root web DNS | Parking A records: `207.207.210.23`, `207.207.210.36`, `207.207.210.50` |
-| www DNS | CNAME `uixie.porkbun.com` |
+| Root web DNS | Porkbun ALIAS `apex-loadbalancer.netlify.com`; public flattened answers `75.2.60.5` and `99.83.231.61` |
+| www DNS | CNAME `everyday-gut-wellness.netlify.app` |
 | Incoming email MX | `fwd1.porkbun.com` priority 10 and `fwd2.porkbun.com` priority 20 already exist; do not add duplicates |
 | Root SPF | `v=spf1 include:_spf.porkbun.com ~all` already exists; preserve it rather than adding a duplicate |
-| DMARC | The public `_dmarc` TXT lookup returned no record; recheck before adding one |
-| Systeme.io domain | `everydaygutwellness.com` added to the user's account; status **Pending**, exact CNAME values obtained below |
-| Netlify domain attachment | Completed in the existing project: `everydaygutwellness.com` is Primary domain; `www.everydaygutwellness.com` redirects to primary; both are **Pending DNS verification** |
+| DMARC | One `_dmarc` TXT: `v=DMARC1; p=none;`; monitoring policy, not enforcement |
+| Systeme.io domain | Last observed dashboard status **Pending**. Corrected the malformed existing CNAME to `si3504776` → `inbound.systeme.io`; all three account-generated CNAMEs now resolve. Dashboard revalidation and verified hello@ sender remain outstanding. |
+| Netlify domain attachment | Apex primary and www alias are attached. Actual HTTPS requests work; www responds 301 to the apex. |
 | Netlify account DNS instructions | The account's Pending DNS modal confirms `apex-loadbalancer.netlify.com` for root ALIAS/ANAME/flattened CNAME; fallback A `75.2.60.5` |
-| HTTPS certificate | Not provisioned yet while the unchanged parking DNS still points away from Netlify |
+| HTTPS certificate | Normal certificate-verified HTTPS requests to both names succeed and serve Netlify. |
 | Code migration | Custom-domain metadata prepared on the working branch; not reported as live production |
-| Porkbun DNS changes | None performed in this task |
+| Porkbun DNS changes | Edited the one malformed Systeme.io CNAME; added one root Google verification TXT with owner approval. Preserved web, mail, DKIM, DMARC and ACME records. |
+| Search Console | Custom-domain DNS ownership verified on November 14. Keep the generated Google TXT. Sitemap submission and custom-domain crawl inspection must follow publication of the custom-domain build. |
 
-Keep the working Porkbun nameservers. The parking web records above are the records to review for replacement, while existing mail records remain intact.
+Keep the working Porkbun nameservers and existing web/mail records. The earlier parking state has been superseded by the actual Netlify HTTPS response.
 
 ## Para sa may-ari
 
@@ -31,7 +32,7 @@ Unahin ang website DNS at HTTPS, pagkatapos ang `hello@everydaygutwellness.com` 
 
 ## 1. Netlify website records
 
-Naidagdag na ang domain sa existing Netlify project. Sa **Domain management → Production domains**, nakita ang `everydaygutwellness.com` bilang **Primary domain** at ang `www.everydaygutwellness.com` bilang redirect papunta rito. Parehong **Pending DNS verification**. Hindi kailangang idagdag ulit ang mga domain.
+Naka-attach na ang domain sa existing Netlify project. Gumagana ang HTTPS sa apex at www, at nagre-redirect ang www sa apex. Hindi kailangang idagdag ulit ang mga domain o ulitin ang working DNS setup.
 
 Nabuksan na ang **Pending DNS verification** at nakumpirma sa mismong account ang root ALIAS target at fallback A value sa ibaba. Kung magbago ang project infrastructure sa hinaharap, basahin muli ang account-specific instructions. [Netlify external DNS](https://docs.netlify.com/manage/domains/configure-domains/configure-external-dns/)
 
@@ -56,13 +57,13 @@ If Netlify requests an ownership TXT record, copy its exact Type, Host and Value
 
 ## 2. Porkbun free incoming email forwarding
 
-Open Porkbun **Domain Management → everydaygutwellness.com → Email**. Under **Email Hosting and Forwarding → Porkbun Email Forwarding**, create the specific forward:
+Observed on November 14: the `hello` forward already exists under Porkbun **Domain Management → everydaygutwellness.com → Email → Current Forwards**, with the owner's chosen Gmail destination. Do not create it again. For a new installation, use:
 
 | Forward username | Destination |
 | --- | --- |
 | `hello` | Your chosen Gmail address, entered privately in Porkbun |
 
-Create the forward in this screen, not only a DNS record. Verify it appears in **Current Forwards**. Test from an address different from the destination Gmail to avoid forwarding-loop behavior. [Porkbun forwarding setup](https://kb.porkbun.com/article/10-how-to-set-up-email-forwarding-service)
+The forward is configured in this screen, not only in DNS. Actual external delivery to it remains an inbox test; test from an address different from the destination Gmail to avoid forwarding-loop behavior. [Porkbun forwarding setup](https://kb.porkbun.com/article/10-how-to-set-up-email-forwarding-service)
 
 The two MX records below already exist in public DNS. Keep them. Creating the `hello` forwarding address in Porkbun is a separate operation; existing MX answers do not prove that forward exists or works. Check the forwarding setup's SPF record as well:
 
@@ -78,7 +79,7 @@ If these exact records already exist, do not create duplicates. Keep one root SP
 
 ## 3. Systeme.io domain authentication
 
-The domain has now been added in the correct Systeme.io account under **Settings → Products & Marketing → Emails → Domains** and is **Pending**. The following three CNAMEs were obtained from that account, rather than inferred from documentation examples. The platform's setup procedure generates these records under its domain-authentication screen. [Systeme.io domain authentication](https://help.systeme.io/article/316-how-to-authenticate-your-personal-domain-name)
+The domain is in the correct Systeme.io account under **Settings → Products & Marketing → Emails → Domains**. Its last observed dashboard status was **Pending** before the CNAME correction. The following three account-generated CNAMEs now resolve publicly; do not add duplicates. Recheck the platform's authentication status separately. [Systeme.io domain authentication](https://help.systeme.io/article/316-how-to-authenticate-your-personal-domain-name)
 
 | Purpose | Type | Porkbun Host | Answer / Value |
 | --- | --- | --- | --- |
@@ -139,7 +140,7 @@ These steps are the proposed operator sequence. Code deployment, DNS changes, mi
 
 ## 7. Verification record
 
-All rows start **NOT_RUN**. Replace a result only after the actual check, with date/time and evidence.
+This reusable table remains the production cutover checklist. The latest audit separately records public DNS/HTTPS/utility-page/health/admin/Gumroad passes and local build/browser passes. NOT_RUN below must not be interpreted as a completed live email or post-merge check.
 
 | Check | Expected result | Status |
 | --- | --- | --- |
@@ -162,4 +163,4 @@ All rows start **NOT_RUN**. Replace a result only after the actual check, with d
 | Retry and repeat request | Provider failure preserves the request; duplicate/retried form does not cause repeated automation | NOT_RUN |
 | Privacy and unsubscribe | No secrets in client bundle; no health tags; marketing suppression/withdrawal preserved | NOT_RUN |
 
-After the custom domain is live, set up its Search Console property and submit the custom-domain sitemap. Monitor indexing and email outcomes separately; domain attachment alone does not prove either.
+The Search Console domain property is verified. After the custom-domain build is published, submit its sitemap and inspect the custom-domain homepage. Monitor indexing and email outcomes separately; ownership verification alone does not prove either.

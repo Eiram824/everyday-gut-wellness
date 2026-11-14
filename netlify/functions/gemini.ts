@@ -1,6 +1,6 @@
 import type { Handler } from "@netlify/functions";
 import { GoogleGenAI } from "@google/genai";
-import { jsonResponse, errorResponse } from "./lib/auth.js";
+import { jsonResponse, errorResponse, verifyAdminAccess } from "./lib/auth.js";
 
 const MODEL_UPGRADES: Record<string, string> = {
   "gemini-2.5-flash": "gemini-3-flash-preview",
@@ -19,13 +19,9 @@ function getApiKey(): string {
   return (process.env.GEMINI_API_KEY || process.env.API_KEY || "").trim();
 }
 
-const ALLOWED_VIDEO_HOSTS = [
-  "generativelanguage.googleapis.com",
-  "storage.googleapis.com",
-  "lh3.googleusercontent.com",
-];
-
 export const handler: Handler = async (event) => {
+  const auth = verifyAdminAccess(event);
+  if (!auth.authorized) return errorResponse(auth.status, auth.error || "Unauthorized.");
   const path = event.path.replace(/\/\.netlify\/functions\/gemini/, "").replace(/\/api/, "");
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
@@ -71,25 +67,27 @@ export const handler: Handler = async (event) => {
     // 4. Video Download (with strict domain validation and SSRF prevention)
     if (normalizedPath === "/video-download") {
       if (event.httpMethod !== "GET") return errorResponse(405, "Method not allowed. Expected GET.");
-      const rawUri = String(event.queryStringParameters?.uri || "").split("&key=")[0];
+      const rawUri = String(event.queryStringParameters?.uri || "");
       if (!rawUri) return errorResponse(400, "Missing uri parameter.");
 
       try {
         const parsedUrl = new URL(rawUri);
-        const isAllowed = ALLOWED_VIDEO_HOSTS.some(
-          (allowed) => parsedUrl.hostname === allowed || parsedUrl.hostname.endsWith(`.${allowed}`)
-        );
+        // Provider credentials may only travel to the exact HTTPS file API.
+        const isAllowed = parsedUrl.protocol === "https:" &&
+          parsedUrl.hostname === "generativelanguage.googleapis.com" &&
+          !parsedUrl.username && !parsedUrl.password && !parsedUrl.port &&
+          /^\/v1(?:beta)?\/files\/[a-zA-Z0-9_-]+(?::download)?$/.test(parsedUrl.pathname);
 
         if (!isAllowed) {
           return errorResponse(403, "Untrusted destination host. Video downloads are restricted to authorized domains.");
         }
 
-        const sep = rawUri.includes("?") ? "&" : "?";
-        const downloadUrl = `${rawUri}${sep}key=${apiKey}`;
-        const upstream = await fetch(downloadUrl);
+        parsedUrl.searchParams.set("key", apiKey);
+        parsedUrl.hash = "";
+        const upstream = await fetch(parsedUrl, { redirect: "error", signal: AbortSignal.timeout(15000) });
 
         if (!upstream.ok) {
-          return errorResponse(upstream.status, `Upstream fetch error: ${upstream.statusText}`);
+          return errorResponse(502, "The requested file is temporarily unavailable.");
         }
 
         const contentType = upstream.headers.get("content-type") || "video/mp4";
@@ -101,18 +99,20 @@ export const handler: Handler = async (event) => {
           isBase64Encoded: true,
           headers: {
             "Content-Type": contentType,
-            "Cache-Control": "public, max-age=86400",
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+            "X-Robots-Tag": "noindex, nofollow",
           },
           body: base64Data,
         };
-      } catch (urlErr: any) {
-        return errorResponse(400, "Malformed URL passed in uri parameter.");
+      } catch {
+        return errorResponse(400, "Unable to retrieve the requested file.");
       }
     }
 
     return errorResponse(404, `Gemini endpoint '${normalizedPath}' is not supported.`);
   } catch (err: any) {
-    console.error("[Netlify Function] Gemini proxy error:", err);
-    return errorResponse(500, err?.message || "Internal serverless error processing AI request.");
+    console.error("[Netlify Function] AI request failed");
+    return errorResponse(500, "The requested service is temporarily unavailable.");
   }
 };
