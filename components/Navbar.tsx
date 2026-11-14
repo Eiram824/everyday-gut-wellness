@@ -13,6 +13,15 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pendingNavigation = React.useRef<string | null>(null);
+
+  React.useEffect(() => {
+    if (mobileMenuOpen || !pendingNavigation.current) return;
+    const target = pendingNavigation.current;
+    pendingNavigation.current = null;
+    // Measure the target only after the expanded drawer leaves the layout.
+    onNavigate(target);
+  }, [mobileMenuOpen, onNavigate]);
 
   const navLinks = [
     { label: 'Habit Check', id: 'daily-check' },
@@ -25,8 +34,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
 
   const handleLinkClick = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
+    if (mobileMenuOpen) {
+      pendingNavigation.current = id;
+      setMobileMenuOpen(false);
+      return;
+    }
     onNavigate(id);
-    setMobileMenuOpen(false);
   };
 
   return (

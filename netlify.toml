@@ -6,6 +6,11 @@
 [functions]
   node_bundler = "esbuild"
 
+[[redirects]]
+  from = "/favicon.ico"
+  to = "/favicon.svg"
+  status = 301
+
 [[headers]]
   for = "/*"
   [headers.values]
