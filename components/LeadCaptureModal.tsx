@@ -252,7 +252,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                     </div>
                     <div className="space-y-2 pt-1 text-xs text-[#4A463F]">
                       <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>The Gut-Brain connection & bowel motility biology</span></div>
-                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Soluble vs. insoluble fiber meal planning guide</span></div>
+                      <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Gradual food choices without blanket restrictions</span></div>
                       <div className="flex items-start gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-[#14382B] shrink-0 mt-0.5" /><span>Printable 7-Day Habit Tracker & symptom diary</span></div>
                     </div>
                 </>
