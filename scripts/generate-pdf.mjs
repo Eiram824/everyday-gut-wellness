@@ -1,9 +1,12 @@
 import fs from 'fs';
 import path from 'path';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, PDFString, rgb, StandardFonts } from 'pdf-lib';
 
 async function generatePDF() {
   const pdfDoc = await PDFDocument.create();
+  pdfDoc.setTitle('The 7-Day Gentle Gut Reset Guide');
+  pdfDoc.setAuthor('Everyday Gut Wellness');
+  pdfDoc.setSubject('An educational habit observation guide for adults; not medical advice');
 
   // Color Palette matching the website
   const colorForest = rgb(20 / 255, 56 / 255, 43 / 255);       // #14382B
@@ -137,14 +140,14 @@ async function generatePDF() {
     });
 
     // Subtitle
-    coverPage.drawText('A practical, evidence-grounded protocol for smoother motility,', {
+    coverPage.drawText('A practical seven-day plan for observing everyday habits,', {
       x: 50,
       y: height - 260,
       size: 13,
       font: helvetica,
       color: rgb(220 / 255, 235 / 255, 228 / 255),
     });
-    coverPage.drawText('sustainable fiber balance, and natural bowel regularity without harsh detoxes.', {
+    coverPage.drawText('making gradual changes, and knowing when to seek support.', {
       x: 50,
       y: height - 280,
       size: 13,
@@ -196,13 +199,13 @@ async function generatePDF() {
     });
 
     const toc = [
-      { num: 'Ch. 1', title: 'The Physiology of Transit & The Gut-Brain Axis', page: 'Page 2' },
-      { num: 'Ch. 2', title: 'The 5 Daily Pillars of Digestive Equilibrium', page: 'Page 3' },
-      { num: 'Ch. 3', title: 'The 7-Day Actionable Reset Protocol (Day-by-Day)', page: 'Page 4' },
-      { num: 'Ch. 4', title: 'Smart Fiber Swaps & Eliminating Bloat Triggers', page: 'Page 5' },
-      { num: 'Ch. 5', title: 'Daily Printable Habit Checklist & Stool Consistency Log', page: 'Page 6' },
-      { num: 'Appx.', title: 'Medical Red Flags, Safety Guidelines & Ingredient Transparency', page: 'Page 7' },
-      { num: 'Ref.', title: 'Recommended Tools, Habit Support & Clinical References', page: 'Page 8' },
+      { num: 'Ch. 1', title: 'How Digestion Works & What a Diary Can Tell You', page: 'Page 2' },
+      { num: 'Ch. 2', title: 'Five Habits to Observe and Adapt', page: 'Page 3' },
+      { num: 'Ch. 3', title: 'Your Seven-Day Observation Plan', page: 'Page 4' },
+      { num: 'Ch. 4', title: 'Food Experiments Without Blanket Restrictions', page: 'Page 5' },
+      { num: 'Ch. 5', title: 'Printable Habit Checklist & Stool Notes', page: 'Page 6' },
+      { num: 'Appx.', title: 'Warning Signs & Safety Boundaries', page: 'Page 7' },
+      { num: 'Ref.', title: 'Next Steps, Sources & Limits of This Guide', page: 'Page 8' },
     ];
 
     let tocY = 285;
@@ -257,6 +260,14 @@ async function generatePDF() {
     return currentY;
   }
 
+  function addLink(page, url, x, y, width, height) {
+    const annotation = pdfDoc.context.register(pdfDoc.context.obj({
+      Type: 'Annot', Subtype: 'Link', Rect: [x, y, x + width, y + height], Border: [0, 0, 0],
+      A: { Type: 'Action', S: 'URI', URI: PDFString.of(url) },
+    }));
+    page.node.addAnnot(annotation);
+  }
+
   // --- PAGE 2: CHAPTER 1 ---
   {
     const page = createPage('Chapter 1: Physiology of Transit', 2);
@@ -269,7 +280,7 @@ async function generatePDF() {
 
     y = drawParagraph(
       page,
-      'Your digestive tract contains over 500 million neurons—a complex biological network known as the Enteric Nervous System (ENS), or "the second brain." Digestion is not a passive mechanical pipe; it is an electrically synchronized muscular rhythm guided by the autonomic nervous system.',
+      'Nerves, hormones, and muscles work together to move food through the digestive tract. The enteric nervous system is a network within the gut wall that helps coordinate this movement. Bowel patterns also vary between people. [1]',
       50, y, 495, helvetica, 10, 16, colorText
     );
     y -= 10;
@@ -281,19 +292,16 @@ async function generatePDF() {
     page.drawText('HOW DIGESTIVE TRANSIT WORKS (PERISTALSIS)', { x: 65, y: y - 22, size: 9.5, font: helveticaBold, color: colorForest });
     drawParagraph(
       page,
-      '1. Muscular Contraction: Ring-like smooth muscles push food bolus forward in rhythmic waves.\n' +
-      '2. Moisture Extraction: The colon absorbs excess water to form compact stool. If transit is too slow, excess water is reabsorbed, resulting in hard, dry pellets (Bristol Type 1-2).\n' +
-      '3. Autonomic Tone: When you are stressed or hurried, the "fight-or-flight" sympathetic branch shuts down gut motility. Regular bowel habits require "rest-and-digest" parasympathetic activation.',
+      'Muscle contractions called peristalsis move and mix food and liquid. The large intestine absorbs water as waste becomes stool. Nerves and hormones help control these processes. This overview cannot explain the cause of an individual symptom. [1]',
       65, y - 40, 465, helvetica, 8.5, 14, colorText
     );
     y -= 130;
 
-    page.drawText('The Migrating Motor Complex (MMC): The Gut\'s Housekeeper', { x: 50, y, size: 13, font: timesRomanBold, color: colorForest });
+    page.drawText('Observe your routine without imposing a fasting schedule', { x: 50, y, size: 13, font: timesRomanBold, color: colorForest });
     y -= 20;
     y = drawParagraph(
       page,
-      'Between meals, when your stomach and small intestine are empty for at least 90 to 120 minutes, the body initiates the Migrating Motor Complex (MMC). These sweeping electromechanical waves act as a biological broom, pushing residual food particles and bacteria into the large intestine.\n\n' +
-      'Constant grazing or frequent snacking halts the MMC before it finishes its cleaning cycle. Allowing a 3 to 4-hour window between meals allows your natural motility sweeps to complete without interruption.',
+      'Use the tracker to notice meal timing and bathroom opportunities. This guide does not prescribe meal gaps, fasting, or food restriction. Keep any eating schedule recommended for your medical needs, medicines, or recovery plan.',
       50, y, 495, helvetica, 9.5, 15, colorText
     );
     y -= 15;
@@ -302,10 +310,10 @@ async function generatePDF() {
     page.drawRectangle({
       x: 50, y: y - 85, width: 495, height: 85, color: colorLightGreen, borderColor: rgb(180 / 255, 210 / 255, 195 / 255), borderWidth: 1
     });
-    page.drawText('CLINICAL TAKEAWAY FOR YOUR ROUTINE', { x: 65, y: y - 20, size: 9, font: helveticaBold, color: colorForest });
+    page.drawText('A RECORD IS A STARTING POINT, NOT A DIAGNOSIS', { x: 65, y: y - 20, size: 9, font: helveticaBold, color: colorForest });
     drawParagraph(
       page,
-      'Irregular bowel movements are rarely caused by a "lazy colon." They are almost always the result of disrupted autonomic signals: chronic low fluid intake, suppressed bathroom urges, sedentary posture, or excessive sympathetic stress during morning hours.',
+      'Constipation can have several causes, including medicines, pelvic floor problems, and other health conditions. Do not assume a symptom is your fault or caused only by stress or habits. Seek medical advice when symptoms persist or warning signs appear. [2]',
       65, y - 36, 465, helvetica, 8.5, 13.5, colorForest
     );
   }
@@ -324,27 +332,27 @@ async function generatePDF() {
       {
         num: 'Pillar 1',
         title: 'Morning Baseline Hydration',
-        body: 'Upon waking, your body has gone 7 to 9 hours without fluids. Drinking 12 to 16 oz of room-temperature or lukewarm water activates gastric stretch receptors and replenishes the mucosal lining before any dehydrating diuretics (coffee or tea) are introduced.',
+        body: 'Keep a drink accessible at a time that suits you. Fluid needs vary; ask a health professional about an appropriate amount, especially if you have a fluid restriction. This guide sets no universal ounce target or water-temperature rule. [3]',
       },
       {
         num: 'Pillar 2',
-        title: 'Soluble vs. Insoluble Fiber Synergy',
-        body: 'Soluble fiber (found in oats, chia, beans, and pears) dissolves in water to create a soft, slippery gel. Insoluble fiber (vegetable skins, leafy greens, bran) provides structure and bulk. You need both working in harmony: soluble fiber softens, while insoluble fiber stimulates peristalsis.',
+        title: 'Gradual Fiber Choices',
+        body: 'Fiber comes from foods such as oats, beans, fruit, and vegetables. Add it gradually and include suitable fluids. Choose foods and portions that fit your needs and tolerances; more is not always more comfortable. [3,5]',
       },
       {
         num: 'Pillar 3',
         title: 'Respecting the Gastrocolic Reflex',
-        body: 'Approximately 15 to 30 minutes after eating (especially warm breakfasts containing healthy fats or fluids), your stomach signals the colon to contract vigorously. This is the Gastrocolic Reflex. If you repeatedly delay or ignore this urge due to a rushed commute, the reflex blunts.',
+        body: 'Eating helps the colon move stool. A regular bathroom opportunity after breakfast may be useful; respond to the urge when practical. Do not force a bowel movement or judge a day by whether one happened. [4]',
       },
       {
         num: 'Pillar 4',
-        title: 'Pelvic Floor Ergonomics (The 35° Squat Angle)',
-        body: 'Modern 90° seated toilets create a kink in the rectum caused by the puborectalis muscle. Elevating your feet 6 to 8 inches on a small bathroom stool or footrest places the hips in a natural 35° squat posture, straightening the anorectal angle and eliminating painful straining.',
+        title: 'Comfortable Bathroom Position',
+        body: 'Relax your muscles and consider a stable footrest if it is safe and comfortable for you. No exact angle or guaranteed relief is promised. Persistent pain or straining deserves professional advice. [4]',
       },
       {
         num: 'Pillar 5',
-        title: 'Post-Prandial Movement (The 10-Minute Walk)',
-        body: 'A gentle 10 to 15-minute walk following lunch or dinner stimulates abdominal blood flow, accelerates gastric emptying, and helps gas circulate through the intestinal tract rather than trapping in painful pockets.',
+        title: 'Movement That Fits Your Day',
+        body: 'Regular physical activity may help constipation. A short walk is one optional way to include movement; choose a safe duration and activity that fit your abilities and existing care advice. [4]',
       },
     ];
 
@@ -371,13 +379,13 @@ async function generatePDF() {
     y -= 25;
 
     const days = [
-      { day: 'Day 1', focus: 'Hydration Baseline & Fluid Anchor', action: 'Drink 16 oz lukewarm water upon waking. Carry a water bottle and aim for pale straw urine. Eliminate all carbonated sugary drinks.' },
-      { day: 'Day 2', focus: 'Soluble Fiber Kickstart (Chia or Oats)', action: 'Add 1 tbsp of chia seeds or 1 cup rolled oats to your morning. Pair with an extra glass of water to allow the gel to expand safely.' },
+      { day: 'Day 1', focus: 'A Fluid Reminder That Fits Your Day', action: 'Choose one place to keep a drink accessible. Follow any clinician-set fluid limits; record your own routine rather than chasing a fixed volume.' },
+      { day: 'Day 2', focus: 'A Gradual Fiber Choice', action: 'If appropriate for you, try a small portion of a familiar fiber-containing food. Keep the change modest and note comfort. Avoid changing several foods at once. [3]' },
       { day: 'Day 3', focus: 'The 15-Minute Unhurried Morning Window', action: 'Wake up 15 minutes earlier. Sit quietly after breakfast with a warm herbal tea. Do not bring your smartphone into the restroom.' },
-      { day: 'Day 4', focus: 'Pelvic Ergonomics & Posture Alignment', action: 'Place a footstool in your bathroom. Practice deep diaphragmatic belly breathing (inhale into abdomen, slow exhale) to relax pelvic floor muscles.' },
-      { day: 'Day 5', focus: 'Legumes & Plant Diversity Lunch', action: 'Add 1/2 cup cooked black beans or lentils to your lunch. Chew each bite thoroughly (20-30 times) to reduce fermentation gas.' },
-      { day: 'Day 6', focus: 'Post-Meal Walking & Stress Downregulation', action: 'Take two dedicated 10-minute walks: one after lunch and one after dinner. Disconnect from work emails during meals.' },
-      { day: 'Day 7', focus: 'Weekly Progress Review & Sustainable Rhythm', action: 'Review your stool consistency against the Bristol Scale. Notice improvements in bloating, energy, and bowel comfort. Lock in these 5 daily habits.' },
+      { day: 'Day 4', focus: 'A Comfortable Bathroom Setup', action: 'Check that the setup is safe and comfortable. A stable footrest is optional. Give yourself time, relax, and avoid forcing a bowel movement. [4]' },
+      { day: 'Day 5', focus: 'Notice Food and Comfort Together', action: 'Record one familiar meal and how you felt. Beans and some other fiber foods can increase gas for some people; a diary may help a clinician or dietitian assess patterns. [5]' },
+      { day: 'Day 6', focus: 'Choose Manageable Movement', action: 'Choose a short, comfortable movement break if it is safe for you. Record what fit your day; skip or adapt anything that conflicts with care advice.' },
+      { day: 'Day 7', focus: 'Review Without Chasing a Perfect Score', action: 'Compare your notes with your starting point. Record what was useful, uncomfortable, or uncertain. Decide whether to continue one manageable habit or seek support.' },
     ];
 
     for (const d of days) {
@@ -402,7 +410,7 @@ async function generatePDF() {
 
     page.drawText('CHAPTER 4', { x: 50, y, size: 10, font: helveticaBold, color: colorTerracotta });
     y -= 24;
-    page.drawText('Smart Fiber Swaps & Eliminating Bloat Triggers', { x: 50, y, size: 19, font: timesRomanBold, color: colorForest });
+    page.drawText('Food Experiments Without Blanket Restrictions', { x: 50, y, size: 19, font: timesRomanBold, color: colorForest });
     y -= 25;
 
     y = drawParagraph(
@@ -413,11 +421,11 @@ async function generatePDF() {
     y -= 15;
 
     const swaps = [
-      { trigger: 'Coarse Raw Wheat Bran', swap: 'Rolled Oats or Ground Flaxseed', why: 'Oats provide gentle beta-glucans that soothe mucosal walls without scraping.' },
-      { trigger: 'Raw Broccoli / Cauliflower Florets', swap: 'Steamed Zucchini, Carrots, or Spinach', why: 'Cooked tender vegetables break down cellulose fibers, reducing fermentation gas.' },
-      { trigger: 'Unsoaked Dried Kidney Beans', swap: 'Rinsed Canned Lentils or Chickpeas', why: 'Canned lentils have already shed water-soluble oligosaccharides, making them gentle.' },
-      { trigger: 'Sugary Carbonated Sodas', swap: 'Peppermint or Chamomile Infusion', why: 'Carbonation traps gas bubbles in the stomach; peppermint relaxes smooth intestinal muscle.' },
-      { trigger: 'Artificial Sugar Alcohols (Sorbitol)', swap: 'Fresh Berries or Ripe Bartlett Pears', why: 'Sugar alcohols draw osmotic water erratically; fruit provides real moisture and pectin.' },
+      { trigger: 'A sudden large fiber increase', swap: 'A smaller gradual change', why: 'Increase fiber gradually; watch your own tolerance. [3]' },
+      { trigger: 'A food you suspect causes gas', swap: 'Record food, portion, and comfort', why: 'A diary can help a professional assess patterns. [5]' },
+      { trigger: 'Beans or lentils causing gas', swap: 'Discuss a tolerable portion', why: 'Legumes can increase gas for some people. [5]' },
+      { trigger: 'Frequent fizzy drinks', swap: 'Try a still drink you tolerate', why: 'Limiting fizzy drinks may reduce gas symptoms. [5]' },
+      { trigger: 'Sugar alcohols on a label', swap: 'Compare a product without them', why: 'Sorbitol and similar sweeteners may increase gas. [5]' },
     ];
 
     // Swaps Table
@@ -427,14 +435,14 @@ async function generatePDF() {
 
     // Table Header
     page.drawRectangle({ x: 50, y: y - 25, width: 495, height: 25, color: colorForest });
-    page.drawText('COMMON BLOAT TRIGGER', { x: 60, y: y - 17, size: 8, font: helveticaBold, color: colorWhite });
-    page.drawText('GENTLE GUT-FRIENDLY SWAP', { x: 210, y: y - 17, size: 8, font: helveticaBold, color: colorWhite });
-    page.drawText('PHYSIOLOGICAL BENEFIT', { x: 375, y: y - 17, size: 8, font: helveticaBold, color: colorWhite });
+    page.drawText('SITUATION TO NOTICE', { x: 60, y: y - 17, size: 8, font: helveticaBold, color: colorWhite });
+    page.drawText('OPTION TO CONSIDER', { x: 210, y: y - 17, size: 8, font: helveticaBold, color: colorWhite });
+    page.drawText('WHY IT MAY BE USEFUL', { x: 375, y: y - 17, size: 8, font: helveticaBold, color: colorWhite });
 
     let swapY = y - 45;
     for (const s of swaps) {
-      page.drawText(s.trigger, { x: 60, y: swapY, size: 8, font: helveticaBold, color: colorTerracotta });
-      page.drawText(s.swap, { x: 210, y: swapY, size: 8, font: helveticaBold, color: colorForest });
+      drawParagraph(page, s.trigger, 60, swapY, 140, helveticaBold, 8, 11, colorTerracotta);
+      drawParagraph(page, s.swap, 210, swapY, 150, helveticaBold, 8, 11, colorForest);
       drawParagraph(page, s.why, 375, swapY + 6, 160, helvetica, 7.5, 11, colorText);
       swapY -= 48;
       page.drawLine({ start: { x: 55, y: swapY + 8 }, end: { x: 540, y: swapY + 8 }, thickness: 0.5, color: colorBorder });
@@ -453,7 +461,7 @@ async function generatePDF() {
 
     y = drawParagraph(
       page,
-      'Print this page or keep it by your bedside. Place a checkmark each day you accomplish the foundational habit, and note your Bristol stool consistency (Goal: Type 3-4, smooth soft sausage).',
+      'Use this private record to describe your routine and stool appearance. It is not a scorecard or a diagnostic test. Adapt or skip habits that do not fit your health needs. Do not submit these health notes through the website form.',
       50, y, 495, helvetica, 9, 14, colorText
     );
     y -= 15;
@@ -472,12 +480,12 @@ async function generatePDF() {
     }
 
     const habits = [
-      '1. Morning 16 oz Hydration',
-      '2. Soluble Fiber Added (Oats/Chia/Beans)',
+      '1. My Appropriate Fluid Reminder',
+      '2. Gradual Fiber Choice (If Suitable)',
       '3. Respect Unhurried Morning Window',
-      '4. Bathroom Footstool / 35° Squat Angle',
-      '5. 10+ Min Post-Meal Movement',
-      '6. Adequate Daily Water (60+ oz)',
+      '4. Safe, Comfortable Bathroom Setup',
+      '5. Movement Within My Abilities',
+      '6. Followed My Individual Fluid Advice',
       '7. Stool Type (Bristol 1 to 7 rating)',
       '8. Daily Bloating Rating (1=None, 5=Severe)',
     ];
@@ -511,9 +519,7 @@ async function generatePDF() {
     page.drawText('BRISTOL STOOL FORM SCALE QUICK REFERENCE', { x: 65, y: chartY + 112, size: 8.5, font: helveticaBold, color: colorForest });
     drawParagraph(
       page,
-      '• Type 1-2 (Constipation / Sluggish Transit): Hard separate lumps or lumpy sausage. Indicates prolonged transit time and dehydration. Increase morning water and soluble fiber.\n' +
-      '• Type 3-4 (IDEAL / Optimal Balance): Like a smooth soft sausage or snake. Comfortable to pass without straining.\n' +
-      '• Type 5-7 (Loose / Rapid Transit): Soft blobs to watery liquid. Increase soluble fiber to absorb liquid and check for food sensitivities or acute causes.',
+      'Types 1-2: hard lumps or lumpy stool. Types 3-4: formed, sausage-like stool. Types 5-7: softer blobs through to watery stool. These are descriptions, not diagnoses or instructions to change your fluid or fiber intake. Note pain, frequency, and persistent change as well. Seek advice for ongoing problems and use the warning signs on page 7.',
       65, chartY + 95, 465, helvetica, 8, 13, colorForest
     );
   }
@@ -536,11 +542,11 @@ async function generatePDF() {
     y -= 15;
 
     const warnings = [
-      { title: 'Rectal Bleeding or Black, Tarry Stool', desc: 'Can indicate active bleeding in the upper or lower GI tract. Requires prompt medical diagnosis.' },
-      { title: 'Severe, Sudden, or Unbearable Abdominal Pain', desc: 'May signal acute appendicitis, bowel obstruction, or perforation requiring urgent clinical assessment.' },
-      { title: 'Inability to Pass Gas Alongside Bowel Stoppage', desc: 'A key mechanical warning sign of bowel obstruction. Seek emergency evaluation.' },
-      { title: 'Unintended, Rapid Weight Loss', desc: 'Losing weight without dieting warrants laboratory work and endoscopic evaluation.' },
-      { title: 'Persistent Changes in Caliber or Frequency (> 3 Weeks)', desc: 'Pencil-thin stool or lasting alternating diarrhea/constipation requires physician evaluation.' },
+      { title: 'Rectal Bleeding or Blood in Stool', desc: 'Seek medical care promptly. Do not use the tracker to explain away bleeding. [2]' },
+      { title: 'Constant or Severe Abdominal Pain', desc: 'Constipation with constant pain needs prompt care. Severe or sudden pain warrants urgent assessment. [2]' },
+      { title: 'Inability to Pass Gas, Vomiting, or Fever', desc: 'With constipation, these symptoms require medical care right away. [2]' },
+      { title: 'Losing Weight Without Trying', desc: 'Arrange prompt medical assessment, especially with constipation or other persistent changes. [2]' },
+      { title: 'Symptoms Persist Despite Self-Care', desc: 'Ask a clinician for assessment. Do not wait for a fixed number of weeks if symptoms worry you or worsen. [2]' },
     ];
 
     for (const w of warnings) {
@@ -594,6 +600,7 @@ async function generatePDF() {
       'https://eiram32.gumroad.com/l/ynisjl',
       65, y - 42, 465, helvetica, 8.5, 14, colorText
     );
+    addLink(page, 'https://eiram32.gumroad.com/l/ynisjl', 65, y - 128, 465, 108);
     y -= 175;
 
     // Final Closing Card
@@ -608,6 +615,24 @@ async function generatePDF() {
       'For paid-product order or delivery support, use the contact link in your Gumroad receipt.',
       65, y - 48, 465, helvetica, 9, 15, colorWhite
     );
+
+    y -= 155;
+    page.drawText('SOURCES & LIMITS OF THIS GUIDE', { x: 50, y, size: 10, font: helveticaBold, color: colorForest });
+    y -= 17;
+    const references = [
+      ['1. NIDDK: Your Digestive System & How It Works', 'https://www.niddk.nih.gov/health-information/digestive-diseases/digestive-system-how-it-works'],
+      ['2. NIDDK: Symptoms & Causes of Constipation', 'https://www.niddk.nih.gov/health-information/digestive-diseases/constipation/symptoms-causes'],
+      ['3. NIDDK: Eating, Diet, & Nutrition for Constipation', 'https://www.niddk.nih.gov/health-information/digestive-diseases/constipation/eating-diet-nutrition'],
+      ['4. NIDDK: Treatment for Constipation', 'https://www.niddk.nih.gov/health-information/digestive-diseases/constipation/treatment'],
+      ['5. NIDDK: Eating, Diet, & Nutrition for Gas', 'https://www.niddk.nih.gov/health-information/digestive-diseases/gas-digestive-tract/eating-diet-nutrition'],
+    ];
+    for (const [title, url] of references) {
+      page.drawText(title, { x: 50, y, size: 8, font: helveticaBold, color: colorForest });
+      page.drawText(url, { x: 50, y: y - 11, size: 6.6, font: helvetica, color: colorText });
+      addLink(page, url, 50, y - 14, helvetica.widthOfTextAtSize(url, 6.6), 13);
+      y -= 31;
+    }
+    drawParagraph(page, 'Sources checked November 14, 2026. They support general background, not endorsement of this guide. This edition is not clinician-reviewed. No seven-day outcome is guaranteed.', 50, y, 495, helvetica, 7.5, 11, colorMuted);
   }
 
   const pdfBytes = await pdfDoc.save();
