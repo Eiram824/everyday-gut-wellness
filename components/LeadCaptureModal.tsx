@@ -218,7 +218,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 className="w-full flex items-center justify-center gap-2.5 py-3 sm:py-3.5 px-6 bg-[#14382B] hover:bg-[#0E281E] text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md transition-all group cursor-pointer"
               >
                 <BookOpen className="w-4 h-4 text-emerald-300" />
-                <span>Open Full Interactive Reader</span>
+                <span>Open the Full Guide</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </button>
             </div>

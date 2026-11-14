@@ -252,15 +252,22 @@ export const WARNING_SIGNS: WarningSign[] = [
   {
     id: 'persistent-change',
     severity: 'routine',
-    symptom: 'Persistent Change in Bowel Habits Lasting More Than a Few Weeks',
+    symptom: 'Persistent or Recurrent Change in Bowel Habits',
     reason: 'An unexplained, lasting change in frequency, consistency, or stool caliber warrants diagnostic investigation.',
     actionRequired: 'Schedule a comprehensive consultation with a primary care doctor or gastroenterologist.'
   },
   {
     id: 'unexplained-weight-loss',
+    severity: 'urgent',
+    symptom: 'Unintended Weight Loss or Fever With Constipation',
+    reason: 'NIDDK advises seeing a doctor right away when constipation occurs with fever or weight loss without trying.',
+    actionRequired: 'Contact a healthcare professional promptly rather than waiting several weeks or relying on self-care.'
+  },
+  {
+    id: 'unexplained-fatigue',
     severity: 'routine',
-    symptom: 'Unintended Weight Loss, Unexplained Fatigue, or Persistent Low-Grade Fever',
-    reason: 'Can indicate malabsorption, inflammatory conditions, or other medical issues requiring evaluation.',
-    actionRequired: 'Contact your physician for routine clinical and laboratory evaluation.'
+    symptom: 'Persistent, Unexplained Fatigue',
+    reason: 'Fatigue that does not improve with usual rest or has no clear explanation deserves an individualized assessment.',
+    actionRequired: 'Arrange a healthcare appointment; seek urgent help if it occurs with severe symptoms or other warning signs.'
   }
 ];
