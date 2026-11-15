@@ -40,13 +40,18 @@ const productCards = [
   },
 ];
 
-const trackCheckout = (product: (typeof productCards)[number]) => {
+const trackProductClick = (product: (typeof productCards)[number]) => {
   if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
-    (window as any).gtag('event', 'begin_checkout', {
-      currency: 'USD',
-      value: product.priceUSD,
-      items: [{ item_id: product.id, item_name: product.title, price: product.priceUSD, quantity: 1 }],
-    });
+    try {
+      (window as any).gtag('event', 'outbound_product_click', {
+        item_id: product.id,
+        item_name: product.title,
+        listed_price_usd: product.priceUSD,
+        destination_url: product.url,
+      });
+    } catch {
+      // Optional analytics must never interrupt the product link.
+    }
   }
 };
 
@@ -119,7 +124,7 @@ export const ProductSection: React.FC<ProductSectionProps> = () => (
                       href={product.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={() => trackCheckout(product)}
+                      onClick={() => trackProductClick(product)}
                       className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#B85D36] px-5 py-3 font-semibold text-white shadow-md transition-colors hover:bg-[#A04E2B] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#B85D36]/30"
                     >
                       {product.action} · ${product.priceUSD}
