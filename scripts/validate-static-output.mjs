@@ -1,121 +1,137 @@
 import assert from 'node:assert/strict';
-import { readFile, access } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
-import { readEditorialSchema } from './lib/editorial-schema.mjs';
+import { tsImport } from 'tsx/esm/api';
+import { readRouteSchema } from './lib/editorial-schema.mjs';
 
-const root = process.cwd();
-const dist = path.join(root, 'dist');
-const html = await readFile(path.join(dist, 'index.html'), 'utf8');
-const canonical = 'https://everydaygutwellness.com/';
-const expectedTitle = 'Everyday Gut Wellness: Practical Microbiome Nutrition, Digestion Habits & Bloating Relief';
-const expectedDescription = 'Improve daily digestion naturally with structured microbiome nutrition, gut-friendly meal habits, and evidence-informed wellness guides for bloating relief and digestive balance.';
-const expectedKeywords = 'everyday gut wellness, digestive health habits, gut microbiome balance, natural bloating relief, gut-friendly foods, prebiotic fiber guide, gut-brain connection, daily digestion routine';
+const { ROUTE_PATHS, ROUTES, SITE_ORIGIN, LAST_UPDATED } = await tsImport('../siteConfig.ts', import.meta.url);
+const { FAQ_ITEMS } = await tsImport('../lib/editorial-content.ts', import.meta.url);
+const dist = path.resolve('dist');
+const legalFiles = { '/privacy': 'privacy.html', '/terms': 'terms.html', '/contact': 'contact.html', '/editorial-standards.html': 'editorial-standards.html' };
+const decode = value => value.replace(/&(?:amp|quot|apos|lt|gt|nbsp|#\d+|#x[\da-f]+);/gi, entity => {
+  const named = { '&amp;': '&', '&quot;': '"', '&apos;': "'", '&lt;': '<', '&gt;': '>', '&nbsp;': ' ' };
+  return named[entity.toLowerCase()] ?? String.fromCodePoint(entity[2].toLowerCase() === 'x' ? parseInt(entity.slice(3, -1), 16) : parseInt(entity.slice(2, -1), 10));
+});
+const text = value => decode(value.replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+const documents = new Map();
+const meta = (html, attribute, key) => decode(html.match(new RegExp(`<meta\\b[^>]*\\b${attribute}="${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*\\bcontent="([^"]*)"`, 'i'))?.[1] || '');
 
-assert.doesNotMatch(html, /Loading guide/i, 'The client-only loading shell must be absent.');
-assert.equal((html.match(/<h1\b/gi) || []).length, 1, 'The page must have exactly one H1.');
-assert.ok((html.match(/<h2\b/gi) || []).length >= 7, 'The rendered article must include its H2 sections.');
-assert.ok((html.match(/<h3\b/gi) || []).length >= 8, 'The rendered article must include its H3 subheadings.');
-assert.match(html, /<main\b/i, 'A semantic main landmark must be present.');
-assert.match(html, /<article\b/i, 'The educational article must be rendered semantically.');
-assert.match(html, /<nav\b/i, 'Navigation must exist in the initial HTML.');
-assert.match(html, /<footer\b/i, 'The footer must exist in the initial HTML.');
-assert.match(html, /Your Gut Has a Routine\. Are Your Daily Habits Working With It\?/);
-assert.match(html, /The Daily Habit Check/);
-assert.match(html, /The Fiber Lesson: Soluble, Insoluble &amp; Gradual Pace/);
-assert.match(html, /The Routine Reset: A Realistic Daily Rhythm/);
-assert.match(html, /When to Seek Medical Advice/);
-assert.match(html, /Editorial &amp; Research Standards/);
-assert.match(html, /Frequently Asked Questions/);
-assert.match(html, /Educational health notice/);
-assert.match(html, /name="keywords"/);
-assert.ok(html.includes(`<title>${expectedTitle.replace('&', '&amp;')}</title>`));
-assert.ok(html.includes(`name="description" content="${expectedDescription}"`));
-assert.ok(html.includes(`name="keywords" content="${expectedKeywords}"`));
-assert.ok(html.includes(`property="og:title" content="${expectedTitle.replace('&', '&amp;')}"`));
-assert.ok(html.includes(`property="og:description" content="${expectedDescription}"`));
-assert.ok(html.includes(`name="twitter:title" content="${expectedTitle.replace('&', '&amp;')}"`));
-assert.ok(html.includes(`name="twitter:description" content="${expectedDescription}"`));
-assert.match(html, /media="print" onload="this\.media='all'"/);
-assert.match(html, /<noscript><link[^>]+fonts\.googleapis\.com/);
-assert.match(html, /rel="preconnect" href="https:\/\/fonts\.googleapis\.com"/);
-
-for (const [label, regex] of [
-  ['canonical', /<link rel="canonical" href="([^"]+)"/],
-  ['Open Graph URL', /<meta property="og:url" content="([^"]+)"/],
-  ['Twitter URL', /<meta name="twitter:url" content="([^"]+)"/],
-]) {
-  const url = html.match(regex)?.[1];
-  assert.equal(url, canonical, `${label} must use the canonical custom-domain URL.`);
+async function resolveLocal(pathname) {
+  const normalized = decodeURIComponent(pathname).replace(/\/+$/, '') || '/';
+  const relative = legalFiles[normalized] || (normalized === '/' ? 'index.html' : normalized.slice(1));
+  for (const candidate of [path.join(dist, relative), path.join(dist, relative, 'index.html')]) {
+    assert.ok(candidate.startsWith(dist + path.sep), 'A local URL must stay inside the production output.');
+    try { if ((await stat(candidate)).isFile()) return candidate; } catch {}
+  }
+  throw new Error(`Missing local page or asset: ${pathname}`);
 }
 
-assert.doesNotMatch(html, /everydaygutwellness\.org/i, 'No unowned-domain references may remain.');
-assert.doesNotMatch(html, /everyday-gut-wellness\.netlify\.app/i, 'Published HTML must use the custom domain rather than the previous hosting URL.');
-for (const regex of [
-  /<meta property="og:image" content="([^"]+)"/,
-  /<meta name="twitter:image" content="([^"]+)"/,
-]) {
-  assert.equal(new URL(html.match(regex)?.[1] || '').origin, new URL(canonical).origin, 'Social images must use the canonical custom domain.');
+for (const pathname of ROUTE_PATHS) {
+  const filename = await resolveLocal(pathname);
+  const html = await readFile(filename, 'utf8');
+  const canonical = `${SITE_ORIGIN}${pathname}`;
+  const route = ROUTES[pathname];
+  const body = html.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1] || '';
+  documents.set(filename, html);
+  assert.doesNotMatch(html, /Loading\s+guide|everydaygutwellness\.org|everyday-gut-wellness\.netlify\.app/i, `${pathname}: stale domain/loading shell.`);
+  assert.equal((body.match(/<h1\b/gi) || []).length, 1, `${pathname}: exactly one H1 is required.`);
+  assert.equal(text(body.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || ''), route.h1, `${pathname}: wrong H1.`);
+  assert.ok((body.match(/<h2\b/gi) || []).length > 0, `${pathname}: content headings must be pre-rendered.`);
+  for (const tag of ['main', 'nav', 'footer']) assert.match(body, new RegExp(`<${tag}\\b`, 'i'), `${pathname}: missing ${tag} landmark.`);
+  assert.equal(text(html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] || ''), route.title);
+  assert.equal(meta(html, 'name', 'description'), route.description);
+  assert.equal(meta(html, 'property', 'og:title'), route.title);
+  assert.equal(meta(html, 'property', 'og:description'), route.description);
+  assert.equal(meta(html, 'name', 'twitter:title'), route.title);
+  assert.equal(meta(html, 'name', 'twitter:description'), route.description);
+  assert.equal(html.match(/<link\b[^>]*rel="canonical"[^>]*href="([^"]+)"/i)?.[1], canonical);
+  assert.equal(meta(html, 'property', 'og:url'), canonical);
+  assert.equal(meta(html, 'name', 'twitter:url'), canonical);
+  assert.equal(new URL(meta(html, 'property', 'og:image')).origin, SITE_ORIGIN);
+  assert.match(html, /media="print" onload="this\.media='all'"/);
+  assert.match(html, /<noscript><link[^>]+fonts\.googleapis\.com/);
+  assert.match(html, /rel="preconnect" href="https:\/\/fonts\.googleapis\.com"/);
+  assert.doesNotMatch(body, /\b(?:href|src|data)=["'][^"']*\.pdf(?:[?#][^"']*)?["']/i, `${pathname}: PDF URL must not appear before verified access.`);
+  assert.match(body, new RegExp(`<time\\b[^>]*datetime="${LAST_UPDATED}"`, 'i'), `${pathname}: visible revision date is missing.`);
+  if (pathname !== '/') assert.match(body, /<nav\b[^>]*aria-label="Breadcrumb"/i, `${pathname}: visible breadcrumb is missing.`);
+  const data = readRouteSchema(html, pathname);
+  for (const node of data['@graph']) {
+    if (node.dateModified) assert.equal(node.dateModified, LAST_UPDATED);
+    if (node['@type'] === 'Article' || node['@type'] === 'MedicalWebPage') assert.equal(node.headline, route.h1);
+  }
+  if (pathname === '/') {
+    const faqSection = body.match(/<section\b(?=[^>]*\bid="faq")[^>]*>([\s\S]*?)<\/section>/i)?.[1] || '';
+    const visibleFaqs = [...faqSection.matchAll(/<details\b[^>]*>([\s\S]*?)<\/details>/gi)].map(match => match[1]);
+    assert.equal(visibleFaqs.length, 4, 'The home page must render exactly four FAQ answers.');
+    for (const item of FAQ_ITEMS) assert.ok(visibleFaqs.some(faq => text(faq).includes(item.question) && text(faq).includes(item.answer)), `FAQ visible/schema mismatch: ${item.question}`);
+  }
+  if (pathname !== '/') assert.doesNotMatch(body, /\bid="faq"/i, `${pathname}: core FAQs belong on the home hub.`);
+  assert.equal(/\bid="scientific-references"/i.test(body), pathname === '/when-to-seek-care', `${pathname}: full references belong on the clinical safety page.`);
+  if (pathname === '/workbooks') {
+    const cards = [...body.matchAll(/<article\b[^>]*>([\s\S]*?)<\/article>/gi)].map(match => match[1]);
+    for (const product of data['@graph'].filter(node => node['@type'] === 'Product')) {
+      const card = cards.find(candidate => text(candidate).includes(product.name) && candidate.includes(`href="${product.offers.url}"`));
+      assert.ok(card, `Missing visible product and Gumroad link: ${product.name}`);
+      assert.ok(text(card).includes(`$${Number(product.offers.price)}`), `Missing visible price: ${product.name}`);
+      assert.ok(text(card).includes(product.description), `Product description differs from visible body: ${product.name}`);
+    }
+  }
+  console.log(`Validated ${pathname}: 1 H1, ${(body.match(/<h2\b/gi) || []).length} H2s, ${(body.match(/<h3\b/gi) || []).length} H3s, ${html.length.toLocaleString()} HTML characters.`);
 }
 
-const structuredData = readEditorialSchema(html);
-const graph = structuredData['@graph'];
-const visibleHtml = html.replace(/<!--[\s\S]*?-->/g, '');
-const bodyHtml = visibleHtml.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1] || '';
-const visibleFaqItems = [...bodyHtml.matchAll(/<details\b[^>]*>([\s\S]*?)<\/details>/gi)].map(match => match[1]);
-
-const faq = graph.find((entry) => entry['@type'] === 'FAQPage');
-assert.equal(faq.mainEntity.length, 4, 'FAQ schema must describe all four visible FAQ items.');
-assert.equal(visibleFaqItems.length, 4, 'All four FAQ answers must be rendered in the body.');
-for (const question of faq.mainEntity) {
-  assert.ok(visibleFaqItems.some(item => item.includes(question.name) && item.includes(question.acceptedAnswer.text)), `FAQ question/answer is missing from the visible body: ${question.name}`);
+for (const pathname of Object.keys(legalFiles)) {
+  const filename = await resolveLocal(pathname);
+  const html = await readFile(filename, 'utf8');
+  documents.set(filename, html);
+  assert.ok(html.includes(`${SITE_ORIGIN}${pathname}`), `${pathname}: canonical legal URL is missing.`);
 }
 
-// Commercial information must remain readable in the initial body HTML,
-// independently of the editorial-only structured data.
-const productSection = bodyHtml.match(/<section\b[^>]*\bid="planner-product"[^>]*>([\s\S]*?)<\/section>/i)?.[1];
-assert.ok(productSection, 'The rendered product section must remain in the initial HTML.');
-const productCards = [...productSection.matchAll(/<article\b[^>]*>([\s\S]*?)<\/article>/gi)].map(match => match[1]);
-for (const product of [
-  { title: 'The 14-Day Gut Clarity Workbook', price: '$25', url: 'https://eiram32.gumroad.com/l/14-day-gut-clarity-workbook', detail: '14 short daily observation logs' },
-  { title: 'The 30-Day Gut Routine Planner', price: '$30', url: 'https://eiram32.gumroad.com/l/ynisjl', detail: 'A 30-day check-off calendar with short check-ins' },
-]) {
-  const card = productCards.find(item => item.includes(product.title));
-  assert.ok(card, `Missing visible product title: ${product.title}`);
-  assert.ok(card.includes(product.price), `Missing visible price: ${product.title}`);
-  assert.ok(card.includes(`href="${product.url}"`), `Missing Gumroad CTA: ${product.title}`);
-  assert.ok(card.includes(product.detail), `Missing visible product details: ${product.title}`);
-}
-
-const localUrls = new Set([...html.matchAll(/\b(?:href|src)="(\/[^"]+)"/g)].map((match) => match[1].split(/[?#]/)[0]));
-const missingAssets = [];
-for (const url of localUrls) {
-  if (url === '/') continue;
-  try {
-    await access(path.join(dist, decodeURIComponent(url.slice(1))));
-  } catch {
-    missingAssets.push(url);
+let localReferenceCount = 0;
+for (const [filename, html] of [...documents]) {
+  const pathname = [...ROUTE_PATHS].find(route => path.resolve(dist, route === '/' ? 'index.html' : route.slice(1), ...(route === '/' ? [] : ['index.html'])) === filename) || Object.keys(legalFiles).find(route => filename === path.join(dist, legalFiles[route])) || '/';
+  for (const match of html.matchAll(/\b(?:href|src)=["']([^"']+)["']/gi)) {
+    const raw = decode(match[1]);
+    if (/^(?:mailto:|tel:|data:|blob:|javascript:)/i.test(raw)) continue;
+    const url = new URL(raw, `${SITE_ORIGIN}${pathname}`);
+    if (url.origin !== SITE_ORIGIN) continue;
+    localReferenceCount++;
+    const target = await resolveLocal(url.pathname);
+    if (url.hash && /\.html$/i.test(target)) {
+      const targetHtml = documents.get(target) || await readFile(target, 'utf8');
+      const fragment = decodeURIComponent(url.hash.slice(1));
+      const ids = [...targetHtml.matchAll(/\b(?:id|name)=["']([^"']+)["']/g)].map(item => decode(item[1]));
+      assert.ok(ids.includes(fragment), `Broken fragment ${raw} linked from ${pathname}.`);
+    }
   }
 }
-assert.deepEqual(missingAssets, [], `Missing local assets or linked pages: ${missingAssets.join(', ')}`);
 
 const robots = await readFile(path.join(dist, 'robots.txt'), 'utf8');
 assert.match(robots, /User-agent:\s*\*/i);
 assert.match(robots, /Allow:\s*\//i);
-assert.ok(robots.includes(`${canonical.replace(/\/$/, '')}/sitemap.xml`));
-
+assert.ok(robots.includes(`${SITE_ORIGIN}/sitemap.xml`));
+for (const privatePath of ['/admin', '/api/admin/', '/api/leads', '/.netlify/functions/']) assert.ok(robots.includes(`Disallow: ${privatePath}`));
 const sitemap = await readFile(path.join(dist, 'sitemap.xml'), 'utf8');
-assert.match(sitemap, /<urlset\b[\s\S]*<\/urlset>/);
-assert.match(sitemap, /<lastmod>2026-11-14<\/lastmod>/);
-const sitemapRoutes = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => new URL(match[1]));
-assert.ok(sitemapRoutes.some((url) => url.href === canonical));
-for (const url of sitemapRoutes) {
-  assert.equal(url.origin, new URL(canonical).origin, 'Every sitemap entry must use the canonical custom domain.');
-  const pathname = url.pathname === '/' ? '/index.html' : url.pathname;
-  try {
-    await access(path.join(dist, decodeURIComponent(pathname.slice(1))));
-  } catch {
-    assert.fail(`Sitemap URL is not present in the production output: ${url.href}`);
-  }
-}
-
-console.log(`Static SEO validation passed: ${html.length.toLocaleString()} HTML characters, 1 H1, ${(html.match(/<h2\b/gi) || []).length} H2s, ${(html.match(/<h3\b/gi) || []).length} H3s, ${faq.mainEntity.length} visible FAQ entries, ${localUrls.size} local references, and ${sitemapRoutes.length} sitemap URLs.`);
+const locations = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]);
+const expectedLocations = [...ROUTE_PATHS, ...Object.keys(legalFiles)].map(route => `${SITE_ORIGIN}${route}`);
+assert.deepEqual([...locations].sort(), expectedLocations.sort(), 'Sitemap must list all six routes and four canonical legal/editorial pages exactly once.');
+const dates = [...sitemap.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(match => match[1]);
+assert.equal(dates.length, locations.length);
+assert.ok(dates.every(date => date === LAST_UPDATED), 'Sitemap lastmod must match the actual revision date.');
+for (const location of locations) await resolveLocal(new URL(location).pathname);
+const redirects = await readFile(path.join(dist, '_redirects'), 'utf8');
+assert.doesNotMatch(redirects, /^\s*\/\*\s+\/index\.html\s+200/m, 'A universal SPA 200 rewrite would create soft 404s.');
+for (const resource of ['/robots.txt', '/sitemap.xml']) assert.ok(redirects.split(/\r?\n/).some(rule => {
+  const [from, to, status] = rule.trim().split(/\s+/);
+  return from === resource && to === resource && status === '200';
+}), `${resource} must retain an explicit static 200 rule.`);
+for (const pathname of ROUTE_PATHS) assert.ok(redirects.split(/\r?\n/).some(rule => {
+  const [from, to, status] = rule.trim().split(/\s+/);
+  return from === pathname && to === (pathname === '/' ? '/index.html' : `${pathname}/index.html`) && status === '200';
+}), `${pathname} must resolve to its own pre-rendered document.`);
+assert.match(redirects, /^\/\*\s+\/404\.html\s+404\s*$/m, 'Unknown paths must retain a real 404 status.');
+const configuration = await readFile('netlify.toml', 'utf8');
+assert.match(configuration, /X-Frame-Options\s*=\s*"DENY"/);
+assert.match(configuration, /X-Content-Type-Options\s*=\s*"nosniff"/);
+assert.match(configuration, /Referrer-Policy\s*=\s*"strict-origin-when-cross-origin"/);
+assert.match(configuration, /from\s*=\s*"\/\*"\s*\n\s*to\s*=\s*"\/404\.html"\s*\n\s*status\s*=\s*404/);
+console.log(`Static route SEO validation passed: ${ROUTE_PATHS.length} complete route pages, ${locations.length} sitemap entries, ${localReferenceCount} local links/assets checked.`);

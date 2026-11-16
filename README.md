@@ -1,108 +1,39 @@
 # Everyday Gut Wellness
 
-An evidence-informed, practical digital wellness publication and digital product storefront dedicated to digestive health education, daily motility habits, gentle fiber diversity, and mindful routine tracking.
+Independent educational publishing at [everydaygutwellness.com](https://everydaygutwellness.com/). General health information and printable planning tools; not medical advice, diagnosis or treatment.
 
-Official Live Applet: [https://ai.studio/apps/bd172229-cd7a-4f89-877d-6c41ba6a4b4e](https://ai.studio/apps/bd172229-cd7a-4f89-877d-6c41ba6a4b4e)  
-GitHub Repository: [https://github.com/Eiram824/everyday-gut-wellness](https://github.com/Eiram824/everyday-gut-wellness)
+## Application
 
----
+React and TypeScript with Vite, Tailwind CSS and Netlify Functions. The build renders six complete HTML documents: home, fiber guide, routine reset, myths vs. facts, when to seek care, and workbooks. Real route links and static fallbacks work independently of SPA navigation. Existing legal/support URLs remain available.
 
-## Overview
+The 3-question Habit Check keeps answers in memory. The 6-item routine checklist supports keyboard input. Workbook previews are labelled illustrative sample layouts; the actual paid PDF files are delivered through Gumroad.
 
-**Everyday Gut Wellness** is designed for adults seeking sustainable, non-prescriptive, and hype-free guidance for bowel regularity. The platform provides:
+## Local development and validation
 
-1. **Evidence-Informed Educational Guide**: Physiology of transit, soluble vs. insoluble fiber balance, gastrocolic reflex, and toilet ergonomics.
-2. **Free Lead Magnet (The 7-Day Gentle Gut Reset Guide)**:
-   - High-fidelity 8-page printable PDF automatically generated at build time using `pdf-lib`.
-   - Fullscreen interactive in-app reader with page flipping, print mode, and direct PDF download.
-   - Responsible lead capture requiring explicit voluntary consent for marketing communications.
-3. **Original Digital Product Showcase (The 30-Day Digestive Wellness Planner)**:
-   - 68-page printable and tablet-fillable habit workbook ($14.99).
-   - Direct Gumroad checkout integration via `VITE_GUMROAD_PRODUCT_URL`.
-   - Safe fallback: if the Gumroad URL is not yet configured, the button gracefully switches to a waitlist notification flow without 404 errors.
-4. **Creator & Lead Management Hub**:
-   - Protected admin modal (`Ctrl+Shift+L` or `#admin` URL hash).
-   - Real-time subscriber stats and RFC-compliant CSV export (`/api/leads/export.csv`).
-   - Optional Sender.net email marketing integration.
-5. **Robust CI/CD & Static Deployment**:
-   - Automated TypeScript type checking (`tsc --noEmit`).
-   - Built-in automated test suite (`npm test`).
-   - Seamless GitHub Pages deployment via `.github/workflows/deploy.yml`.
+Install the lockfile dependencies with `npm ci`. Copy `.env.example` to an ignored local environment file only if backend configuration is needed. Keep real credentials out of source, public variables and chat.
 
----
-
-## Tech Stack
-
-- **Frontend**: React 19, TypeScript, Vite 6, Tailwind CSS, Lucide React icons.
-- **Backend / Dev Server**: Node.js 20+, Express 4, tsx.
-- **PDF Generation Engine**: `pdf-lib` (pure JavaScript, zero system binary dependencies).
-- **Testing**: Node.js native test runner (`node --import tsx --test`).
-- **CI/CD**: GitHub Actions deploying to GitHub Pages.
-
----
-
-## Quick Start & Local Setup
-
-### Prerequisites
-- Node.js version 20.x or 22.x
-- npm version 9.x or later
-
-### Installation
-
-```bash
-# 1. Clone repository
-git clone https://github.com/Eiram824/everyday-gut-wellness.git
-cd everyday-gut-wellness
-
-# 2. Clean install dependencies
-npm ci
-
-# 3. Configure environment variables (optional for local dev)
-cp .env.example .env
-```
-
-### Development Server
-
-```bash
+```sh
 npm run dev
+npm test
+npm run typecheck
+npm run build
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
 
----
+Tests mock external API requests and include a pinned, in-memory PostgreSQL engine for the new bundle-interest migration. They do not send emails or write live subscriber data. The test runner explicitly includes TypeScript JSX tests instead of silently skipping them.
 
-## Build & Validation Commands
+The production build generates the eight-page guide PDF, client assets, six pre-rendered pages, sitemap/robots and routing. It then validates raw HTML, metadata/schema, internal links/assets and the absence of public admin implementation or credentials. The local Express adapter is also compiled.
 
-| Command | Description |
-| :--- | :--- |
-| `npm run typecheck` | Validates TypeScript with zero type errors (`tsc --noEmit`). |
-| `npm test` | Runs the automated test suite across constants, lead flows, and PDF generation. |
-| `npm run build` | Generates the 7-day reset PDF, builds production client assets, and bundles `server.ts`. |
-| `npm run build:client` | Generates the PDF and builds the Vite frontend static bundle (`dist/`). |
-| `npm start` | Starts the production Express server serving `dist/`. |
+## Deployment and safeguards
 
----
+Netlify uses `npm run build:client`, publishes `dist`, and bundles `netlify/functions`. Production-only flags and secrets belong in Netlify's environment configuration; `VITE_` variables are public. Custom-domain redirect generation preserves API POST routes and the known-page static routing rules. Unknown paths return 404.
 
-## Environment Configuration
+The existing guide subscriber, durable requested-guide delivery queue, Systeme.io tagging and server-side admin authentication remain separate from the frontend. Guide access is unlocked only after a verified backend response. The minimal localStorage preference is a device convenience; legacy public PDF URLs remain available for existing email deliveries.
 
-Configure environment variables in `.env` (refer to `.env.example`):
+Two live Gumroad listings are retained:
 
-- `VITE_GUMROAD_PRODUCT_URL`: The public Gumroad checkout link for the 30-Day Planner.
-- `ADMIN_ACCESS_KEY`: Secret key required to access `/api/leads` and download CSV exports. Must be configured; administrative routes fail closed if unset.
-- `SENDER_API_TOKEN`: Optional API token for Sender.net synchronization.
-- `SENDER_GROUP_ID`: Optional Sender.net subscriber group tag.
-- `GEMINI_API_KEY`: Required only for server-side Google GenAI proxy endpoints.
+- [14-Day Gut Clarity Workbook](https://eiram32.gumroad.com/l/14-day-gut-clarity-workbook): $25, 26-page printable US Letter PDF.
+- [30-Day Gut Routine Planner](https://eiram32.gumroad.com/l/ynisjl): $30, 31-page printable US Letter PDF.
 
----
+The $39 bundle is planned. An empty `GUMROAD_BUNDLE_URL` renders a launch-alert trigger rather than a fake checkout. Bundle-alert capture is isolated from existing guide subscribers, disabled by default, and requires the reviewed additive migration before its server flag is enabled. It does not send emails or activate marketing.
 
-## Security & Privacy Standards
-
-- **Open Source Safety**: Live subscriber data (`data/subscribers.json`) and private API tokens (`data/sender_config.json`) are strictly excluded via `.gitignore` to prevent data leakage in public repositories.
-- **Admin Route Protection**: Backend routes (`/api/leads`, `/api/leads/export.csv`, `/api/admin/verify`) strictly require header-based authentication (`x-admin-key` or `Authorization: Bearer <key>`). URL query parameter authentication is disabled to prevent credential leakage in access logs, referrers, and browser histories.
-- **GDPR & CAN-SPAM Compliance**: Transactional guide delivery is strictly decoupled from promotional marketing. Users can access the free guide without consenting to ongoing marketing emails.
-- **No Affiliate Code**: All ClickBank, BellyFlush, and third-party affiliate scripts have been permanently purged.
-
----
-
-## License
-
-Apache-2.0 License.
+See [release configuration and limitations](docs/multi-page-launch.md) and the [implementation/validation report](docs/multi-page-implementation-report.md) before production changes. The native marketing campaign and the separate buyer-exclusion draft are not activated by this refactor.

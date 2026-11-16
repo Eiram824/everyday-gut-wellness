@@ -10,6 +10,7 @@ import { GoogleGenAI } from "@google/genai";
 
 import { handler as healthHandler } from './netlify/functions/health.js';
 import { handler as subscribeHandler } from './netlify/functions/subscribe.js';
+import { handler as bundleInterestHandler } from './netlify/functions/bundle-interest.js';
 import { handler as adminVerifyHandler } from './netlify/functions/admin-verify.js';
 import { handler as adminHandler } from './netlify/functions/admin.js';
 import { handler as leadsHandler } from './netlify/functions/leads.js';
@@ -80,6 +81,7 @@ async function startServer() {
   };
   app.all(['/health', '/api/health'], adapt(healthHandler));
   app.all('/api/subscribe', adapt(subscribeHandler));
+  app.all('/api/bundle-interest', adapt(bundleInterestHandler));
   app.all('/api/admin/verify', adapt(adminVerifyHandler));
   app.all(['/admin', '/admin/', '/admin/logout'], adapt(adminHandler));
   app.all('/api/leads', adapt(leadsHandler));

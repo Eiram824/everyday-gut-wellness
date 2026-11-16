@@ -10,7 +10,7 @@ import { WARNING_SIGNS } from '../constants.js';
 
 describe('Public guide consistency and safety regressions', () => {
   it('reads and downloads one actual eight-page PDF rather than a contradictory second guide', async () => {
-    const html = renderToStaticMarkup(createElement(EBookReader, { isOpen: true, onClose: () => {} }));
+    const html = renderToStaticMarkup(createElement(EBookReader, { isOpen: true, accessGranted: true, onClose: () => {} }));
     const pdfPath = '/The-7-Day-Gentle-Gut-Reset-Guide.pdf';
     assert.ok(html.includes('src="' + pdfPath + '#page=1'));
     assert.ok(html.includes('href="' + pdfPath + '" download='));

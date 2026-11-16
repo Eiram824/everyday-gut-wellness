@@ -46,6 +46,7 @@ export const MythVsFact: React.FC = () => {
                   onClick={() => toggleExpand(item.id)}
                   className="w-full text-left p-6 sm:p-8 flex items-start justify-between gap-4 hover:bg-[#FBF9F5] transition-colors"
                   aria-expanded={isExpanded}
+                  aria-controls={'fact-' + item.id}
                 >
                   <div className="space-y-3 flex-1">
                     <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#B85D36]">
@@ -76,8 +77,7 @@ export const MythVsFact: React.FC = () => {
                 </button>
 
                 {/* Expanded Fact and Detailed Science */}
-                {isExpanded && (
-                  <div className="px-6 pb-8 sm:px-8 border-t border-[#E5DFD5]/80 bg-white space-y-6 pt-6 animate-in fade-in duration-200">
+                  <div id={'fact-' + item.id} hidden={!isExpanded} className="px-6 pb-8 sm:px-8 border-t border-[#E5DFD5]/80 bg-white space-y-6 pt-6 animate-in fade-in duration-200">
                     {/* The Fact */}
                     <div className="flex items-start gap-3 bg-[#EAF1ED] p-4 sm:p-5 rounded-xl border border-[#14382B]/20">
                       <div className="p-1 rounded bg-white text-[#14382B] shrink-0 mt-0.5">
@@ -112,7 +112,6 @@ export const MythVsFact: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                )}
               </div>
             );
           })}

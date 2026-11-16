@@ -8,7 +8,7 @@
     "dev": "tsx server.ts",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test",
+    "test": "node scripts/run-tests.mjs",
     "build": "node scripts/generate-pdf.mjs && vite build && node scripts/prerender.mjs && node scripts/prepare-domain-redirects.mjs && node scripts/validate-static-output.mjs && node scripts/validate-public-privacy.mjs && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --outfile=server-dist/server.cjs",
     "build:client": "node scripts/generate-pdf.mjs && vite build && node scripts/prerender.mjs && node scripts/prepare-domain-redirects.mjs && node scripts/validate-static-output.mjs && node scripts/validate-public-privacy.mjs",
     "validate:seo": "node scripts/validate-static-output.mjs",
@@ -26,6 +26,7 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.16",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.0",
