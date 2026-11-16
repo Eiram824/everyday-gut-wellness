@@ -49,6 +49,8 @@ CREATE TABLE IF NOT EXISTS public.gumroad_buyer_jobs (
   UNIQUE(sale_id,email)
 );
 CREATE INDEX IF NOT EXISTS gumroad_buyer_jobs_due ON public.gumroad_buyer_jobs(status,run_after);
+CREATE INDEX IF NOT EXISTS gumroad_buyer_sales_product_id ON public.gumroad_buyer_sales(product_id);
+CREATE INDEX IF NOT EXISTS gumroad_buyer_jobs_sale_id ON public.gumroad_buyer_jobs(sale_id);
 -- One permanent classification per address across both products and all sales.
 -- Separate invoices must not create concurrent tag mutations for the same buyer.
 CREATE UNIQUE INDEX IF NOT EXISTS gumroad_buyer_jobs_email ON public.gumroad_buyer_jobs(email);
