@@ -43,7 +43,7 @@ function databaseHeaders(extra: Record<string, string> = {}): Record<string, str
   };
 }
 
-async function databaseRequest<T>(
+export async function databaseRequest<T>(
   tablePath: string,
   init: RequestInit = {},
 ): Promise<T> {
