@@ -193,6 +193,37 @@ describe("Systeme requested-guide integration", () => {
     assert.ok(results.every(r=>!r.body.includes(KEY)&&!r.body.includes(JOB)&&!r.body.includes("contactId")));
   });
 
+  it("does not persist public marketing assertions through the guide queue or its fallback", async () => {
+    for (const queueAvailable of [true, false]) {
+      calls=[];
+      mock(call=>{
+        if(call.url.endsWith("/rpc/capture_systeme_guide_request")){
+          return queueAvailable ? response([{job_id:JOB}]) : response({},404);
+        }
+        if(call.url.endsWith("/rpc/claim_systeme_guide_job"))return response([]);
+        if(call.url.includes("/subscribers?")){
+          return response([{id:JOB}],201);
+        }
+        throw new Error("Unexpected request");
+      });
+      const result=await handler(event({email:EMAIL,emailGuideRequested:true,marketingConsent:true}),{} as any) as any;
+      assert.equal(result.statusCode,200);
+      const body=JSON.parse(result.body);
+      assert.equal(body.subscriber.marketingConsent,false);
+      assert.equal(body.emailDeliveryStatus,queueAvailable?"queued":"unavailable");
+      const queued=calls.filter(call=>call.url.endsWith("/rpc/capture_systeme_guide_request"));
+      assert.equal(queued.length,1);
+      assert.equal(JSON.parse(String(queued[0].init?.body)).p_marketing_consent,false);
+      const fallback=calls.filter(call=>call.url.includes("/subscribers?"));
+      assert.equal(fallback.length,queueAvailable?0:1);
+      if(fallback.length){
+        const stored=JSON.parse(String(fallback[0].init?.body));
+        assert.equal(stored.marketing_consent,false);
+        assert.equal(stored.consent_date,null);
+      }
+    }
+  });
+
   it("does not fail PDF access or leak upstream details when the queue migration is missing", async () => {
     mock(call=>call.url.endsWith("/rpc/capture_systeme_guide_request")?response({detail:`${KEY} ${EMAIL} table missing`},404):response([{id:JOB}],201));
     const result=await handler(event({email:EMAIL,emailGuideRequested:true}),{} as any) as any;

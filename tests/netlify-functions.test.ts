@@ -122,7 +122,14 @@ describe("Netlify Serverless Functions Integration Suite", () => {
 
   // 3. Subscribe Function
   describe("Subscribe Function (subscribe.ts)", () => {
-    it("validates and records a new subscriber with consent", async () => {
+    it("records a new guide request without accepting public marketing consent", async () => {
+      let persisted: Record<string, unknown> | undefined;
+      globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+        assert.ok(String(input).includes("/rest/v1/subscribers?on_conflict=email"));
+        assert.equal(init?.method, "POST");
+        persisted = JSON.parse(String(init?.body));
+        return new Response(JSON.stringify([{ id: "new-guide-request" }]), { status: 201 });
+      }) as typeof fetch;
       const event = createMockEvent({
         httpMethod: "POST",
         path: "/api/subscribe",
@@ -138,7 +145,9 @@ describe("Netlify Serverless Functions Integration Suite", () => {
       const data = JSON.parse(res.body);
       assert.equal(data.success, true);
       assert.equal(data.subscriber.email, "wellness.tester@example.com");
-      assert.equal(data.subscriber.marketingConsent, true);
+      assert.equal(data.subscriber.marketingConsent, false);
+      assert.equal(persisted?.marketing_consent, false);
+      assert.equal(persisted?.consent_date, null);
     });
 
     it("rejects malformed email addresses with 400 Bad Request", async () => {
@@ -156,14 +165,28 @@ describe("Netlify Serverless Functions Integration Suite", () => {
       assert.ok(data.error.includes("valid email"));
     });
 
-    it("handles duplicates idempotently without error", async () => {
+    it("keeps repeated guide requests duplicate-safe without reading existing permission", async () => {
+      let writes = 0;
+      globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+        assert.ok(String(input).includes("/rest/v1/subscribers?on_conflict=email&select=id"));
+        assert.equal(init?.method, "POST", "duplicate requests must not read or update an existing row");
+        assert.equal((init?.headers as Record<string, string>).Prefer, "resolution=ignore-duplicates,return=representation");
+        const body = JSON.parse(String(init?.body));
+        assert.equal(body.email, "duplicate@example.com");
+        assert.equal(body.marketing_consent, false);
+        assert.equal(body.consent_date, null);
+        assert.equal(Object.hasOwn(body, "consent_withdrawn_at"), false);
+        writes++;
+        // PostgREST returns no representation when an existing row is ignored.
+        return new Response("[]", { status: 201 });
+      }) as typeof fetch;
       const event = createMockEvent({
         httpMethod: "POST",
         path: "/api/subscribe",
         body: JSON.stringify({
           name: "Duplicate User",
           email: "duplicate@example.com",
-          marketingConsent: false,
+          marketingConsent: true,
         }),
       });
       const res1 = await subscribeHandler(event, {} as any) as any;
@@ -171,6 +194,9 @@ describe("Netlify Serverless Functions Integration Suite", () => {
 
       const res2 = await subscribeHandler(event, {} as any) as any;
       assert.equal(res2.statusCode, 200);
+      assert.equal(writes, 2);
+      assert.deepEqual(JSON.parse(res1.body), JSON.parse(res2.body));
+      assert.equal(JSON.parse(res1.body).subscriber.marketingConsent, false);
     });
   });
 

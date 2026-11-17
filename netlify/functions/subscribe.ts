@@ -37,7 +37,9 @@ export const handler: Handler = async (event) => {
   const name = rawName.replace(/[\u0000-\u001F\u007F]/g, " ").replace(/<[^>]*>?/gm, "").trim().slice(0, 80) || "Reader";
   const requestedSource = typeof body.source === "string" ? body.source : "ebook_lead_modal";
   const source = ALLOWED_SOURCES.has(requestedSource) ? requestedSource : "ebook_lead_modal";
-  const marketingConsent = body.marketingConsent === true;
+  // This endpoint records guide requests, not the separate confirmed marketing
+  // signup. Public payloads cannot establish marketing permission.
+  const marketingConsent = false;
   const emailGuideRequested = source === "ebook_lead_modal" && body.emailGuideRequested === true;
 
   try {
