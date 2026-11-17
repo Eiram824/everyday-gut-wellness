@@ -18,13 +18,13 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-6 sm:p-10">
             {/* Visual Book Presentation */}
             <div className="lg:col-span-5 flex justify-center">
-              <div 
+              <button type="button" aria-label="Get the free 7-Day Gentle Gut Reset Guide"
                 onClick={onOpenEBook}
-                className="relative cursor-pointer group max-w-sm rounded-xl overflow-hidden shadow-xl border border-[#E5DFD5] transition-transform duration-300 hover:-translate-y-1"
+                className="relative cursor-pointer group max-w-sm rounded-xl overflow-hidden shadow-xl border border-[#E5DFD5] transition-transform duration-300 hover:-translate-y-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#14382B]"
               >
-                <img 
-                  src="/assets/images/ebook_cover_guide_1793359029909.jpg" 
-                  alt="The 7-Day Gentle Gut Reset Free eBook Edition" 
+                <img
+                  src="/assets/images/ebook_cover_guide_1793359029909.jpg"
+                  alt="The 7-Day Gentle Gut Reset Free eBook Edition"
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
@@ -33,10 +33,10 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
                   <p className="text-sm font-serif font-bold text-white mt-0.5">The 7-Day Gentle Gut Reset</p>
                   <span className="text-xs text-white/80 mt-1 flex items-center gap-1.5 font-sans">
                     <BookOpen className="w-3.5 h-3.5" />
-                    Click to Open Full eBook Reader
+                    Get the free guide
                   </span>
                 </div>
-              </div>
+              </button>
             </div>
 
             {/* Content & Value Proposition */}
@@ -82,14 +82,14 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
                   className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#14382B] hover:bg-[#0E281E] text-white text-sm font-semibold tracking-wide rounded-lg shadow-sm transition-all group"
                 >
                   <BookOpen className="w-4 h-4" />
-                  <span>Read Free eBook Now</span>
+                  <span>Get the Free Guide</span>
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                 </button>
 
               </div>
 
               <div className="text-[11px] text-[#8C877D] italic">
-                100% Free · No credit card required · Instant access directly in your browser
+                Free · No credit card required · First name and email required for access
               </div>
             </div>
           </div>

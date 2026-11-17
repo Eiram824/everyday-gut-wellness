@@ -8,10 +8,7 @@ import { ROUTINE_CHECKLIST } from '../constants';
 import { Check, RotateCcw, Clock, ShieldCheck, Heart, Footprints } from 'lucide-react';
 
 export const RoutineReset: React.FC = () => {
-  const [completedItems, setCompletedItems] = useState<Record<string, boolean>>({
-    'morning-fluid': true,
-    'unhurried-time': false,
-  });
+  const [completedItems, setCompletedItems] = useState<Record<string, boolean>>({});
 
   const toggleItem = (id: string) => {
     setCompletedItems((prev) => ({
@@ -87,7 +84,17 @@ export const RoutineReset: React.FC = () => {
             return (
               <div
                 key={item.id}
+                role="checkbox"
+                tabIndex={0}
+                aria-checked={isDone}
+                aria-label={item.title}
                 onClick={() => toggleItem(item.id)}
+                onKeyDown={(event) => {
+                  if (event.key === ' ' || event.key === 'Enter') {
+                    event.preventDefault();
+                    toggleItem(item.id);
+                  }
+                }}
                 className={`p-5 sm:p-6 rounded-2xl border transition-all cursor-pointer select-none flex items-start gap-4 ${
                   isDone
                     ? 'bg-white border-[#14382B]/40 shadow-sm'
@@ -101,8 +108,7 @@ export const RoutineReset: React.FC = () => {
                       ? 'bg-[#14382B] border-[#14382B] text-white'
                       : 'border-[#8C877D] bg-transparent'
                   }`}
-                  aria-checked={isDone}
-                  role="checkbox"
+                  aria-hidden="true"
                 >
                   {isDone && <Check className="w-4 h-4 stroke-[3]" />}
                 </div>

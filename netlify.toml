@@ -15,6 +15,7 @@
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), geolocation=(), microphone=()"
     Strict-Transport-Security = "max-age=31536000"
@@ -43,6 +44,11 @@
 [[redirects]]
   from = "/api/subscribe"
   to = "/.netlify/functions/subscribe"
+  status = 200
+
+[[redirects]]
+  from = "/api/bundle-interest"
+  to = "/.netlify/functions/bundle-interest"
   status = 200
 
 [[redirects]]
@@ -96,5 +102,65 @@
   to = "/.netlify/functions/api-not-found"
   status = 404
 
-# The guide uses hash navigation; unknown paths must return the public 404 page.
+# Static crawler resources always resolve to their actual files.
+[[redirects]]
+  from = "/robots.txt"
+  to = "/robots.txt"
+  status = 200
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/sitemap.xml"
+  status = 200
+
+# Only published routes receive a document rewrite. Unknown URLs retain 404s.
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/fiber-guide"
+  to = "/fiber-guide/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/routine-reset"
+  to = "/routine-reset/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/myths-vs-facts"
+  to = "/myths-vs-facts/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/when-to-seek-care"
+  to = "/when-to-seek-care/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/workbooks"
+  to = "/workbooks/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms"
+  to = "/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
 

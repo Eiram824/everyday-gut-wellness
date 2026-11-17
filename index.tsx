@@ -16,7 +16,7 @@ function mount() {
   }
   hydrateRoot(rootElement,
     <React.StrictMode>
-      <App />
+      <App initialPath={window.location.pathname} />
     </React.StrictMode>,
   );
 }

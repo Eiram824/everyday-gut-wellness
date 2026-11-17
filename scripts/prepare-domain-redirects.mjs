@@ -1,4 +1,4 @@
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -10,7 +10,7 @@ export function customDomainRedirects(environment) {
   // Cached pages can still POST to the old origin. Serve these same-origin
   // handlers instead of converting their POST to GET with a host-level 301.
   const handlers = [
-    ['/api/subscribe', 'subscribe'], ['/api/admin/verify', 'admin-verify'],
+    ['/api/subscribe', 'subscribe'], ['/api/bundle-interest', 'bundle-interest'], ['/api/admin/verify', 'admin-verify'],
     ['/api/leads/export.csv', 'leads-export'], ['/api/leads', 'leads'],
     ['/api/health', 'health'], ['/health', 'health'],
     ['/admin', 'admin'], ['/admin/*', 'admin'],
@@ -21,7 +21,14 @@ export function customDomainRedirects(environment) {
 
 export async function writeDomainRedirects(directory, environment = process.env) {
   const redirects = customDomainRedirects(environment);
-  await writeFile(resolve(directory, '_redirects'), redirects, 'utf8');
+  const filename = resolve(directory, '_redirects');
+  // Vite has already copied the static route/API rules from public. Preserve
+  // them in every context, and remove a prior host block when run again.
+  let staticRedirects = '';
+  try { staticRedirects = await readFile(filename, 'utf8'); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  staticRedirects = staticRedirects.replace(/^https:\/\/everyday-gut-wellness\.netlify\.app\S*[^\r\n]*(?:\r?\n|$)/gm, '');
+  await writeFile(filename, redirects + staticRedirects, 'utf8');
   return redirects;
 }
 

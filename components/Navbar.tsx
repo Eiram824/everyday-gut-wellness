@@ -1,156 +1,22 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Menu, X, BookOpen } from 'lucide-react';
+import { ROUTES, type SitePath } from '../siteConfig';
 
-interface NavbarProps {
-  onNavigate: (sectionId: string) => void;
-  onOpenEBook?: () => void;
+export default function Navbar({ currentPath, onOpenEBook }: { currentPath: SitePath; onOpenEBook: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => { setExpanded(false); }, [currentPath]);
+  useEffect(() => { const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') setExpanded(false); }; document.addEventListener('keydown', escape); return () => document.removeEventListener('keydown', escape); }, []);
+  const links = Object.entries(ROUTES).filter(([path]) => path !== '/');
+  return <header className="sticky top-0 z-40 border-b border-[#E5DFD5] bg-[#FBF9F5]/95 backdrop-blur-md">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex min-h-20 items-center justify-between gap-4">
+      <a href="/" className="font-serif text-lg sm:text-2xl font-bold leading-tight text-[#14382B] max-w-[200px] sm:max-w-none">Everyday Gut Wellness<span className="block text-[9px] sm:text-[10px] font-sans font-medium tracking-[.18em] uppercase text-[#635F57] mt-1">Learn · Notice · Practice</span></a>
+      <nav aria-label="Main navigation" className="hidden xl:flex gap-5 items-center text-xs font-medium">{links.map(([path, page]) => <a key={path} href={path} aria-current={path === currentPath ? 'page' : undefined} className="py-3 text-[#635F57] hover:text-[#14382B]">{page.label}</a>)}</nav>
+      <div className="hidden xl:flex gap-3 items-center"><button type="button" onClick={onOpenEBook} className="button-outline !text-xs"><BookOpen size={14} aria-hidden="true" />Free eBook</button><a href="/#daily-check" className="button-primary !text-xs">Habit Check</a></div>
+      <button type="button" aria-label="Toggle navigation menu" aria-expanded={expanded} aria-controls="site-mobile-nav" onClick={() => setExpanded(value => !value)} className="xl:hidden p-3 rounded-lg border border-[#D5CFC5] text-[#14382B] shrink-0">{expanded ? <X size={21} /> : <Menu size={21} />}</button>
+    </div>
+    {expanded && <nav id="site-mobile-nav" aria-label="Mobile navigation" className="xl:hidden max-h-[calc(100dvh-5rem)] overflow-y-auto border-t border-[#E5DFD5] bg-[#FBF9F5] px-4 py-4 space-y-1" onClick={() => setExpanded(false)}>
+      <a href="/" className="mobile-nav-link">Home</a>{links.map(([path, page]) => <a key={path} href={path} className="mobile-nav-link" aria-current={path === currentPath ? 'page' : undefined}>{page.label}</a>)}
+      <a href="/#daily-check" className="mobile-nav-link">Take the Habit Check</a><button type="button" onClick={onOpenEBook} className="button-primary w-full mt-3">Get Free 7-Day Reset eBook</button>
+    </nav>}
+  </header>;
 }
-
-export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const pendingNavigation = React.useRef<string | null>(null);
-
-  React.useEffect(() => {
-    if (mobileMenuOpen || !pendingNavigation.current) return;
-    const target = pendingNavigation.current;
-    pendingNavigation.current = null;
-    // Measure the target only after the expanded drawer leaves the layout.
-    onNavigate(target);
-  }, [mobileMenuOpen, onNavigate]);
-
-  const navLinks = [
-    { label: 'Habit Check', id: 'daily-check' },
-    { label: 'Fiber Guide', id: 'fiber-lesson' },
-    { label: 'Routine Reset', id: 'routine-reset' },
-    { label: 'Myth vs Fact', id: 'myths' },
-    { label: 'Medical Signs', id: 'medical-advice' },
-    { label: '30-Day Planner', id: 'planner-product' },
-  ];
-
-  const handleLinkClick = (e: React.MouseEvent, id: string) => {
-    e.preventDefault();
-    if (mobileMenuOpen) {
-      pendingNavigation.current = id;
-      setMobileMenuOpen(false);
-      return;
-    }
-    onNavigate(id);
-  };
-
-  return (
-    <header className="sticky top-0 z-40 bg-[#FBF9F5]/95 backdrop-blur-md border-b border-[#E5DFD5] transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-3 h-20">
-          {/* Zone 1: Brand Wordmark */}
-          <a
-            href="#hero"
-            onClick={(e) => handleLinkClick(e, 'hero')}
-            className="text-xl sm:text-2xl font-serif font-bold text-[#14382B] tracking-tight hover:opacity-90 transition-opacity whitespace-nowrap shrink-0"
-          >
-            Everyday Gut Wellness
-          </a>
-
-          {/* Zone 2: Nav Links */}
-          <nav aria-label="Main navigation" className="hidden xl:flex items-center gap-4 text-sm font-medium text-[#635F57]">
-            {navLinks.map((link) => (
-              <a
-                key={link.id}
-                href={`#${link.id}`}
-                onClick={(e) => handleLinkClick(e, link.id)}
-                className="hover:text-[#14382B] transition-colors whitespace-nowrap shrink-0 relative py-1 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-[#14382B] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-
-          {/* Zone 3: Actions */}
-          <div className="hidden xl:flex items-center gap-2.5 shrink-0">
-
-            {onOpenEBook && (
-              <button
-                type="button"
-                onClick={onOpenEBook}
-                className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold uppercase tracking-wider text-[#14382B] bg-[#EAF1ED] hover:bg-[#D5E3DB] border border-[#14382B]/20 rounded transition-all whitespace-nowrap shadow-sm"
-              >
-                <BookOpen className="w-3.5 h-3.5 text-[#B85D36]" />
-                <span>Free eBook</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={(e) => handleLinkClick(e, 'daily-check')}
-              className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-[#14382B] rounded hover:bg-[#0E281E] active:scale-[0.98] transition-all whitespace-nowrap shrink-0 shadow-sm"
-            >
-              START HABIT CHECK
-            </button>
-          </div>
-
-          {/* Mobile Menu Toggle */}
-          <div className="flex xl:hidden items-center">
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-[#2C2A26] hover:text-[#14382B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#14382B] rounded"
-              aria-label="Toggle navigation menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="xl:hidden border-b border-[#E5DFD5] bg-[#FBF9F5] px-4 pt-2 pb-5 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
-          {navLinks.map((link) => (
-            <a
-              key={link.id}
-              href={`#${link.id}`}
-              onClick={(e) => handleLinkClick(e, link.id)}
-              className="block px-3 py-2 text-base font-medium text-[#2C2A26] hover:bg-[#E5DFD5]/40 rounded transition-colors"
-            >
-              {link.label}
-            </a>
-          ))}
-          <div className="pt-2 space-y-2">
-            {onOpenEBook && (
-              <button
-                type="button"
-                onClick={() => {
-                  onOpenEBook();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#14382B] bg-[#EAF1ED] border border-[#14382B]/30 rounded shadow-sm hover:bg-[#D5E3DB]"
-              >
-                <BookOpen className="w-4 h-4 text-[#B85D36]" />
-                <span>Read Free 7-Day Reset eBook</span>
-              </button>
-            )}
-            <button
-              type="button"
-              onClick={(e) => handleLinkClick(e, 'daily-check')}
-              className="w-full text-center px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white bg-[#14382B] rounded shadow-sm hover:bg-[#0E281E]"
-            >
-              START HABIT CHECK
-            </button>
-            <button
-              type="button"
-              onClick={(e) => handleLinkClick(e, 'educational-guide')}
-              className="w-full text-center px-4 py-2 text-xs font-medium uppercase tracking-wider text-[#14382B] border border-[#14382B]/30 rounded hover:bg-[#E5DFD5]/40"
-            >
-              Explore the Guide
-            </button>
-          </div>
-        </div>
-      )}
-    </header>
-  );
-};
-export default Navbar;

@@ -1,3 +1,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html { scroll-padding-top: 6.5rem; }
+  body { @apply m-0 bg-[#FBF9F5] text-[#2C2A26] antialiased; }
+  button, input, summary, a { -webkit-tap-highlight-color: transparent; }
+  button, input, a, summary { @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B85D36]; }
+  img, svg { max-width: 100%; }
+  [hidden] { display: none !important; }
+  a { overflow-wrap: anywhere; }
+  button:disabled { cursor: wait; }
+}
+
+@layer components {
+  .page-width { @apply mx-auto max-w-6xl px-4 sm:px-6 lg:px-8; }
+  .section-space { @apply py-12 sm:py-16 lg:py-20; }
+  .eyebrow { @apply text-[10px] sm:text-[11px] font-semibold uppercase tracking-[.16em] text-[#B85D36]; }
+  .section-heading { @apply font-serif text-3xl sm:text-4xl leading-tight text-[#14382B]; text-wrap: balance; }
+  .button-primary { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#14382B] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#245340]; }
+  .button-outline { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-[#14382B]/40 bg-transparent px-5 py-3 text-sm font-semibold text-[#14382B] transition-colors hover:bg-[#EAF1ED]; }
+  .button-light { @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#FBF9F5] px-5 py-3 text-sm font-semibold text-[#14382B] transition-colors hover:bg-[#EAD3C7]; }
+  .mobile-nav-link { @apply block rounded-lg px-3 py-2.5 text-sm font-medium text-[#14382B] hover:bg-[#EAF1ED]; }
+  .skip-link { @apply fixed left-4 top-2 z-[100] -translate-y-24 rounded-lg bg-[#14382B] px-5 py-3 font-semibold text-white focus:translate-y-0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

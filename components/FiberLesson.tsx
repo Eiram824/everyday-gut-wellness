@@ -9,7 +9,6 @@ import { Droplet, Info, Plus, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export const FiberLesson: React.FC = () => {
   const [selectedMealId, setSelectedMealId] = useState<string>('breakfast');
-  const activeMeal = MEAL_UPGRADE_EXAMPLES.find((m) => m.id === selectedMealId) || MEAL_UPGRADE_EXAMPLES[0];
 
   return (
     <section id="fiber-lesson" className="scroll-mt-24 py-20 md:py-28 bg-[#F3EFE6] border-b border-[#E5DFD5]">
@@ -104,10 +103,12 @@ export const FiberLesson: React.FC = () => {
             Increase Fiber Gradually to Help Limit Gas or Bloating
           </h3>
           <p className="text-sm text-[#4A463F] leading-relaxed">
-            When increasing dietary fiber, doing so gradually gives your digestive system and resident gut microbes time to adjust, which can help limit temporary gas, cramping, or bloating. A sensible guideline is adding an extra 3 to 5 grams of fiber every few days while observing how your body responds.
+            When increasing dietary fiber, doing so gradually gives your digestive system and resident gut microbes time to adjust, which can help limit temporary gas, cramping, or bloating. The extra 3 to 5 grams every few days shown below is a practical pacing example, not a universal prescription. NIDDK recommends adding fiber a little at a time; ask a qualified healthcare professional about a suitable pace for you.
           </p>
           <p className="text-sm text-[#4A463F] leading-relaxed">
             <strong className="text-[#14382B]">Why adequate fluids are important:</strong> Fiber and water work in tandem. Because fiber absorbs and binds moisture as it travels, drinking sufficient fluids throughout the day helps fiber do its job comfortably and effectively.
+            {' '}Follow any fluid restrictions given by your healthcare professional.{' '}
+            <a href="https://www.niddk.nih.gov/health-information/digestive-diseases/constipation/eating-diet-nutrition" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Read the NIDDK guidance on gradual changes and fluids.</a>
           </p>
         </div>
 
@@ -171,14 +172,33 @@ export const FiberLesson: React.FC = () => {
           </div>
 
           {/* Interactive Meal Tabs */}
-          <div className="flex flex-wrap gap-2 border-b border-[#E5DFD5] pb-3">
+          <div role="tablist" aria-label="Meal upgrade examples" className="flex flex-wrap gap-2 border-b border-[#E5DFD5] pb-3">
             {MEAL_UPGRADE_EXAMPLES.map((meal) => {
               const isActive = meal.id === selectedMealId;
               return (
                 <button
                   key={meal.id}
+                  id={'meal-tab-' + meal.id}
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls={'meal-' + meal.id}
+                  tabIndex={isActive ? 0 : -1}
                   type="button"
                   onClick={() => setSelectedMealId(meal.id)}
+                  onKeyDown={(event) => {
+                    const current = MEAL_UPGRADE_EXAMPLES.findIndex(item => item.id === meal.id);
+                    let next: number | null = null;
+                    if (event.key === 'ArrowRight') next = (current + 1) % MEAL_UPGRADE_EXAMPLES.length;
+                    if (event.key === 'ArrowLeft') next = (current + MEAL_UPGRADE_EXAMPLES.length - 1) % MEAL_UPGRADE_EXAMPLES.length;
+                    if (event.key === 'Home') next = 0;
+                    if (event.key === 'End') next = MEAL_UPGRADE_EXAMPLES.length - 1;
+                    if (next !== null) {
+                      event.preventDefault();
+                      const target = MEAL_UPGRADE_EXAMPLES[next].id;
+                      setSelectedMealId(target);
+                      document.getElementById('meal-tab-' + target)?.focus();
+                    }
+                  }}
                   className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
                     isActive
                       ? 'bg-[#14382B] text-white shadow-sm'
@@ -192,7 +212,8 @@ export const FiberLesson: React.FC = () => {
           </div>
 
           {/* Active Meal Breakdown */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center bg-[#FBF9F5] p-6 rounded-xl border border-[#E5DFD5]">
+          {MEAL_UPGRADE_EXAMPLES.map(activeMeal => (
+          <div key={activeMeal.id} id={'meal-' + activeMeal.id} role="tabpanel" aria-labelledby={'meal-tab-' + activeMeal.id} hidden={activeMeal.id !== selectedMealId} style={activeMeal.id !== selectedMealId ? { display: 'none' } : undefined} className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center bg-[#FBF9F5] p-6 rounded-xl border border-[#E5DFD5]">
             <div className="md:col-span-5 space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C877D]">Starting Meal</span>
               <div className="text-base font-semibold text-[#2C2A26]">{activeMeal.baseMeal}</div>
@@ -223,6 +244,7 @@ export const FiberLesson: React.FC = () => {
               <span><strong className="text-[#14382B]">Fluid Pairing Tip:</strong> {activeMeal.hydrationTip}</span>
             </div>
           </div>
+          ))}
         </div>
       </div>
     </section>
