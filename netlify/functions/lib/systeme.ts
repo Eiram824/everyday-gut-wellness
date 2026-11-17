@@ -50,14 +50,14 @@ function retryAfter(header: string | null): number {
   return Number.isFinite(seconds) ? Math.max(60, Math.min(86400, seconds)) : 60;
 }
 
-async function request(path: string, key: string, init: RequestInit = {}): Promise<Response> {
+async function request(path: string, key: string, init: RequestInit = {}, timeoutMs = REQUEST_TIMEOUT_MS): Promise<Response> {
   const tagging = init.method === "POST" && path.endsWith("/tags");
   let response: Response;
   try {
     response = await fetch(`${API_BASE}${path}`, {
       ...init,
       headers: { "X-API-Key": key, Accept: "application/json", "Content-Type": "application/json" },
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
       redirect: "error",
     });
   } catch {
@@ -71,6 +71,11 @@ async function request(path: string, key: string, init: RequestInit = {}): Promi
   }
   return response;
 }
+
+// Server-only primitives shared by buyer classification. Guide behavior stays unchanged.
+export { ProviderError as SystemeProviderError, findContact as findSystemeContact,
+  contact as parseSystemeContact, request as requestSysteme, json as readSystemeJson };
+export type { Contact as SystemeContact };
 
 function contact(value: unknown, expectedEmail: string): Contact {
   const c = value as Contact;
