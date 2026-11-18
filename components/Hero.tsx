@@ -33,11 +33,11 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
           {/* Main Copy Column */}
           <div className="lg:col-span-7 space-y-6">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-serif font-bold text-[#14382B] leading-[1.15] tracking-tight [text-wrap:balance]">
-              Your Gut Has a Routine. Are Your Daily Habits Working With It?
+              Restore Your Natural Digestive Rhythm with Simple Daily Habits
             </h1>
 
             <p className="text-lg sm:text-xl text-[#4A463F] leading-relaxed max-w-2xl font-light">
-              A practical guide to fiber, fluids, movement, and the small daily choices that can influence bowel regularity.
+              Stop guessing and start feeling lighter. Our physiology-backed guide helps you master fiber, hydration, and movement to support lasting bowel regularity—no extreme cleanses required.
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">

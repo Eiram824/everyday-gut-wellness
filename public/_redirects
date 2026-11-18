@@ -1,5 +1,8 @@
 # Netlify Redirects Configuration
-# 1. API routes redirected to Netlify Functions
+# 1. Canonical Domain Redirect
+https://everyday-gut-wellness.netlify.app/*  https://everydaygutwellness.com/:splat  301!
+
+# 2. API routes redirected to Netlify Functions
 /api/health            /.netlify/functions/health          200
 /api/leads/export.csv  /.netlify/functions/leads-export    200
 /api/leads             /.netlify/functions/leads           200

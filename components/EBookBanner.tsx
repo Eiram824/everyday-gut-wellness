@@ -47,11 +47,11 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
               </div>
 
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-[#14382B] leading-tight">
-                The 7-Day Gentle Gut Reset Guide
+                The 7-Day Gentle Gut Reset: Your Step-by-Step Guide
               </h2>
 
               <p className="text-[#4A463F] text-sm sm:text-base leading-relaxed font-light">
-                A clinically grounded, step-by-step masterclass to soothe chronic bloating, stimulate natural peristalsis, and re-establish regular bowel habits without extreme cleanses or artificial stimulants.
+                An evidence-informed educational guide designed to help adults understand fiber, hydration, and daily habits supporting everyday digestive comfort.
               </p>
 
               {/* What's Inside Checklist */}

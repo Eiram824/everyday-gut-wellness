@@ -1,20 +1,20 @@
 import type { SubscriberRecord } from "./subscribers.js";
 
-const SUPABASE_URL = (process.env.SUPABASE_URL || "").trim().replace(/\/$/, "");
-// This variable stores the Supabase server-only secret key (sb_secret_...). Keep it in Netlify Functions only.
-const SUPABASE_SERVICE_ROLE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
-
 export function isDatabaseConfigured(): boolean {
-  return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+  const url = (process.env.SUPABASE_URL || "").trim().replace(/\/$/, "");
+  const key = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  return Boolean(url && key);
 }
 
 function databaseHeaders(extra: Record<string, string> = {}): Record<string, string> {
-  if (!isDatabaseConfigured()) {
+  const url = (process.env.SUPABASE_URL || "").trim().replace(/\/$/, "");
+  const key = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  if (!url || !key) {
     throw new Error("Persistent subscriber storage is not configured.");
   }
   return {
     // Supabase sb_secret_* keys are opaque API keys, not JWTs. Send only via apikey.
-    apikey: SUPABASE_SERVICE_ROLE_KEY,
+    apikey: key,
     "Content-Type": "application/json",
     Accept: "application/json",
     ...extra,
@@ -25,7 +25,8 @@ async function databaseRequest<T>(
   tablePath: string,
   init: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/${tablePath}`, {
+  const url = (process.env.SUPABASE_URL || "").trim().replace(/\/$/, "");
+  const response = await fetch(`${url}/rest/v1/${tablePath}`, {
     ...init,
     headers: databaseHeaders((init.headers || {}) as Record<string, string>),
   });

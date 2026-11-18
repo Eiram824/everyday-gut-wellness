@@ -88,7 +88,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 Configure environment variables in `.env` (refer to `.env.example`):
 
 - Gumroad checkout URL and public product metadata: `constants.ts` (`GUT_CLARITY_PRODUCT`).
-- `ADMIN_ACCESS_KEY`: Secret key required to access `/api/leads` and download CSV exports. Must be configured; administrative routes fail closed if unset.
+- `ADMIN_ACCESS_KEY`: Secret key for the private lead dashboard and CSV export. Set it as a secret in Netlify for both Production and Deploy Preview; administrative routes fail closed if it is missing.
 - `SENDER_API_TOKEN`: Optional API token for Sender.net synchronization.
 - `SENDER_GROUP_ID`: Optional Sender.net subscriber group tag.
 - `GEMINI_API_KEY`: Required only for server-side Google GenAI proxy endpoints.

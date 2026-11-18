@@ -1,13 +1,16 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { PLANNER_PRODUCT_INFO, HABIT_QUESTIONS, FIBER_FOODS, MEAL_UPGRADE_EXAMPLES } from '../constants.js';
+import { GUT_CLARITY_PRODUCT, GUT_ROUTINE_PLANNER_PRODUCT, HABIT_QUESTIONS, FIBER_FOODS, MEAL_UPGRADE_EXAMPLES } from '../constants.js';
 
 describe('Everyday Gut Wellness - Constants & Business Rules', () => {
-  it('should define the 30-Day Digestive Wellness Planner product accurately', () => {
-    assert.equal(PLANNER_PRODUCT_INFO.id, '30-day-digestive-wellness-planner');
-    assert.equal(PLANNER_PRODUCT_INFO.title, 'The 30-Day Digestive Wellness Planner');
-    assert.equal(PLANNER_PRODUCT_INFO.defaultPrice, '$14.99');
-    assert.ok(PLANNER_PRODUCT_INFO.pages.includes('68 Pages'));
+  it('should define the digital workbook products accurately', () => {
+    assert.equal(GUT_CLARITY_PRODUCT.id, '14-day-gut-clarity-workbook');
+    assert.equal(GUT_CLARITY_PRODUCT.title, 'The 14-Day Gut Clarity Workbook');
+    assert.equal(GUT_CLARITY_PRODUCT.priceUSD, 25);
+
+    assert.equal(GUT_ROUTINE_PLANNER_PRODUCT.id, '30-day-gut-routine-planner');
+    assert.equal(GUT_ROUTINE_PLANNER_PRODUCT.title, 'The 30-Day Gut Routine Planner');
+    assert.equal(GUT_ROUTINE_PLANNER_PRODUCT.priceUSD, 30);
   });
 
   it('should have 3 foundational habit diagnostic questions with options and guidance', () => {

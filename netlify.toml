@@ -3,10 +3,22 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[build.processing]
+  skip_processing = false
+[build.processing.html]
+  pretty_urls = true
+
 [functions]
   node_bundler = "esbuild"
 
-# 1. API Route Redirects to Netlify Serverless Functions
+# 1. Canonical Domain Redirect (Netlify subdomain to primary domain)
+[[redirects]]
+  from = "https://everyday-gut-wellness.netlify.app/*"
+  to = "https://everydaygutwellness.com/:splat"
+  status = 301
+  force = true
+
+# 2. API Route Redirects to Netlify Serverless Functions
 [[redirects]]
   from = "/api/health"
   to = "/.netlify/functions/health"

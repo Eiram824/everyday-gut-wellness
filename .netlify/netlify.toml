@@ -1,0 +1,105 @@
+functionsDirectory = "C:\\Users\\kimMark\\Documents\\Codex\\2026-11-13\\everyday-gut-wellness-netlify-app-https\\work\\everyday-gut-wellness\\netlify\\functions"
+functionsDirectoryOrigin = "config-v1"
+redirectsOrigin = "config"
+plugins = []
+headers = []
+
+[build]
+publish = "C:\\Users\\kimMark\\Documents\\Codex\\2026-11-13\\everyday-gut-wellness-netlify-app-https\\work\\everyday-gut-wellness\\dist"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "npm run build:client"
+functions = "C:\\Users\\kimMark\\Documents\\Codex\\2026-11-13\\everyday-gut-wellness-netlify-app-https\\work\\everyday-gut-wellness\\netlify\\functions"
+
+[build.environment]
+
+[build.processing]
+skip_processing = false
+
+[build.processing.css]
+
+[build.processing.html]
+pretty_urls = true
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions."*"]
+node_bundler = "esbuild"
+
+[[redirects]]
+from = "https://everyday-gut-wellness.netlify.app/*"
+to = "https://everydaygutwellness.com/:splat"
+status = 301.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/api/health"
+to = "/.netlify/functions/health"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/api/leads/export.csv"
+to = "/.netlify/functions/leads-export"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/api/leads"
+to = "/.netlify/functions/leads"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/api/*"
+to = "/.netlify/functions/api-not-found"
+status = 404.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/*"
+to = "/index.html"
+status = 200.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
