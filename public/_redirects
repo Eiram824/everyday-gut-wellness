@@ -4,6 +4,7 @@ https://everyday-gut-wellness.netlify.app/*  https://everydaygutwellness.com/:sp
 
 # 2. API routes redirected to Netlify Functions
 /api/health            /.netlify/functions/health          200
+/api/admin/verify      /.netlify/functions/admin-verify    200!
 /api/leads/export.csv  /.netlify/functions/leads-export    200
 /api/leads             /.netlify/functions/leads           200
 /api/subscribe         /.netlify/functions/subscribe       200!
@@ -12,5 +13,6 @@ https://everyday-gut-wellness.netlify.app/*  https://everydaygutwellness.com/:sp
 # 2. Unknown API routes return JSON 404 (does not swallow API errors)
 /api/*                 /.netlify/functions/api-not-found   404
 
-# 3. Single Page Application routing fallback
-/*                     /index.html                         200
+# 3. No catch-all SPA fallback: the app uses #hash navigation, so unknown
+#    paths fall through to Netlify's real 404 (public/404.html, status 404).
+

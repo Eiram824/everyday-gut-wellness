@@ -586,13 +586,13 @@ async function generatePDF() {
     page.drawRectangle({
       x: 50, y: y - 150, width: 495, height: 150, color: colorCardBg, borderColor: colorBorder, borderWidth: 1
     });
-    page.drawText('LOOKING FOR STRUCTURED DAILY TRACKING? THE 30-DAY WELLNESS PLANNER', { x: 65, y: y - 22, size: 8.5, font: helveticaBold, color: colorForest });
+    page.drawText('LOOKING FOR STRUCTURED DAILY TRACKING? THE 30-DAY GUT ROUTINE PLANNER', { x: 65, y: y - 22, size: 8.5, font: helveticaBold, color: colorForest });
     drawParagraph(
       page,
-      'Ready to turn these 7 days into lasting, month-long consistency? Explore our original companion workbook: The 30-Day Digestive Wellness Planner.\n\n' +
-      'Featuring 68 pages of structured daily food & hydration journals, gentle fiber addition worksheets, post-meal movement logs, Bristol Stool consistency records, and weekly progress reflections.\n\n' +
-      'Available as an instant printable and tablet-fillable digital workbook download via Gumroad at:\n' +
-      'https://everydaygutwellness.org/#planner-product',
+      'Ready to turn these 7 days into lasting, month-long consistency? Explore our companion printable: The 30-Day Gut Routine Planner.\n\n' +
+      'A 31-page printable planner: choose one everyday routine, fit it to your real schedule, check it off on a 30-day calendar, and plan a smaller fallback for busy or low-energy days.\n\n' +
+      'Available as an instant printable download via Gumroad at:\n' +
+      'https://everydaygutwellness.com/#planner-product',
       65, y - 42, 465, helvetica, 8.5, 14, colorText
     );
     y -= 175;
@@ -617,10 +617,6 @@ async function generatePDF() {
   const publicPath = path.join(process.cwd(), 'public', 'The-7-Day-Gentle-Gut-Reset-Guide.pdf');
   fs.writeFileSync(publicPath, pdfBytes);
   console.log(`[Success] Generated PDF at ${publicPath} (${pdfBytes.length} bytes)`);
-
-  // Also save with alternative naming for SEO / direct url matching
-  const publicAltPath = path.join(process.cwd(), 'public', 'the-7-day-gentle-gut-reset-guide.pdf');
-  fs.writeFileSync(publicAltPath, pdfBytes);
 }
 
 generatePDF().catch(err => {
