@@ -17,11 +17,7 @@ export function systemeConfig() {
   // Deploy previews/dev must not send even if an operator shares production flags.
   // An absent context supports isolated local unit mocks without claiming a deploy.
   const productionContext = (!context || context === "production") && env("NETLIFY_DEV") !== "true";
-  // Optional second tag for readers who ticked the marketing consent box.
-  // Only this tag may start the nurture series in Systeme.io.
-  const rawMarketingTag = env("SYSTEME_IO_MARKETING_TAG_ID");
-  const marketingTagId = /^\d+$/.test(rawMarketingTag) && Number(rawMarketingTag) !== tagId ? Number(rawMarketingTag) : 0;
-  return { key, tagId, marketingTagId, ready: configured && productionContext && env("SYSTEME_IO_GUIDE_DELIVERY_READY") === "true" };
+  return { key, tagId, ready: configured && productionContext && env("SYSTEME_IO_GUIDE_DELIVERY_READY") === "true" };
 }
 
 export function systemePublicConfig(): { guideEmailAvailable: boolean; marketingSignupUrl: string | null } {
@@ -102,7 +98,7 @@ async function findContact(email: string, key: string): Promise<Contact | null> 
 
 export async function syncSystemeContact(email: string, tagId: number, reconcileOnly = false): Promise<SystemeSyncResult> {
   const config = systemeConfig();
-  if (!config.ready || tagId <= 0 || (tagId !== config.tagId && tagId !== config.marketingTagId)) return { status: "failed", code: "provider_not_ready" };
+  if (!config.ready || config.tagId !== tagId) return { status: "failed", code: "provider_not_ready" };
   let current: Contact | null = null;
   try {
     current = await findContact(email, config.key);

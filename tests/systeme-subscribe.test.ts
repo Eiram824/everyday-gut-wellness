@@ -21,7 +21,7 @@ describe("Systeme.io guide delivery on signup", () => {
     calls = []; tags = [];
     Object.assign(process.env, {
       SUPABASE_URL: "https://db.test", SUPABASE_SERVICE_ROLE_KEY: "sb_secret_test",
-      SYSTEME_IO_API_KEY: "key", SYSTEME_IO_TAG_ID: "100", SYSTEME_IO_MARKETING_TAG_ID: "200",
+      SYSTEME_IO_API_KEY: "key", SYSTEME_IO_TAG_ID: "100",
       SYSTEME_IO_ENABLED: "true", SYSTEME_IO_GUIDE_DELIVERY_READY: "true",
     });
     delete process.env.CONTEXT; delete process.env.SENDER_API_TOKEN;
@@ -41,8 +41,8 @@ describe("Systeme.io guide delivery on signup", () => {
   });
   afterEach(() => { globalThis.fetch = originalFetch; });
 
-  it("queues and applies only the guide tag without marketing consent", async () => {
-    const res = await signup("reader@example.com", false);
+  it("tags opted-in readers once so Systeme.io sends the guide and series", async () => {
+    const res = await signup("reader@example.com", true);
     assert.equal(res.statusCode, 200);
     assert.equal(JSON.parse(res.body).emailDeliveryStatus, "queued");
     assert.deepEqual(tags, [100]);
@@ -50,9 +50,11 @@ describe("Systeme.io guide delivery on signup", () => {
     assert.equal(finish?.body.p_status, "synced");
   });
 
-  it("adds the nurture tag only when the reader opted in", async () => {
-    await signup("reader@example.com", true);
-    assert.deepEqual(tags, [100, 200]);
+  it("never sends readers without marketing consent to Systeme.io", async () => {
+    const res = await signup("reader@example.com", false);
+    assert.equal(res.statusCode, 200);
+    assert.equal(JSON.parse(res.body).emailDeliveryStatus, "not_requested");
+    assert.equal(calls.some(c => c.url.includes("systeme.io") || c.url.includes("rpc/")), false);
   });
 
   it("does not call Systeme.io when delivery is not marked ready", async () => {
