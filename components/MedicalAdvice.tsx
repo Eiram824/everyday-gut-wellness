@@ -16,7 +16,7 @@ export const MedicalAdvice: React.FC = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-4 mb-16">
-          <div className="text-xs font-semibold tracking-widest uppercase text-[#B85D36]">
+          <div className="text-xs font-semibold tracking-widest uppercase text-[#A3502C]">
             Clinical Safety & Triage
           </div>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#14382B] tracking-tight [text-wrap:balance]">
@@ -31,8 +31,8 @@ export const MedicalAdvice: React.FC = () => {
         <div className="space-y-12">
           {/* Urgent Red Flag Signs */}
           <div className="bg-white rounded-2xl border border-[#B85D36]/50 p-6 sm:p-8 md:p-10 shadow-sm relative overflow-hidden">
-            <div className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-wider text-[#B85D36] mb-3">
-              <ShieldAlert className="w-5 h-5 text-[#B85D36]" />
+            <div className="flex items-center gap-2.5 text-xs font-bold uppercase tracking-wider text-[#A3502C] mb-3">
+              <ShieldAlert className="w-5 h-5 text-[#A3502C]" />
               <span>Red Flag Warning Signs · Seek Prompt or Urgent Medical Care</span>
             </div>
 
@@ -52,7 +52,7 @@ export const MedicalAdvice: React.FC = () => {
                 >
                   <div>
                     <div className="flex items-start gap-3.5 mb-3.5">
-                      <div className="w-8 h-8 rounded-lg bg-[#B85D36]/15 text-[#B85D36] flex items-center justify-center shrink-0 mt-0.5">
+                      <div className="w-8 h-8 rounded-lg bg-[#B85D36]/15 text-[#A3502C] flex items-center justify-center shrink-0 mt-0.5">
                         <AlertTriangle className="w-4 h-4" />
                       </div>
                       <h4 className="text-base font-serif font-bold text-[#9A4622] leading-snug">

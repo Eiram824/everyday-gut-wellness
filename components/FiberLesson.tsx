@@ -16,7 +16,7 @@ export const FiberLesson: React.FC = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-4 mb-16">
-          <div className="text-xs font-semibold tracking-widest uppercase text-[#B85D36]">
+          <div className="text-xs font-semibold tracking-widest uppercase text-[#A3502C]">
             Nutritional Physiology
           </div>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#14382B] tracking-tight [text-wrap:balance]">
@@ -65,10 +65,10 @@ export const FiberLesson: React.FC = () => {
           <div className="bg-white rounded-2xl border border-[#E5DFD5] p-6 sm:p-8 space-y-5 shadow-sm">
             <div className="flex items-center justify-between border-b border-[#E5DFD5] pb-4">
               <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#B85D36]">Type 02</span>
+                <span className="text-xs font-bold uppercase tracking-wider text-[#A3502C]">Type 02</span>
                 <h3 className="text-2xl font-serif font-bold text-[#14382B]">Insoluble Fiber</h3>
               </div>
-              <span className="text-xs bg-[#F8EFEA] text-[#B85D36] font-semibold px-2.5 py-1 rounded">
+              <span className="text-xs bg-[#F8EFEA] text-[#A3502C] font-semibold px-2.5 py-1 rounded">
                 Adds Bulk to Stool
               </span>
             </div>
@@ -88,7 +88,7 @@ export const FiberLesson: React.FC = () => {
             </div>
 
             <div className="bg-[#FBF9F5] p-3.5 rounded-xl border border-[#E5DFD5] text-xs text-[#635F57] flex items-start gap-2">
-              <Info className="w-4 h-4 text-[#B85D36] shrink-0 mt-0.5" />
+              <Info className="w-4 h-4 text-[#A3502C] shrink-0 mt-0.5" />
               <span>General role: Can help add bulk to stool and support regular bowel movements, though individual response varies across diets.</span>
             </div>
           </div>
@@ -125,7 +125,7 @@ export const FiberLesson: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             {/* The Gradual Pacing Strategy */}
             <div className="space-y-4">
-              <h4 className="text-sm font-bold uppercase tracking-wider text-[#B85D36]">
+              <h4 className="text-sm font-bold uppercase tracking-wider text-[#A3502C]">
                 Pacing Your Fiber Additions
               </h4>
               <p className="text-sm text-[#4A463F] leading-relaxed">
@@ -134,7 +134,7 @@ export const FiberLesson: React.FC = () => {
               <div className="p-4 bg-[#FBF9F5] border border-[#E5DFD5] rounded-xl text-xs space-y-2 text-[#4A463F]">
                 <div className="font-semibold text-[#14382B]">Pacing guideline:</div>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#B85D36]">+3 to 5 grams</span>
+                  <span className="font-bold text-[#A3502C]">+3 to 5 grams</span>
                   <span>every few days, paired with an extra glass of water.</span>
                 </div>
               </div>
@@ -159,7 +159,7 @@ export const FiberLesson: React.FC = () => {
         {/* Practical Example: The 'Add One Food' Meal Upgrade */}
         <div className="bg-white rounded-2xl border border-[#E5DFD5] p-6 sm:p-8 md:p-10 shadow-sm space-y-8">
           <div>
-            <div className="text-xs font-semibold tracking-widest uppercase text-[#B85D36] mb-2">
+            <div className="text-xs font-semibold tracking-widest uppercase text-[#A3502C] mb-2">
               Practical Kitchen Application
             </div>
             <h3 className="text-2xl font-serif font-bold text-[#14382B]">
@@ -194,7 +194,7 @@ export const FiberLesson: React.FC = () => {
           {/* Active Meal Breakdown */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center bg-[#FBF9F5] p-6 rounded-xl border border-[#E5DFD5]">
             <div className="md:col-span-5 space-y-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C877D]">Starting Meal</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#6F6A62]">Starting Meal</span>
               <div className="text-base font-semibold text-[#2C2A26]">{activeMeal.baseMeal}</div>
               <div className="text-xs text-[#635F57] flex items-center gap-1.5">
                 <span>Estimated base fiber:</span>
@@ -202,14 +202,14 @@ export const FiberLesson: React.FC = () => {
               </div>
             </div>
 
-            <div className="md:col-span-2 flex justify-center text-[#B85D36]">
+            <div className="md:col-span-2 flex justify-center text-[#A3502C]">
               <div className="w-8 h-8 rounded-full bg-[#F8EFEA] border border-[#EAD3C7] flex items-center justify-center font-bold">
                 <Plus className="w-4 h-4" />
               </div>
             </div>
 
             <div className="md:col-span-5 space-y-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#B85D36]">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#A3502C]">
                 Add One Whole Plant Food
               </span>
               <div className="text-base font-semibold text-[#14382B]">{activeMeal.upgradeAddition}</div>

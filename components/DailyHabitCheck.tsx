@@ -27,7 +27,7 @@ export const DailyHabitCheck: React.FC = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-4 mb-16">
-          <div className="text-xs font-semibold tracking-widest uppercase text-[#B85D36]">
+          <div className="text-xs font-semibold tracking-widest uppercase text-[#A3502C]">
             Self-Reflection & Awareness
           </div>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#14382B] tracking-tight [text-wrap:balance]">
@@ -55,7 +55,7 @@ export const DailyHabitCheck: React.FC = () => {
               >
                 {/* Question Header & Rationale */}
                 <div className="border-b border-[#E5DFD5] pb-6 mb-6">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[#B85D36] uppercase tracking-wider mb-2">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[#A3502C] uppercase tracking-wider mb-2">
                     <span>Question 0{qIndex + 1}</span>
                     <span aria-hidden="true">·</span>
                     <span>Physiological Foundation</span>
@@ -109,7 +109,7 @@ export const DailyHabitCheck: React.FC = () => {
                 {/* Tailored Educational Guidance Output */}
                 <div className="bg-[#FBF9F5] rounded-xl p-5 border border-[#E5DFD5] flex items-start gap-3.5">
                   <div className="p-2 rounded bg-white border border-[#E5DFD5] text-[#14382B] shrink-0 mt-0.5">
-                    <Sparkles className="w-4 h-4 text-[#B85D36]" />
+                    <Sparkles className="w-4 h-4 text-[#A3502C]" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold uppercase tracking-wider text-[#14382B] mb-1">

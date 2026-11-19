@@ -23,8 +23,10 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
                 className="relative cursor-pointer group max-w-sm rounded-xl overflow-hidden shadow-xl border border-[#E5DFD5] transition-transform duration-300 hover:-translate-y-1"
               >
                 <img 
-                  src="/assets/images/ebook_cover_guide_1793359029909.jpg" 
+                  src="/assets/images/ebook-cover-800.webp" 
                   alt="The 7-Day Gentle Gut Reset Free eBook Edition" 
+                  width="800"
+                  height="537"
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                   loading="lazy"
                 />
@@ -42,7 +44,7 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
             {/* Content & Value Proposition */}
             <div className="lg:col-span-7 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAF1ED] text-[#14382B] text-xs font-semibold uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5 text-[#B85D36]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#A3502C]" />
                 Exclusive Free Downloadable eBook
               </div>
 
@@ -88,7 +90,7 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
 
               </div>
 
-              <div className="text-[11px] text-[#8C877D] italic">
+              <div className="text-[11px] text-[#6F6A62] italic">
                 100% Free · No credit card required · Instant access directly in your browser
               </div>
             </div>

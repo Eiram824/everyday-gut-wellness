@@ -67,7 +67,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
                 onClick={onOpenEBook}
                 className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold uppercase tracking-wider text-[#14382B] bg-[#EAF1ED] hover:bg-[#D5E3DB] border border-[#14382B]/20 rounded transition-all whitespace-nowrap shadow-sm"
               >
-                <BookOpen className="w-3.5 h-3.5 text-[#B85D36]" />
+                <BookOpen className="w-3.5 h-3.5 text-[#A3502C]" />
                 <span>Free eBook</span>
               </button>
             )}
@@ -118,7 +118,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
                 }}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#14382B] bg-[#EAF1ED] border border-[#14382B]/30 rounded shadow-sm hover:bg-[#D5E3DB]"
               >
-                <BookOpen className="w-4 h-4 text-[#B85D36]" />
+                <BookOpen className="w-4 h-4 text-[#A3502C]" />
                 <span>Read Free 7-Day Reset eBook</span>
               </button>
             )}
