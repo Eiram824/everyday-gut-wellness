@@ -5,7 +5,8 @@
 
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
-import { handler as webhookHandler } from "../netlify/functions/gumroad-webhook.js";
+import { createHmac } from "node:crypto";
+import { handler as webhookHandler, verifyGumroadSignature } from "../netlify/functions/gumroad-webhook.js";
 
 const SELLER = "seller_abc123";
 
@@ -53,6 +54,7 @@ describe("Gumroad Ping receiver (gumroad-webhook.ts)", () => {
     process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
     process.env.GUMROAD_SELLER_ID = SELLER;
     delete process.env.GUMROAD_WEBHOOK_SECRET;
+    delete process.env.GUMROAD_PING_SIGNING_SECRET;
     delete process.env.SYSTEME_IO_API_KEY;
     globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ url: String(input), method: init?.method, body: init?.body ? JSON.parse(String(init.body)) : null });
@@ -111,5 +113,31 @@ describe("Gumroad Ping receiver (gumroad-webhook.ts)", () => {
     globalThis.fetch = (async () => new Response("err", { status: 500 })) as typeof fetch;
     const res = (await webhookHandler(createMockEvent({ body: form(SALE) }), {} as any)) as any;
     assert.equal(res.statusCode, 500);
+  });
+  it("checks X-Gumroad-Signature when a signing secret is configured", async () => {
+    process.env.GUMROAD_PING_SIGNING_SECRET = "sign_secret";
+    const body = form(SALE);
+    const t = Math.floor(Date.now() / 1000);
+    const sig = createHmac("sha256", "sign_secret").update(`${t}.${body}`).digest("hex");
+    const headers = { "content-type": "application/x-www-form-urlencoded" };
+
+    const missing = (await webhookHandler(createMockEvent({ body }), {} as any)) as any;
+    assert.equal(missing.statusCode, 401);
+
+    const bad = (await webhookHandler(createMockEvent({ body, headers: { ...headers, "X-Gumroad-Signature": `t=${t},v1=${"0".repeat(64)}` } }), {} as any)) as any;
+    assert.equal(bad.statusCode, 401);
+
+    const good = (await webhookHandler(createMockEvent({ body, headers: { ...headers, "X-Gumroad-Signature": `t=${t},v1=${sig}` } }), {} as any)) as any;
+    assert.equal(good.statusCode, 200);
+  });
+
+  it("rejects stale or tampered signatures", () => {
+    const body = "a=1";
+    const t = 1_700_000_000;
+    const sig = createHmac("sha256", "s").update(`${t}.${body}`).digest("hex");
+    assert.equal(verifyGumroadSignature(`t=${t},v1=${sig}`, body, "s", t + 60), true);
+    assert.equal(verifyGumroadSignature(`t=${t},v1=${sig}`, body, "s", t + 7200), false);
+    assert.equal(verifyGumroadSignature(`t=${t},v1=${sig}`, "a=2", "s", t), false);
+    assert.equal(verifyGumroadSignature("garbage", body, "s", t), false);
   });
 });

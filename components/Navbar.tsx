@@ -33,8 +33,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
 
   return (
     <header className="sticky top-0 z-40 bg-[#FBF9F5]/95 backdrop-blur-md border-b border-[#E5DFD5] transition-colors">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-8 h-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-6 h-20">
           {/* Zone 1: Brand Wordmark */}
           <a
             href="#hero"
@@ -45,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
           </a>
 
           {/* Zone 2: Nav Links */}
-          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-[#635F57]">
+          <nav className="hidden xl:flex items-center gap-5 text-sm font-medium text-[#635F57]">
             {navLinks.map((link) => (
               <a
                 key={link.id}
@@ -59,7 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
           </nav>
 
           {/* Zone 3: Actions */}
-          <div className="hidden md:flex items-center gap-2.5 shrink-0">
+          <div className="hidden xl:flex items-center gap-2.5 shrink-0">
 
             {onOpenEBook && (
               <button
@@ -74,14 +74,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
             <button
               type="button"
               onClick={(e) => handleLinkClick(e, 'daily-check')}
-              className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-[#14382B] rounded hover:bg-[#0E281E] active:scale-[0.98] transition-all whitespace-nowrap shrink-0 shadow-sm"
+              className="hidden 2xl:block px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-[#14382B] rounded hover:bg-[#0E281E] active:scale-[0.98] transition-all whitespace-nowrap shrink-0 shadow-sm"
             >
               START HABIT CHECK
             </button>
           </div>
 
           {/* Mobile Menu Toggle */}
-          <div className="flex md:hidden items-center">
+          <div className="flex xl:hidden items-center">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -97,7 +97,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b border-[#E5DFD5] bg-[#FBF9F5] px-4 pt-2 pb-5 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="xl:hidden border-b border-[#E5DFD5] bg-[#FBF9F5] px-4 pt-2 pb-5 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
           {navLinks.map((link) => (
             <a
               key={link.id}

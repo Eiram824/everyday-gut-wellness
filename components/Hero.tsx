@@ -25,7 +25,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
           <span aria-hidden="true" className="text-[#8C877D]">·</span>
           <span className="text-[#635F57]">Evidence-Informed</span>
           <span aria-hidden="true" className="text-[#8C877D]">·</span>
-          <span className="text-[#635F57]">US Dietary Standards</span>
+          <span className="text-[#635F57]">Public Health Guidelines</span>
         </div>
 
         {/* Hero Grid */}
