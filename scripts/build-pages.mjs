@@ -159,6 +159,8 @@ const indent = (html, n = 8) =>
     .join('\n');
 
 const ORG = { '@type': 'Organization', '@id': `${SITE}/#organization`, name: BRAND, url: `${SITE}/`, email: EMAIL };
+const EDITOR_NAME = 'Mark Laurence E. Medina';
+const EDITOR = { '@type': 'Person', '@id': `${SITE}/about.html#editor`, name: EDITOR_NAME, jobTitle: 'Founder and editor', url: `${SITE}/about.html#editor`, worksFor: { '@id': `${SITE}/#organization` } };
 
 function breadcrumb(items) {
   return {
@@ -207,7 +209,7 @@ for (const g of guides) {
   const inner = indent(`<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <a href="/guides/">Guides</a> &rsaquo; <span aria-current="page">${esc(meta.h1)}</span></nav>
 <p class="eyebrow">${esc(meta.eyebrow || 'Guide')}</p>
 <h1>${esc(meta.h1)}</h1>
-<p class="byline">By the ${BRAND} editorial team &middot; Updated <time datetime="${g.updated}">${longDate(g.updated)}</time> &middot; ${g.minutes} min read</p>
+<p class="byline">By <a href="/about.html#editor" rel="author">${EDITOR_NAME}</a>, founder and editor &middot; Updated <time datetime="${g.updated}">${longDate(g.updated)}</time> &middot; ${g.minutes} min read</p>
 <div class="note"><strong>Educational information, not medical advice.</strong> This guide is general information for healthy adults and is not reviewed for your personal situation. Talk with a clinician about symptoms that are new, severe, or persistent. <a href="#when-to-see-a-doctor">When to see a doctor</a></div>
 ${g.body}
 <div class="cta">
@@ -225,7 +227,7 @@ ${g.body}
       dateModified: g.updated,
       mainEntityOfPage: `${SITE}${g.urlPath}`,
       image: OG_IMAGE,
-      author: ORG,
+      author: EDITOR,
       publisher: ORG,
       inLanguage: 'en',
     },
