@@ -39,8 +39,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
           <a
             href="#hero"
             onClick={(e) => handleLinkClick(e, 'hero')}
-            className="text-xl sm:text-2xl font-serif font-bold text-[#14382B] tracking-tight hover:opacity-90 transition-opacity whitespace-nowrap shrink-0"
+            className="flex items-center gap-2.5 text-xl sm:text-2xl font-serif font-bold text-[#14382B] tracking-tight hover:opacity-90 transition-opacity whitespace-nowrap shrink-0"
           >
+            <img src="/logo.svg" alt="" width={32} height={32} className="w-8 h-8 shrink-0" />
             Everyday Gut Wellness
           </a>
 

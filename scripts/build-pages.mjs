@@ -65,7 +65,7 @@ a{color:var(--forest);text-decoration:underline;text-underline-offset:3px}a:hove
 header.site{background:#fff;border-bottom:1px solid var(--border)}
 .wrap{max-width:760px;margin:0 auto;padding:0 20px}
 header.site .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px 16px;min-height:64px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
-.brand{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:20px;color:var(--forest);text-decoration:none}
+.brand{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:20px;color:var(--forest);text-decoration:none;display:inline-flex;align-items:center;gap:10px}.brand img{width:28px;height:28px;flex-shrink:0}
 nav.top a{font-size:14px;font-weight:600;text-decoration:none;margin-right:16px}
 main{padding:40px 0 64px}
 .crumbs{font-size:13px;color:var(--muted);margin:0 0 16px}.crumbs a{color:var(--muted)}
@@ -131,7 +131,7 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
     <header class="site">
       <div class="wrap">
         <a class="skip" href="#main">Skip to content</a>
-        <a class="brand" href="/">${BRAND}</a>
+        <a class="brand" href="/"><img src="/logo.svg" alt="" width="28" height="28" />${BRAND}</a>
         <nav class="top" aria-label="Main"><a href="/">Home</a><a href="/guides/">Guides</a><a href="/about.html">About</a><a href="/#gut-clarity-workbook">Workbook</a></nav>
       </div>
     </header>
@@ -158,7 +158,7 @@ const indent = (html, n = 8) =>
     .map((l) => (l ? ' '.repeat(n) + l : l))
     .join('\n');
 
-const ORG = { '@type': 'Organization', '@id': `${SITE}/#organization`, name: BRAND, url: `${SITE}/`, email: EMAIL };
+const ORG = { '@type': 'Organization', '@id': `${SITE}/#organization`, name: BRAND, url: `${SITE}/`, logo: { '@type': 'ImageObject', url: `${SITE}/logo-512.png`, width: 512, height: 512 }, email: EMAIL };
 const EDITOR_NAME = 'Mark Laurence E. Medina';
 const EDITOR = { '@type': 'Person', '@id': `${SITE}/about.html#editor`, name: EDITOR_NAME, jobTitle: 'Founder and editor', url: `${SITE}/about.html#editor`, worksFor: { '@id': `${SITE}/#organization` } };
 
