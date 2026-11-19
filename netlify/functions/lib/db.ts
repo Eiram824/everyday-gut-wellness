@@ -39,7 +39,9 @@ async function databaseRequest<T>(
   }
 
   if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
+  // return=minimal answers 201 with an empty body.
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 export async function saveSubscriber(input: {
@@ -141,6 +143,34 @@ export async function markSenderSync(
       sender_synced: success,
       sender_synced_at: success ? new Date().toISOString() : null,
       sender_sync_error: success ? null : (errorMessage || "Sender.net sync failed").slice(0, 300),
+    }),
+  });
+}
+
+// Gumroad sales. Table lives in scripts/gumroad-purchases-migration.sql.
+export async function recordPurchase(input: {
+  saleId: string;
+  email: string;
+  productId: string;
+  productName: string;
+  priceCents: number | null;
+  currency: string;
+  refunded: boolean;
+  purchasedAt: string;
+}): Promise<void> {
+  await databaseRequest<void>("purchases?on_conflict=sale_id", {
+    method: "POST",
+    headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({
+      sale_id: input.saleId,
+      email: input.email,
+      product_id: input.productId || null,
+      product_name: input.productName || null,
+      price_cents: input.priceCents,
+      currency: input.currency || null,
+      refunded: input.refunded,
+      purchased_at: input.purchasedAt,
+      updated_at: new Date().toISOString(),
     }),
   });
 }
