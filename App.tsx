@@ -9,6 +9,7 @@ import Hero from './components/Hero';
 import EBookBanner from './components/EBookBanner';
 import EBookReader from './components/EBookReader';
 import LeadCaptureModal from './components/LeadCaptureModal';
+import GuidesTeaser from './components/GuidesTeaser';
 import LeadAdminModal from './components/LeadAdminModal';
 import DailyHabitCheck from './components/DailyHabitCheck';
 import FiberLesson from './components/FiberLesson';
@@ -43,6 +44,17 @@ export function App() {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('hashchange', checkHash);
     };
+  }, []);
+
+  // Static guide pages link to /#free-guide to open the free-guide signup directly.
+  React.useEffect(() => {
+    if (window.location.hash === '#free-guide') {
+      handleOpenEBook();
+      try {
+        window.history.replaceState(null, '', window.location.pathname);
+      } catch (err) {}
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Checks whether the user is already subscribed before opening the lead modal
@@ -150,6 +162,9 @@ export function App() {
 
         {/* Section 6: When to Seek Medical Advice */}
         <MedicalAdvice />
+
+        {/* Latest crawlable guides (static pages under /guides/) */}
+        <GuidesTeaser />
 
         {/* Section 7: Paid digital product — checkout hosted by Gumroad. */}
         <ProductSection />
