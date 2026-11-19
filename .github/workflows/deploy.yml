@@ -1,4 +1,9 @@
-name: CI & Deploy to GitHub Pages
+name: CI
+
+# Build, type-check and test every push and PR.
+# The live site is deployed by Netlify (everydaygutwellness.com) only.
+# GitHub Pages deployment was removed: it published a second copy of the
+# site on github.io, which is duplicate content for search engines.
 
 on:
   push:
@@ -11,11 +16,9 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: 'pages'
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -47,25 +50,3 @@ jobs:
 
       - name: Build production assets & PDF
         run: bun run build
-
-      - name: Upload artifact for GitHub Pages
-        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: './dist'
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: validate
-    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
