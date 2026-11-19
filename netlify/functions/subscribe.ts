@@ -1,6 +1,8 @@
 import type { Config, Handler } from "@netlify/functions";
 import { jsonResponse, errorResponse } from "./lib/auth.js";
-import { isDatabaseConfigured, saveSubscriber, markSenderSync } from "./lib/db.js";
+import { isDatabaseConfigured, saveSubscriber, markSenderSync, captureSystemeGuideRequest } from "./lib/db.js";
+import { systemeConfig, syncSystemeContact } from "./lib/systeme.js";
+import { processSystemeQueue } from "./lib/systeme-queue.js";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 const MAX_REQUEST_BYTES = 16_384;
@@ -39,6 +41,33 @@ export const handler: Handler = async (event) => {
   try {
     // Persist first. The user only receives success after Supabase confirms the record.
     const subscriber = await saveSubscriber({ name, email, source, marketingConsent });
+
+    // Systeme.io: tag the contact so the guide email goes out once. The queue
+    // dedupes per subscriber and a scheduled function retries failures, so a
+    // provider outage never blocks the instant PDF and never double-sends.
+    let emailDeliveryStatus = "not_configured";
+    const systeme = systemeConfig();
+    if (systeme.ready && source === "ebook_lead_modal") {
+      try {
+        const jobId = await captureSystemeGuideRequest({ name, email, source, marketingConsent, tagId: systeme.tagId });
+        emailDeliveryStatus = "queued";
+        try { await processSystemeQueue(jobId); } catch {
+          console.warn("[Lead capture] guide-email sync will be retried");
+        }
+      } catch {
+        emailDeliveryStatus = "unavailable";
+        console.warn("[Lead capture] guide-email queue requires operator attention");
+      }
+    }
+    // Nurture series tag only for readers who opted in to marketing emails.
+    if (systeme.ready && marketingConsent && systeme.marketingTagId) {
+      try {
+        const result = await syncSystemeContact(email, systeme.marketingTagId);
+        if (result.status !== "synced") console.warn("[Lead capture] marketing tag not applied:", result.code || result.status);
+      } catch {
+        console.warn("[Lead capture] marketing tag request failed");
+      }
+    }
 
     // Marketing sync is optional and must never block delivery of the free guide.
     let senderSynced = false;
@@ -86,6 +115,7 @@ export const handler: Handler = async (event) => {
       subscriber: { name: subscriber.name, email: subscriber.email, marketingConsent: subscriber.marketingConsent },
       senderSynced,
       senderStatus,
+      emailDeliveryStatus,
     });
   } catch (error: any) {
     console.error("[Netlify Function] Lead capture failed:", error?.message || "unknown_error");
