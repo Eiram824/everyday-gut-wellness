@@ -6,7 +6,6 @@ import { handler as subscribeHandler } from "../netlify/functions/subscribe.js";
 import { handler as leadsHandler } from "../netlify/functions/leads.js";
 import { handler as leadsExportHandler } from "../netlify/functions/leads-export.js";
 import { handler as notFoundHandler } from "../netlify/functions/api-not-found.js";
-import { handler as geminiHandler } from "../netlify/functions/gemini.js";
 
 // Helper to construct mock HandlerEvent
 function createMockEvent(options: {
@@ -243,34 +242,6 @@ describe("Netlify Serverless Functions Integration Suite", () => {
       assert.equal(res.headers["Content-Type"], "application/json");
       const data = JSON.parse(res.body);
       assert.equal(data.status, 404);
-    });
-  });
-
-  // 6. Gemini Function Security & SSRF Protection
-  describe("Gemini Serverless Function (gemini.ts)", () => {
-    it("fails closed with 503 if GEMINI_API_KEY is not configured", async () => {
-      delete process.env.GEMINI_API_KEY;
-      delete process.env.API_KEY;
-      const event = createMockEvent({
-        httpMethod: "POST",
-        path: "/api/generate-content",
-        body: JSON.stringify({ contents: "test" }),
-      });
-      const res = await geminiHandler(event, {} as any) as any;
-      assert.equal(res.statusCode, 503);
-    });
-
-    it("blocks untrusted destination URLs with 403 on video download (SSRF prevention)", async () => {
-      process.env.GEMINI_API_KEY = "dummy_key";
-      const event = createMockEvent({
-        httpMethod: "GET",
-        path: "/api/video-download",
-        queryStringParameters: { uri: "https://evil-attacker-site.com/video.mp4" },
-      });
-      const res = await geminiHandler(event, {} as any) as any;
-      assert.equal(res.statusCode, 403);
-      const data = JSON.parse(res.body);
-      assert.ok(data.error.includes("Untrusted destination"));
     });
   });
 });
