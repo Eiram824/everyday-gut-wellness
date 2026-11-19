@@ -19,16 +19,17 @@
     
     <!-- OpenGraph / Social Cards -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://everydaygutwellness.com/" />
     <meta property="og:title" content="Everyday Gut Wellness – Your Gut Has a Routine" />
     <meta property="og:description" content="A practical guide to digestive routines, plus a 14-day printable workbook for noticing patterns and preparing for a clearer clinician conversation." />
     <meta property="og:site_name" content="Everyday Gut Wellness" />
-    <meta property="og:image" content="/assets/images/ebook_cover_guide_1793359029909.jpg" />
+    <meta property="og:image" content="https://everydaygutwellness.com/assets/images/ebook_cover_guide_1793359029909.jpg" />
     
     <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Everyday Gut Wellness – Your Gut Has a Routine" />
     <meta name="twitter:description" content="A practical guide to digestive routines, plus a 14-day workbook for noticing patterns and preparing for a clearer clinician conversation." />
-    <meta name="twitter:image" content="/assets/images/ebook_cover_guide_1793359029909.jpg" />
+    <meta name="twitter:image" content="https://everydaygutwellness.com/assets/images/ebook_cover_guide_1793359029909.jpg" />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -97,25 +98,25 @@
       "@graph": [
         {
           "@type": "WebSite",
-          "@id": "https://everyday-gut-wellness.netlify.app/#website",
-          "url": "https://everyday-gut-wellness.netlify.app/",
+          "@id": "https://everydaygutwellness.com/#website",
+          "url": "https://everydaygutwellness.com/",
           "name": "Everyday Gut Wellness",
           "description": "Evidence-informed digestive wellness education and original digital workbooks.",
           "publisher": {
-            "@id": "https://everyday-gut-wellness.netlify.app/#organization"
+            "@id": "https://everydaygutwellness.com/#organization"
           }
         },
         {
           "@type": "Organization",
-          "@id": "https://everyday-gut-wellness.netlify.app/#organization",
+          "@id": "https://everydaygutwellness.com/#organization",
           "name": "Everyday Gut Wellness",
-          "url": "https://everyday-gut-wellness.netlify.app/",
-          "logo": "https://everyday-gut-wellness.netlify.app/assets/images/ebook_cover_guide_1793359029909.jpg"
+          "url": "https://everydaygutwellness.com/",
+          "logo": "https://everydaygutwellness.com/assets/images/ebook_cover_guide_1793359029909.jpg"
         },
         {
           "@type": "MedicalWebPage",
-          "@id": "https://everyday-gut-wellness.netlify.app/#webpage",
-          "url": "https://everyday-gut-wellness.netlify.app/",
+          "@id": "https://everydaygutwellness.com/#webpage",
+          "url": "https://everydaygutwellness.com/",
           "name": "Everyday Gut Wellness – Your Gut Has a Routine",
           "headline": "Your Gut Has a Routine. Are Your Daily Habits Working With It?",
           "description": "A practical guide to fiber, fluids, movement, and the small daily choices that can influence bowel regularity.",
@@ -131,16 +132,55 @@
         },
         {
           "@type": "Product",
-          "@id": "https://everyday-gut-wellness.netlify.app/#gut-clarity-workbook",
+          "@id": "https://everydaygutwellness.com/#gut-clarity-workbook",
           "name": "The 14-Day Gut Clarity Workbook",
           "description": "A 26-page printable digestive self-observation workbook with daily logs, pattern reviews, safety guidance, and an appointment-ready summary. Educational use only; not medical advice.",
+          "image": [
+            "https://everydaygutwellness.com/assets/images/gut-clarity-gumroad-cover.png"
+          ],
           "brand": { "@type": "Brand", "name": "Everyday Gut Wellness" },
           "offers": {
             "@type": "Offer",
             "price": "25.00",
             "priceCurrency": "USD",
             "availability": "https://schema.org/InStock",
-            "url": "https://eiram32.gumroad.com/l/14-day-gut-clarity-workbook"
+            "itemCondition": "https://schema.org/NewCondition",
+            "url": "https://eiram32.gumroad.com/l/14-day-gut-clarity-workbook",
+            "shippingDetails": {
+              "@type": "OfferShippingDetails",
+              "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": "USD"
+              },
+              "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": "US"
+              },
+              "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "unitCode": "DAY"
+                },
+                "transitTime": {
+                  "@type": "QuantitativeValue",
+                  "minValue": 0,
+                  "maxValue": 0,
+                  "unitCode": "DAY"
+                }
+              }
+            },
+            "hasMerchantReturnPolicy": {
+              "@type": "MerchantReturnPolicy",
+              "applicableCountry": "US",
+              "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+              "merchantReturnDays": 30,
+              "returnFees": "https://schema.org/FreeReturn",
+              "refundType": "https://schema.org/FullRefund"
+            }
           }
         }
       ]
