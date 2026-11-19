@@ -4,14 +4,14 @@
  */
 
 import React, { useState } from 'react';
-import { ShieldCheck, Mail, Lock, X, Heart, ExternalLink } from 'lucide-react';
+import { ShieldCheck, Mail, X, Heart, ExternalLink } from 'lucide-react';
 
 interface TrustAndFooterProps {
   onNavigate: (sectionId: string) => void;
 }
 
 export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) => {
-  const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'contact' | 'editorial' | 'affiliate' | null>(null);
+  const [activeModal, setActiveModal] = useState<'contact' | 'editorial' | 'affiliate' | null>(null);
 
   return (
     <footer className="bg-[#14382B] text-[#EAF1ED] pt-16 pb-12 border-t border-[#0E281E]">
@@ -101,6 +101,12 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
               Trust & Transparency
             </h4>
             <div className="space-y-2.5">
+              <a
+                href="/about.html"
+                className="block text-xs text-[#EAF1ED]/80 hover:text-white transition-colors text-left"
+              >
+                About Everyday Gut Wellness
+              </a>
               <button
                 type="button"
                 onClick={() => setActiveModal('editorial')}
@@ -108,20 +114,18 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
               >
                 Editorial Standards & Medical Review Process
               </button>
-              <button
-                type="button"
-                onClick={() => setActiveModal('privacy')}
+              <a
+                href="/privacy.html"
                 className="block text-xs text-[#EAF1ED]/80 hover:text-white transition-colors text-left"
               >
                 Privacy Policy & Data Security
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveModal('terms')}
+              </a>
+              <a
+                href="/terms.html"
                 className="block text-xs text-[#EAF1ED]/80 hover:text-white transition-colors text-left"
               >
                 Terms of Service & User Agreement
-              </button>
+              </a>
               <button
                 type="button"
                 onClick={() => setActiveModal('affiliate')}
@@ -140,7 +144,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
 
             <div className="pt-2 text-xs text-[#EAF1ED]/70 leading-relaxed bg-white/5 p-3 rounded-lg border border-white/10">
               <span className="font-semibold text-white block mb-0.5">Independent Educational Publishing:</span>
-              Everyday Gut Wellness is an independent educational publishing project. The free guide is available now; checkout for the 14-Day Gut Clarity Workbook is being prepared and is not yet open. We do not sell or promote third-party affiliate supplements.
+              Everyday Gut Wellness is an independent educational publishing project. The free guide is available now, and our printable workbooks are sold securely through Gumroad. We do not sell or promote third-party affiliate supplements.
             </div>
           </div>
         </div>
@@ -174,7 +178,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
         </div>
       </div>
 
-      {/* Modals for Privacy, Terms, Contact, Editorial */}
+      {/* Modals for Contact, Editorial, Affiliate */}
       {activeModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white text-[#2C2A26] rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
@@ -186,66 +190,6 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
             >
               <X className="w-5 h-5" />
             </button>
-
-            {/* Privacy Modal */}
-            {activeModal === 'privacy' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#14382B]">
-                  <Lock className="w-4 h-4 text-[#14382B]" />
-                  <span>Privacy Policy</span>
-                </div>
-                <h3 className="text-xl font-serif font-bold text-[#14382B]">
-                  Privacy Policy & Data Protection
-                </h3>
-                <div className="text-xs sm:text-sm text-[#4A463F] space-y-3 leading-relaxed">
-                  <p>
-                    Everyday Gut Wellness is committed to protecting your privacy and practicing transparent data management.
-                  </p>
-                  <p>
-                    <strong>Information We Collect:</strong> When you request our free 7-Day Gentle Gut Reset Guide, we collect your name and email address to provide immediate access. We do NOT collect credit card numbers, health records, or personal identification documents on this website.
-                  </p>
-                  <p>
-                    <strong>Email Delivery & Marketing Consent:</strong> Requesting the free guide delivers the publication immediately. If you optionally choose to check the marketing consent box, you may receive educational articles and wellness newsletters. You may unsubscribe at any time with a single click using the link at the bottom of every email.
-                  </p>
-                  <p>
-                    <strong>Digital product purchases:</strong> Checkout for the 14-Day Gut Clarity Workbook is not open yet. If the workbook is offered for sale, Gumroad will handle payment and digital delivery under its own terms and privacy policy. This website does not collect payment card details.
-                  </p>
-                  <p>
-                    <strong>Analytics:</strong> We use Google Analytics 4 (GA4) with IP anonymization to evaluate aggregate website traffic and usability. We do not pass health symptoms or personal medical data into analytics.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Terms of Service Modal */}
-            {activeModal === 'terms' && (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#14382B]">
-                  <ShieldCheck className="w-4 h-4 text-[#14382B]" />
-                  <span>Terms of Service</span>
-                </div>
-                <h3 className="text-xl font-serif font-bold text-[#14382B]">
-                  Terms of Service & User Agreement
-                </h3>
-                <div className="text-xs sm:text-sm text-[#4A463F] space-y-3 leading-relaxed">
-                  <p>
-                    By accessing or using Everyday Gut Wellness, you agree to comply with and be bound by these Terms of Service.
-                  </p>
-                  <p>
-                    <strong>Educational Use Only:</strong> All content, checklists, planners, and articles provided on this website are for educational and self-reflection purposes only and are not a substitute for professional medical diagnosis or treatment.
-                  </p>
-                  <p>
-                    <strong>Digital Products & Payments:</strong> The 14-Day Gut Clarity Workbook is a comprehensive educational digital download. Secure checkout is handled by Gumroad, which displays the final price and manages immediate file delivery. No medical outcome is promised; the workbook is not a substitute for individualized medical care.
-                  </p>
-                  <p>
-                    <strong>Intellectual Property:</strong> The articles, graphics, habit trackers, and workbook designs on Everyday Gut Wellness are original intellectual property protected by copyright. You may not republish, resell, or distribute our materials without prior written consent.
-                  </p>
-                  <p>
-                    <strong>Limitation of Liability:</strong> Under no circumstances shall Everyday Gut Wellness or its creators be held liable for any direct or indirect damages resulting from the use or misuse of educational information or habit worksheets provided on this site.
-                  </p>
-                </div>
-              </div>
-            )}
 
             {/* Contact Modal */}
             {activeModal === 'contact' && (
@@ -262,8 +206,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                     We welcome inquiries regarding citation verification, evidence updates, or editorial corrections.
                   </p>
                   <div className="p-4 bg-[#FBF9F5] rounded-xl border border-[#E5DFD5] space-y-1.5 text-xs">
-                    <div><strong>Editorial Desk:</strong> editorial@everydaygutwellness.org</div>
-                    <div><strong>General Inquiries:</strong> contact@everydaygutwellness.org</div>
+                    <div><strong>Email:</strong> <a href="mailto:hello@everydaygutwellness.com" className="underline">hello@everydaygutwellness.com</a></div>
                     <div><strong>Response Window:</strong> 2–3 business days for non-clinical inquiries.</div>
                   </div>
                   <p className="text-xs text-[#635F57] italic">
