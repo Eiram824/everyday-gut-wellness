@@ -14,16 +14,18 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navLinks = [
+  const navLinks: { label: string; id: string; href?: string }[] = [
     { label: 'Habit Check', id: 'daily-check' },
     { label: 'Fiber Guide', id: 'fiber-lesson' },
     { label: 'Routine Reset', id: 'routine-reset' },
     { label: 'Myth vs Fact', id: 'myths' },
     { label: 'Medical Signs', id: 'medical-advice' },
+    { label: 'Guides', id: 'guides', href: '/guides/' },
     { label: '14-Day Workbook', id: 'gut-clarity-workbook' },
   ];
 
-  const handleLinkClick = (e: React.MouseEvent, id: string) => {
+  const handleLinkClick = (e: React.MouseEvent, id: string, href?: string) => {
+    if (href) return; // real page link: let the browser navigate
     e.preventDefault();
     onNavigate(id);
     setMobileMenuOpen(false);
@@ -47,8 +49,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
             {navLinks.map((link) => (
               <a
                 key={link.id}
-                href={`#${link.id}`}
-                onClick={(e) => handleLinkClick(e, link.id)}
+                href={link.href ?? `#${link.id}`}
+                onClick={(e) => handleLinkClick(e, link.id, link.href)}
                 className="hover:text-[#14382B] transition-colors whitespace-nowrap shrink-0 relative py-1 after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1.5px] after:bg-[#14382B] after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
               >
                 {link.label}
@@ -99,8 +101,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
           {navLinks.map((link) => (
             <a
               key={link.id}
-              href={`#${link.id}`}
-              onClick={(e) => handleLinkClick(e, link.id)}
+              href={link.href ?? `#${link.id}`}
+              onClick={(e) => handleLinkClick(e, link.id, link.href)}
               className="block px-3 py-2 text-base font-medium text-[#2C2A26] hover:bg-[#E5DFD5]/40 rounded transition-colors"
             >
               {link.label}
