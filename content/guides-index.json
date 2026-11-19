@@ -1,15 +1,45 @@
 [
   {
+    "href": "/guides/soluble-vs-insoluble-fiber",
+    "title": "Soluble vs Insoluble Fiber: What Is the Difference?",
+    "summary": "Soluble fiber forms a gel; insoluble fiber adds bulk. Which foods contain each, and which helps constipation more.",
+    "minutes": 2
+  },
+  {
+    "href": "/guides/morning-routine-for-regular-bowel-movements",
+    "title": "A Simple Morning Routine for Regular Bowel Movements",
+    "summary": "A warm drink, breakfast, unhurried toilet time and a footstool: a practical routine that works with your body's morning rhythm.",
+    "minutes": 2
+  },
+  {
+    "href": "/guides/how-often-should-you-poop",
+    "title": "How Often Should You Poop? What Is Normal",
+    "summary": "Normal ranges from three times a day to three times a week. Here is what matters more than the number, plus the Bristol stool chart.",
+    "minutes": 3
+  },
+  {
     "href": "/guides/how-much-fiber-per-day",
     "title": "How Much Fiber Do You Need a Day?",
     "summary": "Daily targets for adults, the foods that get you there fastest, and how to increase fiber without the bloat.",
     "minutes": 3
   },
   {
+    "href": "/guides/foods-that-help-constipation",
+    "title": "Foods That Help Constipation (and How Much to Eat)",
+    "summary": "Kiwifruit, prunes, rye bread and other foods with real evidence behind them, with practical amounts and how to start.",
+    "minutes": 4
+  },
+  {
     "href": "/guides/does-drinking-water-help-constipation",
     "title": "Does Drinking Water Help Constipation?",
     "summary": "When more water actually helps, how much fluid adults need, and why water and fiber work best as a team.",
     "minutes": 3
+  },
+  {
+    "href": "/guides/constipation-when-traveling",
+    "title": "Constipation When Traveling: How to Prevent It",
+    "summary": "Why travel so often causes constipation, and a simple before, during and after plan to keep things moving.",
+    "minutes": 2
   },
   {
     "href": "/guides/constipation-when-to-see-a-doctor",
