@@ -14,8 +14,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JE9KCKNQ54"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-JE9KCKNQ54');</script>
+    <script src="/consent.js"></script>
     <style>
 :root{--ivory:#FBF9F5;--ivory-dark:#F3EFE6;--forest:#14382B;--forest-soft:#EAF1ED;--terra:#B85D36;--ink:#2C2A26;--muted:#635F57;--border:#E5DFD5}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
@@ -24,6 +23,7 @@ a{color:var(--forest);text-decoration:underline;text-underline-offset:3px}a:hove
 header.site{background:#fff;border-bottom:1px solid var(--border)}
 .wrap{max-width:760px;margin:0 auto;padding:0 20px}
 header.site .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;flex-wrap:wrap}
+.skip{position:absolute;left:-999px}.skip:focus{left:16px;top:8px;background:#fff;padding:8px 12px;z-index:10}
 .brand{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:20px;color:var(--forest);text-decoration:none}
 nav.top a{font-size:14px;font-weight:600;text-decoration:none;margin-right:16px}
 main{padding:48px 0 64px}
@@ -36,18 +36,21 @@ ul{padding-left:22px}li{margin:6px 0}
 .btn{display:inline-block;background:var(--forest);color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:999px;margin-top:12px}
 .btn:hover{background:var(--terra);color:#fff}
 footer.site{background:var(--forest);color:var(--forest-soft);font-size:14px;padding:32px 0}
-footer.site a{color:#fff;margin-right:16px}
+footer.site a,footer.site .linklike{color:#fff;margin-right:16px;display:inline-block;padding:6px 0}
+.linklike{background:none;border:0;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+:focus-visible{outline:3px solid #B85D36;outline-offset:2px}
 footer.site p{margin:12px 0 0;opacity:.8;font-size:13px}
 </style>
   </head>
   <body>
     <header class="site">
       <div class="wrap">
+        <a class="skip" href="#main">Skip to content</a>
         <a class="brand" href="/">Everyday Gut Wellness</a>
         <nav class="top" aria-label="Main"><a href="/">Guide</a><a href="/about.html">About</a><a href="/#gut-clarity-workbook">Workbook</a></nav>
       </div>
     </header>
-    <main>
+    <main id="main">
       <div class="wrap">
         <p class="eyebrow">Error 404</p>
         <h1>Page not found</h1>
@@ -57,7 +60,7 @@ footer.site p{margin:12px 0 0;opacity:.8;font-size:13px}
     </main>
     <footer class="site">
       <div class="wrap">
-        <a href="/">Home</a><a href="/about.html">About</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a><a href="mailto:hello@everydaygutwellness.com">Contact</a>
+        <a href="/">Home</a><a href="/about.html">About</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a><a href="mailto:hello@everydaygutwellness.com">Contact</a><button type="button" class="linklike" onclick="window.egwCookieSettings&&window.egwCookieSettings()">Cookie settings</button>
         <p>Everyday Gut Wellness is an independent educational publication. It does not provide medical advice, diagnosis, or treatment. Always talk with a qualified clinician about your own health.</p>
         <p>&copy; 2026 Everyday Gut Wellness. All rights reserved.</p>
       </div>

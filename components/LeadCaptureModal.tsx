@@ -273,7 +273,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                     className="w-4 h-4 mt-0.5 rounded border-[#D5CFC5] text-[#14382B] focus:ring-[#14382B] accent-[#14382B] cursor-pointer"
                   />
                   <label htmlFor="lead-marketing-consent" className="text-xs text-[#4A463F] leading-snug select-none cursor-pointer">
-                    <span className="font-semibold text-[#14382B]">(Optional)</span> Yes, I would also like to receive future educational wellness articles, daily habit tips, and digital product updates. You can unsubscribe at any time with 1 click.
+                    <span className="font-semibold text-[#14382B]">(Optional)</span> Yes, email me a copy of the guide, plus practical routine tips, new guides, and product updates from Everyday Gut Wellness. Unsubscribe anytime with one click. See our <a href="/privacy.html" target="_blank" rel="noopener" className="underline text-[#14382B]">Privacy Policy</a>.
                   </label>
                 </div>
 

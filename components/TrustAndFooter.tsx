@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ShieldCheck, Mail, X, Heart, ExternalLink } from 'lucide-react';
 
 interface TrustAndFooterProps {
@@ -12,6 +12,22 @@ interface TrustAndFooterProps {
 
 export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) => {
   const [activeModal, setActiveModal] = useState<'contact' | 'editorial' | 'affiliate' | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!activeModal) return;
+    openerRef.current = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveModal(null);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      openerRef.current?.focus();
+    };
+  }, [activeModal]);
 
   return (
     <footer className="bg-[#14382B] text-[#EAF1ED] pt-16 pb-12 border-t border-[#0E281E]">
@@ -28,7 +44,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
             </p>
             <div className="text-xs text-[#EAF1ED]/60 space-y-1">
               <p>Independent educational resource · Not a medical provider</p>
-              <p>United States Dietary Guidelines Reference Edition</p>
+              <p>Based on published dietary guidelines and peer-reviewed research</p>
             </div>
           </div>
 
@@ -112,7 +128,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                 onClick={() => setActiveModal('editorial')}
                 className="block text-xs text-[#EAF1ED]/80 hover:text-white transition-colors text-left"
               >
-                Editorial Standards & Medical Review Process
+                Editorial Standards & Sources
               </button>
               <a
                 href="/privacy.html"
@@ -140,6 +156,13 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
               >
                 Contact Editorial Desk
               </button>
+              <button
+                type="button"
+                onClick={() => (window as any).egwCookieSettings?.()}
+                className="block text-xs text-[#EAF1ED]/80 hover:text-white transition-colors text-left"
+              >
+                Cookie Settings
+              </button>
             </div>
 
             <div className="pt-2 text-xs text-[#EAF1ED]/70 leading-relaxed bg-white/5 p-3 rounded-lg border border-white/10">
@@ -152,7 +175,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
         {/* Detailed Medical Disclaimer */}
         <div className="bg-black/20 rounded-xl p-5 border border-white/10 text-xs text-[#EAF1ED]/70 space-y-2">
           <strong className="text-white block font-semibold uppercase tracking-wider text-[11px]">
-            Comprehensive Clinical & Educational Disclaimer (FDA Compliance):
+            Medical & Educational Disclaimer:
           </strong>
           <p className="leading-relaxed">
             The content on Everyday Gut Wellness is created strictly for informational and educational purposes. It is not intended to provide medical advice, diagnosis, or treatment, nor does it create a doctor-patient relationship. Statements on this website have not been evaluated by the Food and Drug Administration. Any dietary supplement or formulation mentioned is not intended to diagnose, treat, cure, or prevent any disease. Always seek the advice of your physician, gastroenterologist, or other qualified healthcare provider with any questions you may have regarding a medical condition. Never disregard professional medical advice or delay in seeking it because of something you have read on this website.
@@ -180,9 +203,10 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
 
       {/* Modals for Contact, Editorial, Affiliate */}
       {activeModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white text-[#2C2A26] rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={(e) => { if (e.target === e.currentTarget) setActiveModal(null); }}>
+          <div role="dialog" aria-modal="true" aria-labelledby="footer-dialog-title" className="bg-white text-[#2C2A26] rounded-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <button
+              ref={closeRef}
               type="button"
               onClick={() => setActiveModal(null)}
               className="absolute top-5 right-5 p-1.5 rounded-lg text-[#635F57] hover:bg-[#F3EFE6] transition-colors"
@@ -198,7 +222,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                   <Mail className="w-4 h-4 text-[#14382B]" />
                   <span>Editorial Desk</span>
                 </div>
-                <h3 className="text-xl font-serif font-bold text-[#14382B]">
+                <h3 id="footer-dialog-title" className="text-xl font-serif font-bold text-[#14382B]">
                   Contact & Reader Feedback
                 </h3>
                 <div className="text-xs sm:text-sm text-[#4A463F] space-y-3 leading-relaxed">
@@ -223,7 +247,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                   <ShieldCheck className="w-4 h-4 text-[#14382B]" />
                   <span>Affiliate Disclosure</span>
                 </div>
-                <h3 className="text-xl font-serif font-bold text-[#14382B]">
+                <h3 id="footer-dialog-title" className="text-xl font-serif font-bold text-[#14382B]">
                   Affiliate & Financial Transparency
                 </h3>
                 <div className="text-xs sm:text-sm text-[#4A463F] space-y-3 leading-relaxed">
@@ -242,9 +266,9 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#14382B]">
                   <ShieldCheck className="w-4 h-4 text-[#14382B]" />
-                  <span>Review Standards</span>
+                  <span>Editorial Standards</span>
                 </div>
-                <h3 className="text-xl font-serif font-bold text-[#14382B]">
+                <h3 id="footer-dialog-title" className="text-xl font-serif font-bold text-[#14382B]">
                   Editorial & Evidence Standards
                 </h3>
                 <div className="text-xs sm:text-sm text-[#4A463F] space-y-3 leading-relaxed">
@@ -259,6 +283,9 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                     <li>Clear distinction between everyday benign irregularity and red-flag clinical symptoms.</li>
                     <li>Uncompromising independence in evaluating dietary supplements against deceptive marketing practices.</li>
                   </ul>
+                  <p>
+                    Articles are researched and written by our editorial team and are not individually reviewed by a licensed clinician. Spot an error? Email hello@everydaygutwellness.com and we will check and correct it.
+                  </p>
                 </div>
               </div>
             )}

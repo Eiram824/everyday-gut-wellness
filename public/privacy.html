@@ -16,8 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JE9KCKNQ54"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-JE9KCKNQ54');</script>
+    <script src="/consent.js"></script>
     <style>
 :root{--ivory:#FBF9F5;--ivory-dark:#F3EFE6;--forest:#14382B;--forest-soft:#EAF1ED;--terra:#B85D36;--ink:#2C2A26;--muted:#635F57;--border:#E5DFD5}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
@@ -26,6 +25,7 @@ a{color:var(--forest);text-decoration:underline;text-underline-offset:3px}a:hove
 header.site{background:#fff;border-bottom:1px solid var(--border)}
 .wrap{max-width:760px;margin:0 auto;padding:0 20px}
 header.site .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:64px;flex-wrap:wrap}
+.skip{position:absolute;left:-999px}.skip:focus{left:16px;top:8px;background:#fff;padding:8px 12px;z-index:10}
 .brand{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:20px;color:var(--forest);text-decoration:none}
 nav.top a{font-size:14px;font-weight:600;text-decoration:none;margin-right:16px}
 main{padding:48px 0 64px}
@@ -38,78 +38,94 @@ ul{padding-left:22px}li{margin:6px 0}
 .btn{display:inline-block;background:var(--forest);color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:999px;margin-top:12px}
 .btn:hover{background:var(--terra);color:#fff}
 footer.site{background:var(--forest);color:var(--forest-soft);font-size:14px;padding:32px 0}
-footer.site a{color:#fff;margin-right:16px}
+footer.site a,footer.site .linklike{color:#fff;margin-right:16px;display:inline-block;padding:6px 0}
+.linklike{background:none;border:0;font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+:focus-visible{outline:3px solid #B85D36;outline-offset:2px}
 footer.site p{margin:12px 0 0;opacity:.8;font-size:13px}
 </style>
   </head>
   <body>
     <header class="site">
       <div class="wrap">
+        <a class="skip" href="#main">Skip to content</a>
         <a class="brand" href="/">Everyday Gut Wellness</a>
         <nav class="top" aria-label="Main"><a href="/">Guide</a><a href="/about.html">About</a><a href="/#gut-clarity-workbook">Workbook</a></nav>
       </div>
     </header>
-    <main>
+    <main id="main">
       <div class="wrap">
         <p class="eyebrow">Privacy</p>
         <h1>Privacy Policy</h1>
         <p class="updated">Last updated: November 19, 2026</p>
-        <p>This policy explains what information Everyday Gut Wellness ("we", "us") collects when you use everydaygutwellness.com, why we collect it, which services help us, and the choices you have. We keep it short and plain on purpose.</p>
+        <p>This policy explains what personal information Everyday Gut Wellness (&ldquo;we&rdquo;, &ldquo;us&rdquo;) collects when you use everydaygutwellness.com, why, which services help us, and the choices and rights you have. We keep it plain on purpose.</p>
 
-        <h2>Information we collect</h2>
+        <h2 id="who">Who we are</h2>
+        <p>Everyday Gut Wellness is an independent educational publication operated from Napindan, Taguig City 1630, Philippines. We are the &ldquo;controller&rdquo; of the personal information described here. Contact for all privacy matters: <a href="mailto:hello@everydaygutwellness.com">hello@everydaygutwellness.com</a>.</p>
+
+        <h2 id="collect">Information we collect</h2>
         <ul>
           <li><strong>When you request the free 7-Day Gentle Gut Reset Guide:</strong> your first name (optional), your email address, whether you ticked the box to receive emails from us, and the date and page you signed up from.</li>
-          <li><strong>When you buy a workbook or planner:</strong> checkout happens on Gumroad. Gumroad tells us your name, email address, and what you bought so we can support your order. We never see or store your card details.</li>
-          <li><strong>When you browse the site:</strong> Google Analytics 4 collects aggregate usage data such as pages viewed, device type, approximate region, and how you arrived. Our host, Netlify, keeps standard server logs (such as IP address and browser type) for security and reliability.</li>
+          <li><strong>When you buy a workbook or planner:</strong> checkout happens on Gumroad. Gumroad shares your name, email address, and what you bought so we can support your order. We never see or store your card details.</li>
+          <li><strong>When you browse the site:</strong> if analytics cookies are allowed (see <a href="#cookies">Cookies</a>), Google Analytics 4 collects usage data such as pages viewed, device type, approximate region, and how you arrived. Google Analytics 4 does not log or store full IP addresses. Our host, Netlify, keeps standard server logs (such as IP address and browser type) for security and reliability.</li>
         </ul>
         <p>We do not ask for, and do not want, health records, diagnoses, or symptom details. Please do not send us personal medical information.</p>
 
-        <h2>How we use your information</h2>
+        <h2 id="use">How we use it, and our legal bases</h2>
         <ul>
-          <li>To give you the free guide you asked for.</li>
-          <li>Only if you ticked the consent box: to email you the guide and a short series of practical digestive-routine notes, followed by occasional updates about new guides and our workbooks. Every email has a one-click unsubscribe link.</li>
-          <li>To deliver and support digital products you buy.</li>
-          <li>To understand which pages are useful so we can improve the site.</li>
-          <li>To keep the site secure and prevent abuse.</li>
+          <li><strong>To give you the free guide you asked for</strong> (to take steps you requested).</li>
+          <li><strong>Only if you ticked the consent box:</strong> to email you the guide, a short series of practical digestive-routine notes, and occasional updates about new guides and our workbooks (your consent; withdraw it any time with the unsubscribe link in every email).</li>
+          <li><strong>To deliver and support digital products you buy</strong> (to perform our contract with you).</li>
+          <li><strong>To understand which pages are useful</strong> (your consent where the law requires it, otherwise our legitimate interest in improving the site).</li>
+          <li><strong>To keep the site secure and prevent abuse</strong> (our legitimate interest), and to keep records the law requires (legal obligation).</li>
         </ul>
-        <p>We do not sell or rent your personal information, and we do not share it with advertisers.</p>
+        <p>We do not sell or rent your personal information, we do not share it for cross-context behavioral advertising, and we do not use it to make automated decisions about you.</p>
 
-        <h2>Services that process data for us</h2>
+        <h2 id="processors">Services that process data for us</h2>
         <ul>
           <li><strong>Supabase</strong> stores signup records (name, email, consent choice, signup date).</li>
-          <li><strong>Systeme.io</strong> sends our emails to readers who gave consent, and handles unsubscribes.</li>
+          <li><strong>Systeme.io</strong> sends our emails to readers who gave consent and handles unsubscribes.</li>
           <li><strong>Gumroad</strong> processes payments and delivers purchased files under its own <a href="https://gumroad.com/privacy" rel="noopener">privacy policy</a>.</li>
           <li><strong>Google Analytics</strong> measures site usage under <a href="https://policies.google.com/privacy" rel="noopener">Google&rsquo;s privacy policy</a>.</li>
           <li><strong>Netlify</strong> hosts the website.</li>
         </ul>
-        <p>These providers may store data on servers outside your country. They process it only to provide their service to us.</p>
+        <p>These providers act on our instructions and may process data in the United States, the European Union, or other countries. Where the law requires it (for example for data from the UK or EU), transfers rely on the providers&rsquo; standard contractual clauses or an equivalent safeguard.</p>
 
-        <h2>Cookies</h2>
-        <p>Google Analytics sets cookies to tell visits apart. The site also saves a small note in your browser after you sign up, so you are not asked again. You can block or clear cookies in your browser settings at any time; the guide still works without them.</p>
+        <h2 id="cookies">Cookies</h2>
+        <ul>
+          <li><strong>Analytics cookies</strong> (Google Analytics, names starting with <code>_ga</code>, kept up to 2 years): only set if allowed. Visitors in the UK, EU, and EEA see them switched off until they click &ldquo;Accept&rdquo;. Everyone else can switch them off with &ldquo;Reject&rdquo;.</li>
+          <li><strong>Preference storage</strong> (in your browser, not sent to us): remembers your cookie choice and, after you sign up, that you already have the guide.</li>
+        </ul>
+        <p>We do not use advertising or tracking cookies. Change your choice any time: <button type="button" class="linklike" onclick="window.egwCookieSettings&&window.egwCookieSettings()">open cookie settings</button>. You can also block or clear cookies in your browser. The guide works either way.</p>
 
-        <h2>How long we keep information</h2>
-        <p>We keep signup records while you remain subscribed or until you ask us to delete them. If you unsubscribe, we keep only what we need to make sure you are not emailed again. Purchase records are kept as long as needed for tax and accounting.</p>
+        <h2 id="retention">How long we keep information</h2>
+        <p>We keep signup records while you remain subscribed or until you ask us to delete them. If you unsubscribe, we keep only your email address on a suppression list so we never email you again. Purchase records are kept as long as tax and accounting law requires. Server logs are kept for a short period by our host.</p>
 
-        <h2>Your choices and rights</h2>
+        <h2 id="rights">Your rights</h2>
         <ul>
           <li><strong>Stop emails:</strong> click &ldquo;unsubscribe&rdquo; at the bottom of any email.</li>
-          <li><strong>See, correct, or delete your data:</strong> email <a href="mailto:hello@everydaygutwellness.com">hello@everydaygutwellness.com</a> from the address you signed up with. We reply within 30 days.</li>
+          <li><strong>Access, correct, delete, or export your data, or object to or restrict how we use it:</strong> email <a href="mailto:hello@everydaygutwellness.com">hello@everydaygutwellness.com</a> from the address you signed up with. We reply within 30 days and never charge for a reasonable request.</li>
         </ul>
-        <p>Depending on where you live (for example the EU, UK, or California), you may have additional rights under local law, and we honor them.</p>
+        <p><strong>UK, EU, and EEA residents</strong> also have the right to complain to a data protection authority, such as the UK Information Commissioner&rsquo;s Office (<a href="https://ico.org.uk" rel="noopener">ico.org.uk</a>) or the authority in the country where you live.</p>
+        <p><strong>California residents</strong> have the right to know, delete, and correct personal information, and to opt out of its sale or sharing. We do not sell or share personal information as those terms are defined in the CCPA/CPRA, and we will not discriminate against you for using your rights. Categories we collect are identifiers (name, email) and internet activity (analytics), from the sources and for the purposes described above.</p>
+        <p><strong>Canada, Australia, and the Philippines:</strong> we handle personal information consistently with PIPEDA, the Australian Privacy Principles, and the Philippine Data Privacy Act of 2012, and you may also contact the privacy regulator in your country.</p>
+        <p><strong>Do Not Track and Global Privacy Control:</strong> we do not track you across other websites. If your browser sends a Global Privacy Control signal, we treat it as a request to opt out of any sale or sharing.</p>
 
-        <h2>Children</h2>
-        <p>This site is written for adults. We do not knowingly collect information from children under 16.</p>
+        <h2 id="security">Security</h2>
+        <p>Data is sent over encrypted connections (HTTPS) and stored with providers that use access controls and encryption. No system is perfectly secure, so we collect only what we need.</p>
 
-        <h2>Changes to this policy</h2>
-        <p>If we change how we handle data, we will update this page and the date at the top.</p>
+        <h2 id="children">Children</h2>
+        <p>This site is written for adults. We do not knowingly collect information from anyone under 16. If you believe a child has given us information, contact us and we will delete it.</p>
 
-        <h2>Contact</h2>
-        <p>Questions about privacy: <a href="mailto:hello@everydaygutwellness.com">hello@everydaygutwellness.com</a>.</p>
+        <h2 id="changes">Changes to this policy</h2>
+        <p>If we change how we handle data, we will update this page and the date at the top. If a change is significant, we will tell subscribers by email.</p>
+
+        <h2 id="contact">Contact</h2>
+        <p>Questions or requests about privacy: <a href="mailto:hello@everydaygutwellness.com">hello@everydaygutwellness.com</a>, or write to Everyday Gut Wellness, Napindan, Taguig City 1630, Philippines.</p>
       </div>
     </main>
     <footer class="site">
       <div class="wrap">
-        <a href="/">Home</a><a href="/about.html">About</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a><a href="mailto:hello@everydaygutwellness.com">Contact</a>
+        <a href="/">Home</a><a href="/about.html">About</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a><a href="mailto:hello@everydaygutwellness.com">Contact</a><button type="button" class="linklike" onclick="window.egwCookieSettings&&window.egwCookieSettings()">Cookie settings</button>
         <p>Everyday Gut Wellness is an independent educational publication. It does not provide medical advice, diagnosis, or treatment. Always talk with a qualified clinician about your own health.</p>
         <p>&copy; 2026 Everyday Gut Wellness. All rights reserved.</p>
       </div>
