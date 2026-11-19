@@ -1,6 +1,8 @@
 import type { Config, Handler } from "@netlify/functions";
 import { jsonResponse, errorResponse } from "./lib/auth.js";
-import { isDatabaseConfigured, saveSubscriber, markSenderSync } from "./lib/db.js";
+import { isDatabaseConfigured, saveSubscriber, markSenderSync, captureSystemeGuideRequest } from "./lib/db.js";
+import { systemeConfig } from "./lib/systeme.js";
+import { processSystemeQueue } from "./lib/systeme-queue.js";
 
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 const MAX_REQUEST_BYTES = 16_384;
@@ -39,6 +41,26 @@ export const handler: Handler = async (event) => {
   try {
     // Persist first. The user only receives success after Supabase confirms the record.
     const subscriber = await saveSubscriber({ name, email, source, marketingConsent });
+
+    // Systeme.io (free plan allows one tag): the `gut-reset-lead` tag sends the
+    // guide email AND starts the nurture campaign, so only readers who ticked
+    // the marketing consent box are tagged. Everyone still gets the instant PDF.
+    // The queue dedupes per subscriber and a scheduled function retries
+    // failures, so a provider outage never blocks the PDF or double-sends.
+    let emailDeliveryStatus = marketingConsent ? "not_configured" : "not_requested";
+    const systeme = systemeConfig();
+    if (systeme.ready && marketingConsent && source === "ebook_lead_modal") {
+      try {
+        const jobId = await captureSystemeGuideRequest({ name, email, source, marketingConsent, tagId: systeme.tagId });
+        emailDeliveryStatus = "queued";
+        try { await processSystemeQueue(jobId); } catch {
+          console.warn("[Lead capture] guide-email sync will be retried");
+        }
+      } catch {
+        emailDeliveryStatus = "unavailable";
+        console.warn("[Lead capture] guide-email queue requires operator attention");
+      }
+    }
 
     // Marketing sync is optional and must never block delivery of the free guide.
     let senderSynced = false;
@@ -86,6 +108,7 @@ export const handler: Handler = async (event) => {
       subscriber: { name: subscriber.name, email: subscriber.email, marketingConsent: subscriber.marketingConsent },
       senderSynced,
       senderStatus,
+      emailDeliveryStatus,
     });
   } catch (error: any) {
     console.error("[Netlify Function] Lead capture failed:", error?.message || "unknown_error");
