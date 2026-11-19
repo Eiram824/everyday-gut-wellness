@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { createHmac } from "node:crypto";
 import type { Config, Handler } from "@netlify/functions";
 import { jsonResponse, errorResponse, safeSecretMatch } from "./lib/auth.js";
 import { isDatabaseConfigured, recordPurchase } from "./lib/db.js";
@@ -10,17 +11,36 @@ import { isDatabaseConfigured, recordPurchase } from "./lib/db.js";
 /**
  * Gumroad "Ping" receiver (Gumroad > Settings > Advanced > Ping endpoint).
  *
- * Gumroad Ping sends application/x-www-form-urlencoded data and cannot add
- * custom headers or signatures, so a request is accepted only when it proves
- * it came from our Gumroad account:
+ * Gumroad Ping sends application/x-www-form-urlencoded data. A request is
+ * accepted only when it proves it came from our Gumroad account:
  *   - its `seller_id` equals GUMROAD_SELLER_ID, and/or
- *   - the ping URL carries ?key=<GUMROAD_WEBHOOK_SECRET>.
+ *   - the ping URL carries ?key=<GUMROAD_WEBHOOK_SECRET>, and/or
+ *   - its X-Gumroad-Signature header ("t=<unix seconds>,v1=<hex>") is a valid
+ *     HMAC-SHA256 of "<t>.<raw body>" with GUMROAD_PING_SIGNING_SECRET
+ *     (Gumroad > Settings > Advanced > "Sign my pings"), at most 1 hour old.
  * Every configured check must pass. With neither configured the endpoint
  * fails closed (503), so nobody can write fake purchases.
  *
  * Sales are stored in Supabase `purchases` (scripts/gumroad-purchases-migration.sql).
  * Buyers are NOT added to the email list: buying is not consent to marketing.
  */
+
+const SIGNATURE_MAX_AGE_SECONDS = 60 * 60;
+
+export function verifyGumroadSignature(header: string, rawBody: string, secret: string, nowSeconds = Math.floor(Date.now() / 1000)): boolean {
+  const parts = Object.fromEntries(
+    header.split(",").map((part) => {
+      const i = part.indexOf("=");
+      return i > 0 ? [part.slice(0, i).trim(), part.slice(i + 1).trim()] : ["", ""];
+    }),
+  );
+  const t = parts.t || "";
+  const v1 = parts.v1 || "";
+  if (!/^\d{1,12}$/.test(t) || !/^[0-9a-f]{64}$/i.test(v1)) return false;
+  if (Math.abs(nowSeconds - Number(t)) > SIGNATURE_MAX_AGE_SECONDS) return false;
+  const expected = createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex");
+  return safeSecretMatch(v1.toLowerCase(), expected);
+}
 
 export const config: Config = {
   path: "/api/gumroad-webhook",
@@ -38,13 +58,15 @@ export const handler: Handler = async (event) => {
 
   const expectedSeller = (process.env.GUMROAD_SELLER_ID || "").trim();
   const expectedKey = (process.env.GUMROAD_WEBHOOK_SECRET || "").trim();
+  const signingSecret = (process.env.GUMROAD_PING_SIGNING_SECRET || "").trim();
   if (!event.body) {
     return errorResponse(400, "Webhook payload is empty.");
   }
 
   let data: Record<string, any>;
+  let raw: string;
   try {
-    const raw = event.isBase64Encoded ? Buffer.from(event.body, "base64").toString("utf8") : event.body;
+    raw = event.isBase64Encoded ? Buffer.from(event.body, "base64").toString("utf8") : event.body;
     if (firstHeader(event.headers as any, "content-type").includes("application/json")) {
       data = JSON.parse(raw);
     } else {
@@ -54,13 +76,19 @@ export const handler: Handler = async (event) => {
     return errorResponse(400, "Invalid webhook body.");
   }
 
-  if (!expectedSeller && !expectedKey) {
+  if (!expectedSeller && !expectedKey && !signingSecret) {
     // Setup aid: seller_id is a public account id (not a secret). Logging it lets
     // the owner copy it into GUMROAD_SELLER_ID after Gumroad's first test ping.
     console.warn(`[Gumroad Ping] Rejected: verification not configured. Received seller_id=${String(data.seller_id || "").slice(0, 64)}`);
     return errorResponse(503, "Webhook is not configured.");
   }
 
+  if (signingSecret) {
+    const signature = firstHeader(event.headers as any, "x-gumroad-signature");
+    if (!signature || !verifyGumroadSignature(signature, raw, signingSecret)) {
+      return errorResponse(401, "Unauthorized webhook request.");
+    }
+  }
   if (expectedKey) {
     const key = String(event.queryStringParameters?.key || "");
     if (!key || !safeSecretMatch(key, expectedKey)) {
