@@ -60,3 +60,12 @@
 
 # 3. No SPA catch-all: the app uses #hash navigation, so unknown paths get
 #    Netlify's real 404 response (public/404.html with status 404).
+
+# Security headers for every page and file.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()"

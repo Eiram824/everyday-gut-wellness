@@ -129,7 +129,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
             </div>
 
             <div className="space-y-1.5 sm:space-y-2 max-w-md">
-              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#B85D36]">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-[#A3502C]">
                 Access Granted · PDF Ready
               </span>
               <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold text-[#14382B]">
@@ -162,7 +162,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
               </button>
             </div>
 
-            <div className="pt-1 flex items-center gap-1.5 text-[11px] sm:text-xs text-[#8C877D]">
+            <div className="pt-1 flex items-center gap-1.5 text-[11px] sm:text-xs text-[#6F6A62]">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Free guide access. Optional email updates can be unsubscribed anytime.</span>
             </div>
@@ -181,7 +181,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 <>
                     <div className="relative rounded-lg overflow-hidden shadow-lg border border-[#DCD5C9] group">
                       <img
-                        src="/assets/images/ebook_cover_guide_1793359029909.jpg"
+                        src="/assets/images/ebook-cover-800.webp"
                         alt="The 7-Day Gentle Gut Reset eBook Cover"
                         className="w-full h-auto object-cover group-hover:scale-102 transition-transform duration-300"
                       />
@@ -207,7 +207,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
               
               {/* Header - Exactly matches user's screenshot as the immediate top view */}
               <div className="space-y-2 pr-8 sm:pr-0">
-                <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#B85D36] font-bold">
+                <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#A3502C] font-bold">
                   Instant Download & In-Browser Access
                 </span>
                 <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#14382B] leading-tight">
@@ -229,10 +229,10 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                 {/* First Name Field */}
                 <div>
                   <label htmlFor="lead-name" className="block text-xs font-semibold text-[#14382B] mb-1">
-                    First Name <span className="text-[#8C877D] font-normal">(Optional)</span>
+                    First Name <span className="text-[#6F6A62] font-normal">(Optional)</span>
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-[#8C877D] absolute left-3.5 top-3" />
+                    <User className="w-4 h-4 text-[#6F6A62] absolute left-3.5 top-3" />
                     <input
                       id="lead-name"
                       type="text"
@@ -250,7 +250,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                     Email Address <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-[#8C877D] absolute left-3.5 top-3" />
+                    <Mail className="w-4 h-4 text-[#6F6A62] absolute left-3.5 top-3" />
                     <input
                       id="lead-email"
                       type="email"
@@ -300,7 +300,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
               {/* Direct Reader Bypass Option & Trust Badges */}
               <div className="space-y-2.5 pt-1.5 border-t border-[#E5DFD5]">
 
-                <div className="flex items-center justify-center gap-2 sm:gap-3 text-[11px] text-[#8C877D]">
+                <div className="flex items-center justify-center gap-2 sm:gap-3 text-[11px] text-[#6F6A62]">
                   <span className="flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     100% Privacy Protected

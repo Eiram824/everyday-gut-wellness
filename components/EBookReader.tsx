@@ -72,7 +72,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
               <BookOpen className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-[11px] font-semibold tracking-wider uppercase text-[#B85D36]">Official Wellness Publication</span>
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-[#A3502C]">Official Wellness Publication</span>
               <h2 id="ebook-modal-title" className="text-sm sm:text-base font-serif font-bold text-[#14382B] truncate max-w-xs sm:max-w-md">
                 The 7-Day Gentle Gut Reset Guide
               </h2>
@@ -166,7 +166,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
           <button
             onClick={() => setActiveTab('tracker')}
             className={`px-3 py-1.5 rounded-md transition-colors whitespace-nowrap ${
-              activeTab === 'tracker' ? 'bg-[#B85D36] text-white shadow-sm' : 'text-[#635F57] hover:text-[#B85D36] hover:bg-white/60'
+              activeTab === 'tracker' ? 'bg-[#B85D36] text-white shadow-sm' : 'text-[#635F57] hover:text-[#A3502C] hover:bg-white/60'
             }`}
           >
             Ch. 5: Daily Tracker (Printable)
@@ -215,7 +215,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                         download="The-7-Day-Gentle-Gut-Reset-Guide.pdf"
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-[#14382B] hover:bg-emerald-50 rounded-lg text-sm font-bold transition-all shadow-md"
                       >
-                        <Download className="w-4 h-4 text-[#B85D36]" />
+                        <Download className="w-4 h-4 text-[#A3502C]" />
                         <span>Download Free PDF Guide</span>
                       </a>
                       <button
@@ -232,7 +232,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                   <div className="md:col-span-5 flex justify-center">
                     <div className="relative group max-w-xs rounded-xl overflow-hidden shadow-2xl border-2 border-white/20">
                       <img 
-                        src="/assets/images/ebook_cover_guide_1793359029909.jpg" 
+                        src="/assets/images/ebook-cover-800.webp" 
                         alt="The 7-Day Gentle Gut Reset eBook Cover" 
                         className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                         loading="eager"
@@ -249,7 +249,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
 
               {/* Author Note & Medical Framing */}
               <div className="bg-white p-6 rounded-xl border border-[#E5DFD5] shadow-sm space-y-4">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#B85D36]">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-[#A3502C]">
                   <CheckCircle2 className="w-4 h-4" />
                   Editorial Core Philosophy
                 </div>
@@ -276,10 +276,10 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                     className="flex items-center justify-between p-3 rounded-lg bg-white/80 hover:bg-white text-left transition-colors border border-[#E5DFD5]/60 group"
                   >
                     <div>
-                      <span className="text-xs font-semibold text-[#B85D36] block">Chapter 1</span>
+                      <span className="text-xs font-semibold text-[#A3502C] block">Chapter 1</span>
                       <span className="font-medium text-[#14382B] group-hover:underline">The Physiology of Digestion</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-[#8C877D] group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="w-4 h-4 text-[#6F6A62] group-hover:translate-x-1 transition-transform" />
                   </button>
 
                   <button 
@@ -287,10 +287,10 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                     className="flex items-center justify-between p-3 rounded-lg bg-white/80 hover:bg-white text-left transition-colors border border-[#E5DFD5]/60 group"
                   >
                     <div>
-                      <span className="text-xs font-semibold text-[#B85D36] block">Chapter 2</span>
+                      <span className="text-xs font-semibold text-[#A3502C] block">Chapter 2</span>
                       <span className="font-medium text-[#14382B] group-hover:underline">The 5 Non-Negotiable Daily Habits</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-[#8C877D] group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="w-4 h-4 text-[#6F6A62] group-hover:translate-x-1 transition-transform" />
                   </button>
 
                   <button 
@@ -298,10 +298,10 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                     className="flex items-center justify-between p-3 rounded-lg bg-white/80 hover:bg-white text-left transition-colors border border-[#E5DFD5]/60 group"
                   >
                     <div>
-                      <span className="text-xs font-semibold text-[#B85D36] block">Chapter 3</span>
+                      <span className="text-xs font-semibold text-[#A3502C] block">Chapter 3</span>
                       <span className="font-medium text-[#14382B] group-hover:underline">The 7-Day Day-by-Day Protocol</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-[#8C877D] group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="w-4 h-4 text-[#6F6A62] group-hover:translate-x-1 transition-transform" />
                   </button>
 
                   <button 
@@ -309,10 +309,10 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                     className="flex items-center justify-between p-3 rounded-lg bg-white/80 hover:bg-white text-left transition-colors border border-[#E5DFD5]/60 group"
                   >
                     <div>
-                      <span className="text-xs font-semibold text-[#B85D36] block">Chapter 4</span>
+                      <span className="text-xs font-semibold text-[#A3502C] block">Chapter 4</span>
                       <span className="font-medium text-[#14382B] group-hover:underline">Smart Swaps for Bloating</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-[#8C877D] group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="w-4 h-4 text-[#6F6A62] group-hover:translate-x-1 transition-transform" />
                   </button>
 
                   <button 
@@ -320,10 +320,10 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                     className="flex items-center justify-between p-3 rounded-lg bg-white/80 hover:bg-white text-left transition-colors border border-[#E5DFD5]/60 group sm:col-span-2"
                   >
                     <div>
-                      <span className="text-xs font-semibold text-[#B85D36] block">Chapter 5</span>
+                      <span className="text-xs font-semibold text-[#A3502C] block">Chapter 5</span>
                       <span className="font-medium text-[#14382B] group-hover:underline">Printable Daily Habit & Symptom Log</span>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-[#8C877D] group-hover:translate-x-1 transition-transform" />
+                    <ChevronRight className="w-4 h-4 text-[#6F6A62] group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </div>
@@ -334,11 +334,11 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
           {(activeTab === 'ch1' || window.matchMedia?.('print')?.matches) && (
             <article className="space-y-6 bg-white p-6 sm:p-8 rounded-2xl border border-[#E5DFD5] shadow-sm">
               <div className="border-b border-[#E5DFD5] pb-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#B85D36]">Chapter 1</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#A3502C]">Chapter 1</span>
                 <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#14382B] mt-1">
                   How Your Digestive Engine Actually Works
                 </h3>
-                <p className="text-xs text-[#8C877D] mt-1">Understanding Transit Time, Gut-Brain Wiring, and Peristalsis</p>
+                <p className="text-xs text-[#6F6A62] mt-1">Understanding Transit Time, Gut-Brain Wiring, and Peristalsis</p>
               </div>
 
               <div className="prose text-sm text-[#4A463F] space-y-4 leading-relaxed">
@@ -394,17 +394,17 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
           {(activeTab === 'ch2' || window.matchMedia?.('print')?.matches) && (
             <article className="space-y-6 bg-white p-6 sm:p-8 rounded-2xl border border-[#E5DFD5] shadow-sm">
               <div className="border-b border-[#E5DFD5] pb-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#B85D36]">Chapter 2</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#A3502C]">Chapter 2</span>
                 <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#14382B] mt-1">
                   The 5 Non-Negotiable Daily Habits
                 </h3>
-                <p className="text-xs text-[#8C877D] mt-1">The foundational lifestyle anchors that restore gut ease</p>
+                <p className="text-xs text-[#6F6A62] mt-1">The foundational lifestyle anchors that restore gut ease</p>
               </div>
 
               {/* Graphic Feature */}
               <div className="rounded-xl overflow-hidden border border-[#E5DFD5] bg-[#F3EFE6]">
                 <img 
-                  src="/assets/images/gut_healthy_bowl_1793359029827.jpg" 
+                  src="/assets/images/gut-healthy-bowl-1200.webp" 
                   alt="Nutrient-dense gut wellness bowl with sweet potatoes, greens, quinoa and healthy fats"
                   className="w-full h-48 sm:h-64 object-cover"
                   loading="lazy"
@@ -494,11 +494,11 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
           {(activeTab === 'ch3' || window.matchMedia?.('print')?.matches) && (
             <article className="space-y-6 bg-white p-6 sm:p-8 rounded-2xl border border-[#E5DFD5] shadow-sm">
               <div className="border-b border-[#E5DFD5] pb-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#B85D36]">Chapter 3</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#A3502C]">Chapter 3</span>
                 <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#14382B] mt-1">
                   The 7-Day Day-by-Day Reset Protocol
                 </h3>
-                <p className="text-xs text-[#8C877D] mt-1">Implement one simple, high-impact habit per day to build permanent rhythm</p>
+                <p className="text-xs text-[#6F6A62] mt-1">Implement one simple, high-impact habit per day to build permanent rhythm</p>
               </div>
 
               <div className="space-y-4 text-sm text-[#4A463F]">
@@ -506,7 +506,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                 <div className="border border-[#E5DFD5] rounded-xl p-4 bg-[#FBF9F5] space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-0.5 rounded bg-[#14382B] text-white text-xs font-bold font-serif">Day 1</span>
-                    <span className="text-xs font-medium text-[#B85D36]">Foundation</span>
+                    <span className="text-xs font-medium text-[#A3502C]">Foundation</span>
                   </div>
                   <h4 className="font-serif font-bold text-[#14382B] text-base">The Morning Hydration Anchor</h4>
                   <p className="text-xs sm:text-sm leading-relaxed">
@@ -518,7 +518,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                 <div className="border border-[#E5DFD5] rounded-xl p-4 bg-[#FBF9F5] space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-0.5 rounded bg-[#14382B] text-white text-xs font-bold font-serif">Day 2</span>
-                    <span className="text-xs font-medium text-[#B85D36]">Mechanical Ease</span>
+                    <span className="text-xs font-medium text-[#A3502C]">Mechanical Ease</span>
                   </div>
                   <h4 className="font-serif font-bold text-[#14382B] text-base">The Screen-Free Chewing Routine</h4>
                   <p className="text-xs sm:text-sm leading-relaxed">
@@ -530,7 +530,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                 <div className="border border-[#E5DFD5] rounded-xl p-4 bg-[#FBF9F5] space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-0.5 rounded bg-[#14382B] text-white text-xs font-bold font-serif">Day 3</span>
-                    <span className="text-xs font-medium text-[#B85D36]">Nourishment</span>
+                    <span className="text-xs font-medium text-[#A3502C]">Nourishment</span>
                   </div>
                   <h4 className="font-serif font-bold text-[#14382B] text-base">Add One Soluble Gel Booster</h4>
                   <p className="text-xs sm:text-sm leading-relaxed">
@@ -542,7 +542,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                 <div className="border border-[#E5DFD5] rounded-xl p-4 bg-[#FBF9F5] space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-0.5 rounded bg-[#14382B] text-white text-xs font-bold font-serif">Day 4</span>
-                    <span className="text-xs font-medium text-[#B85D36]">Audit</span>
+                    <span className="text-xs font-medium text-[#A3502C]">Audit</span>
                   </div>
                   <h4 className="font-serif font-bold text-[#14382B] text-base">The Gas & Bloat Trigger Pause</h4>
                   <p className="text-xs sm:text-sm leading-relaxed">
@@ -554,7 +554,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                 <div className="border border-[#E5DFD5] rounded-xl p-4 bg-[#FBF9F5] space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-0.5 rounded bg-[#14382B] text-white text-xs font-bold font-serif">Day 5</span>
-                    <span className="text-xs font-medium text-[#B85D36]">Motility</span>
+                    <span className="text-xs font-medium text-[#A3502C]">Motility</span>
                   </div>
                   <h4 className="font-serif font-bold text-[#14382B] text-base">The 10-Minute Post-Dinner Stroll</h4>
                   <p className="text-xs sm:text-sm leading-relaxed">
@@ -566,7 +566,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                 <div className="border border-[#E5DFD5] rounded-xl p-4 bg-[#FBF9F5] space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-0.5 rounded bg-[#14382B] text-white text-xs font-bold font-serif">Day 6</span>
-                    <span className="text-xs font-medium text-[#B85D36]">Circadian Rhythm</span>
+                    <span className="text-xs font-medium text-[#A3502C]">Circadian Rhythm</span>
                   </div>
                   <h4 className="font-serif font-bold text-[#14382B] text-base">The 3-Hour Digestive Night Fast</h4>
                   <p className="text-xs sm:text-sm leading-relaxed">
@@ -578,7 +578,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                 <div className="border border-[#E5DFD5] rounded-xl p-4 bg-[#FBF9F5] space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="px-2.5 py-0.5 rounded bg-[#14382B] text-white text-xs font-bold font-serif">Day 7</span>
-                    <span className="text-xs font-medium text-[#B85D36]">Mastery</span>
+                    <span className="text-xs font-medium text-[#A3502C]">Mastery</span>
                   </div>
                   <h4 className="font-serif font-bold text-[#14382B] text-base">The 30-Day Blueprint Synthesis</h4>
                   <p className="text-xs sm:text-sm leading-relaxed">
@@ -610,11 +610,11 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
           {(activeTab === 'ch4' || window.matchMedia?.('print')?.matches) && (
             <article className="space-y-6 bg-white p-6 sm:p-8 rounded-2xl border border-[#E5DFD5] shadow-sm">
               <div className="border-b border-[#E5DFD5] pb-4">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#B85D36]">Chapter 4</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#A3502C]">Chapter 4</span>
                 <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#14382B] mt-1">
                   Smart Food Swaps for Bloat Relief
                 </h3>
-                <p className="text-xs text-[#8C877D] mt-1">Practical adjustments that decrease fermentation gas while nourishing gut flora</p>
+                <p className="text-xs text-[#6F6A62] mt-1">Practical adjustments that decrease fermentation gas while nourishing gut flora</p>
               </div>
 
               <div className="overflow-x-auto">
@@ -628,27 +628,27 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
                   </thead>
                   <tbody className="divide-y divide-[#E5DFD5] text-[#4A463F]">
                     <tr className="hover:bg-[#F3EFE6]/50 transition-colors">
-                      <td className="p-3 font-semibold text-[#B85D36]">Raw cruciferous vegetables (Raw broccoli, raw kale)</td>
+                      <td className="p-3 font-semibold text-[#A3502C]">Raw cruciferous vegetables (Raw broccoli, raw kale)</td>
                       <td className="p-3">High in raffinose and tough insoluble cellulose that requires vigorous microbial fermentation.</td>
                       <td className="p-3 font-medium text-[#14382B]">Lightly steamed zucchini, roasted carrots, or tender spinach.</td>
                     </tr>
                     <tr className="hover:bg-[#F3EFE6]/50 transition-colors">
-                      <td className="p-3 font-semibold text-[#B85D36]">Carbonated water & diet sodas</td>
+                      <td className="p-3 font-semibold text-[#A3502C]">Carbonated water & diet sodas</td>
                       <td className="p-3">Introduces direct carbonic gas into the stomach alongside fermentable artificial polyols (sorbitol, mannitol).</td>
                       <td className="p-3 font-medium text-[#14382B]">Warm ginger tea with fresh lemon or filtered room-temperature water.</td>
                     </tr>
                     <tr className="hover:bg-[#F3EFE6]/50 transition-colors">
-                      <td className="p-3 font-semibold text-[#B85D36]">Refined white flour pastries & breads</td>
+                      <td className="p-3 font-semibold text-[#A3502C]">Refined white flour pastries & breads</td>
                       <td className="p-3">Low in water-retaining moisture; forms dense boluses that slow down colonic transit.</td>
                       <td className="p-3 font-medium text-[#14382B]">Slow-fermented genuine sourdough bread or steel-cut oatmeal.</td>
                     </tr>
                     <tr className="hover:bg-[#F3EFE6]/50 transition-colors">
-                      <td className="p-3 font-semibold text-[#B85D36]">Large unrinsed canned beans</td>
+                      <td className="p-3 font-semibold text-[#A3502C]">Large unrinsed canned beans</td>
                       <td className="p-3">Complex oligosaccharides in the canning liquid induce rapid fermentation in the distal colon.</td>
                       <td className="p-3 font-medium text-[#14382B]">Rinsed red lentils cooked with cumin or small peeled edamame.</td>
                     </tr>
                     <tr className="hover:bg-[#F3EFE6]/50 transition-colors">
-                      <td className="p-3 font-semibold text-[#B85D36]">Drinking 3 large glasses during lunch</td>
+                      <td className="p-3 font-semibold text-[#A3502C]">Drinking 3 large glasses during lunch</td>
                       <td className="p-3">Dilutes gastric pepsin and expands stomach volume excessively during food intake.</td>
                       <td className="p-3 font-medium text-[#14382B]">Sip 4–6 oz warm herbal tea slowly; drink larger volumes 45 mins after meals.</td>
                     </tr>
@@ -680,11 +680,11 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
             <article className="space-y-6 bg-white p-6 sm:p-8 rounded-2xl border-2 border-[#14382B]/20 shadow-sm print:border-none">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E5DFD5] pb-4">
                 <div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-[#B85D36]">Chapter 5 · Ready to Print</span>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[#A3502C]">Chapter 5 · Ready to Print</span>
                   <h3 className="text-2xl sm:text-3xl font-serif font-bold text-[#14382B] mt-1">
                     Daily Gut Wellness & Regularity Tracker
                   </h3>
-                  <p className="text-xs text-[#8C877D] mt-1">A simple daily reflection sheet to identify your body's unique rhythms</p>
+                  <p className="text-xs text-[#6F6A62] mt-1">A simple daily reflection sheet to identify your body's unique rhythms</p>
                 </div>
 
                 <button
@@ -847,7 +847,7 @@ export const EBookReader: React.FC<EBookReaderProps> = ({ isOpen, onClose }) => 
         </div>
 
         {/* Footer info (Print hidden) */}
-        <footer className="px-6 py-3 bg-white border-t border-[#E5DFD5] flex items-center justify-between text-xs text-[#8C877D] shrink-0 print:hidden">
+        <footer className="px-6 py-3 bg-white border-t border-[#E5DFD5] flex items-center justify-between text-xs text-[#6F6A62] shrink-0 print:hidden">
           <span>© 2026 Everyday Gut Wellness. For educational purposes only.</span>
           <div className="flex items-center gap-3">
             <span className="text-[#14382B] font-semibold">Everyday Gut Wellness Publication</span>

@@ -33,7 +33,7 @@ export const RoutineReset: React.FC = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mx-auto text-center space-y-4 mb-16">
-          <div className="text-xs font-semibold tracking-widest uppercase text-[#B85D36]">
+          <div className="text-xs font-semibold tracking-widest uppercase text-[#A3502C]">
             Everyday Rhythms
           </div>
           <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#14382B] tracking-tight [text-wrap:balance]">
@@ -87,8 +87,17 @@ export const RoutineReset: React.FC = () => {
             return (
               <div
                 key={item.id}
+                role="checkbox"
+                aria-checked={isDone}
+                tabIndex={0}
                 onClick={() => toggleItem(item.id)}
-                className={`p-5 sm:p-6 rounded-2xl border transition-all cursor-pointer select-none flex items-start gap-4 ${
+                onKeyDown={(e) => {
+                  if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    toggleItem(item.id);
+                  }
+                }}
+                className={`p-5 sm:p-6 rounded-2xl border transition-all cursor-pointer select-none flex items-start gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#14382B] focus-visible:ring-offset-2 ${
                   isDone
                     ? 'bg-white border-[#14382B]/40 shadow-sm'
                     : 'bg-white border-[#E5DFD5] hover:border-[#14382B]/30 hover:bg-[#FBF9F5]'
@@ -101,8 +110,7 @@ export const RoutineReset: React.FC = () => {
                       ? 'bg-[#14382B] border-[#14382B] text-white'
                       : 'border-[#8C877D] bg-transparent'
                   }`}
-                  aria-checked={isDone}
-                  role="checkbox"
+                  aria-hidden="true"
                 >
                   {isDone && <Check className="w-4 h-4 stroke-[3]" />}
                 </div>
@@ -110,14 +118,14 @@ export const RoutineReset: React.FC = () => {
                 {/* Content */}
                 <div className="space-y-1.5 flex-1">
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                    <span className="text-xs font-semibold text-[#B85D36] flex items-center gap-1">
+                    <span className="text-xs font-semibold text-[#A3502C] flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       <span>{item.timeWindow}</span>
                     </span>
                     <span aria-hidden="true" className="text-[#E5DFD5]">·</span>
-                    <h4 className={`text-base font-semibold ${isDone ? 'text-[#14382B]' : 'text-[#2C2A26]'}`}>
+                    <h3 className={`text-base font-semibold ${isDone ? 'text-[#14382B]' : 'text-[#2C2A26]'}`}>
                       {item.title}
-                    </h4>
+                    </h3>
                   </div>
 
                   <p className="text-sm text-[#4A463F] leading-relaxed">
@@ -137,7 +145,7 @@ export const RoutineReset: React.FC = () => {
         {/* The Posture Footnote */}
         <div className="mt-12 bg-white rounded-2xl border border-[#E5DFD5] p-6 sm:p-8 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#14382B]">
-            <Footprints className="w-4 h-4 text-[#B85D36]" />
+            <Footprints className="w-4 h-4 text-[#A3502C]" />
             <span>Ergonomics Note: The Squatting Angle</span>
           </div>
           <h4 className="text-lg font-serif font-bold text-[#14382B]">

@@ -20,11 +20,11 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Top Editorial Kicker */}
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-widest uppercase text-[#B85D36] mb-4">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-widest uppercase text-[#A3502C] mb-4">
           <span>Digestive Health Guide</span>
-          <span aria-hidden="true" className="text-[#8C877D]">·</span>
+          <span aria-hidden="true" className="text-[#6F6A62]">·</span>
           <span className="text-[#635F57]">Evidence-Informed</span>
-          <span aria-hidden="true" className="text-[#8C877D]">·</span>
+          <span aria-hidden="true" className="text-[#6F6A62]">·</span>
           <span className="text-[#635F57]">Public Health Guidelines</span>
         </div>
 
@@ -88,7 +88,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
                   <span className="text-xs font-semibold uppercase tracking-wider text-[#14382B]">
                     Everyday Regularity Pillars
                   </span>
-                  <span className="text-xs text-[#8C877D]">Gastrointestinal Rhythms</span>
+                  <span className="text-xs text-[#6F6A62]">Gastrointestinal Rhythms</span>
                 </div>
 
                 {/* 3 Pillar Summary Box */}
@@ -98,7 +98,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
                       1
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-[#14382B]">Diverse Fiber Matrix</h4>
+                      <h2 className="text-sm font-semibold text-[#14382B]">Diverse Fiber Matrix</h2>
                       <p className="text-xs text-[#635F57] mt-0.5 leading-relaxed">
                         Soluble fibers (which can form a gel) and insoluble bulk work together to support comfortable transit.
                       </p>
@@ -110,7 +110,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
                       2
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-[#14382B]">Proactive Fluid Hydration</h4>
+                      <h2 className="text-sm font-semibold text-[#14382B]">Proactive Fluid Hydration</h2>
                       <p className="text-xs text-[#635F57] mt-0.5 leading-relaxed">
                         Adequate water helps maintain stool hydration so that dietary fiber can work effectively.
                       </p>
@@ -122,7 +122,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
                       3
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-[#14382B]">The Gastrocolic Window</h4>
+                      <h2 className="text-sm font-semibold text-[#14382B]">The Gastrocolic Window</h2>
                       <p className="text-xs text-[#635F57] mt-0.5 leading-relaxed">
                         Allowing calm time after meals supports the body's natural gastrocolic reflex without strain.
                       </p>
@@ -130,7 +130,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
                   </div>
                 </div>
 
-                <div className="pt-2 text-center text-xs text-[#8C877D] italic">
+                <div className="pt-2 text-center text-xs text-[#6F6A62] italic">
                   Healthy bowel frequency naturally ranges from 3 times a day to 3 times a week.
                 </div>
               </div>

@@ -56,7 +56,7 @@ function readingMinutes(html) {
 }
 
 const CSS = `
-:root{--ivory:#FBF9F5;--forest:#14382B;--forest-soft:#EAF1ED;--terra:#B85D36;--terra-soft:#F8EFEA;--ink:#2C2A26;--muted:#635F57;--border:#E5DFD5}
+:root{--ivory:#FBF9F5;--forest:#14382B;--forest-soft:#EAF1ED;--terra:#A3502C;--terra-soft:#F8EFEA;--ink:#2C2A26;--muted:#635F57;--border:#E5DFD5}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--ivory);color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;line-height:1.7;font-size:17px}
 a{color:var(--forest);text-decoration:underline;text-underline-offset:3px}a:hover{color:var(--terra)}
@@ -107,6 +107,9 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${esc(title)}</title>
     <meta name="description" content="${esc(description)}" />

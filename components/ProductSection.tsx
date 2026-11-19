@@ -10,7 +10,7 @@ import { GUT_CLARITY_PRODUCT, GUT_ROUTINE_PLANNER_PRODUCT } from '../constants';
 const productCards = [
   {
     ...GUT_CLARITY_PRODUCT,
-    image: 'https://public-files.gumroad.com/m3o0mzdz54gzc3vt75c1suyecr7l',
+    image: '/assets/images/gut-clarity-cover-1280.webp',
     imageAlt: 'Cover of The 14-Day Gut Clarity Workbook',
     eyebrow: 'NOTICE & PREPARE',
     description: 'Capture observations and context, then turn scattered notes into a concise summary and useful questions for a healthcare conversation.',
@@ -25,7 +25,7 @@ const productCards = [
   },
   {
     ...GUT_ROUTINE_PLANNER_PRODUCT,
-    image: 'https://public-files.gumroad.com/sk4wkyzpoyq5zicx3ym72y60verl',
+    image: '/assets/images/gut-routine-planner-cover-1280.webp',
     imageAlt: 'Cover of The 30-Day Gut Routine Planner',
     eyebrow: 'PLAN & PRACTICE',
     description: 'Choose one everyday routine, fit it to your real schedule, and make a smaller fallback for busy, travel, or low-energy days.',
@@ -59,7 +59,7 @@ export const ProductSection: React.FC<ProductSectionProps> = () => (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
       <div className="mx-auto mb-12 max-w-3xl space-y-4 text-center">
         <span className="inline-flex items-center gap-2 rounded-full bg-[#14382B]/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-[#14382B]">
-          <BookOpenCheck aria-hidden="true" className="h-4 w-4 text-[#B85D36]" />
+          <BookOpenCheck aria-hidden="true" className="h-4 w-4 text-[#A3502C]" />
           Practical tools, clear purpose
         </span>
         <h2 id="workbooks-title" className="font-serif text-3xl font-bold tracking-tight text-[#14382B] [text-wrap:balance] sm:text-4xl lg:text-5xl">
@@ -86,7 +86,7 @@ export const ProductSection: React.FC<ProductSectionProps> = () => (
 
             <div className="flex flex-1 flex-col p-6 sm:p-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#B85D36]">{product.eyebrow}</span>
+                <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#A3502C]">{product.eyebrow}</span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#14382B]/[0.07] px-3 py-1.5 text-xs font-semibold text-[#14382B]">
                   <CalendarDays aria-hidden="true" className="h-3.5 w-3.5" />
                   {product.format}
@@ -130,7 +130,7 @@ export const ProductSection: React.FC<ProductSectionProps> = () => (
                       Listing being prepared
                     </span>
                   )}
-                  <span className="text-xs leading-relaxed text-[#8C877D]">Instant digital delivery handled by Gumroad.</span>
+                  <span className="text-xs leading-relaxed text-[#6F6A62]">Instant digital delivery handled by Gumroad.</span>
                 </div>
               </div>
             </div>

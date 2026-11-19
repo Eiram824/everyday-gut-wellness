@@ -249,7 +249,7 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
             onClick={() => setActiveTab('gumroad')}
             className={`py-3 px-4 text-xs font-semibold uppercase tracking-wider border-b-2 flex items-center gap-2 transition-colors ${
               activeTab === 'gumroad'
-                ? 'border-[#B85D36] text-[#B85D36]'
+                ? 'border-[#B85D36] text-[#A3502C]'
                 : 'border-transparent text-[#635F57] hover:text-[#14382B]'
             }`}
           >
@@ -291,7 +291,7 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
 
             <div className="rounded-2xl border border-[#E5DFD5] bg-white p-5">
               <div className="flex items-start gap-3">
-                <BookOpen className="mt-0.5 h-5 w-5 text-[#B85D36]" />
+                <BookOpen className="mt-0.5 h-5 w-5 text-[#A3502C]" />
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-[#635F57]">Future product concept</p>
                   <h5 className="mt-1 font-serif text-lg font-bold text-[#14382B]">The 30-Day Digestive Wellness Planner</h5>
@@ -346,7 +346,7 @@ export const LeadAdminModal: React.FC<LeadAdminModalProps> = ({ isOpen, onClose 
                   </button>
                 </form>
 
-                <p className="text-[11px] text-[#8C877D]">
+                <p className="text-[11px] text-[#6F6A62]">
                   Access restricted to authorized administrators. Configure your secret key via <code className="bg-stone-100 px-1 py-0.5 rounded text-stone-700">ADMIN_ACCESS_KEY</code> in server environment variables.
                 </p>
               </div>
