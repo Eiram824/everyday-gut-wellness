@@ -31,8 +31,7 @@ function collectTargets(section: Element): Element[] {
     const isHeader = !!block.querySelector(':scope > h2');
     const isList = hasClass(block, 'grid') || hasClass(block, 'space-y') || block.tagName === 'UL';
     if ((isHeader || isList) && block.children.length > 0) {
-      // Headings get their own entrance (see initHeadings), so skip them here.
-      targets.push(...Array.from(block.children).filter((c) => !/^H[1-3]$/.test(c.tagName)));
+      targets.push(...Array.from(block.children));
     } else {
       targets.push(block);
     }
@@ -89,76 +88,12 @@ export function initReveal(): () => void {
     }
   });
 
-  const stopHeadings = initHeadings(fold);
   const revealAll = () => hidden.forEach((el) => el.removeAttribute('data-reveal'));
   window.addEventListener('beforeprint', revealAll);
 
   return () => {
     io.disconnect();
-    stopHeadings();
     window.removeEventListener('beforeprint', revealAll);
     revealAll();
   };
-}
-
-/**
- * Headings (H2/H3) get their own motion, different from the content blocks:
- * - Entrance: the words appear one after another, each rising softly into place.
- * - Hover: the words do a small wave (each lifts a few pixels in turn) and warm
- *   to terracotta. Styles live in index.css.
- * Only plain-text headings are split into word spans; the original text nodes are
- * kept and put back on cleanup, so React's view of the DOM stays correct.
- */
-function initHeadings(fold: number): () => void {
-  const MAX_WORD_DELAY = 14;
-  const headings = Array.from(
-    document.querySelectorAll<HTMLElement>('#free-ebook h2, main h2, main h3'),
-  );
-  const originals = new Map<HTMLElement, ChildNode[]>();
-
-  for (const h of headings) {
-    const nodes = Array.from(h.childNodes);
-    if (!nodes.length || !nodes.every((n) => n.nodeType === Node.TEXT_NODE)) continue;
-    const words = (h.textContent || '').trim().split(/\s+/);
-    if (!words.length) continue;
-    originals.set(h, nodes);
-    const frag = document.createDocumentFragment();
-    words.forEach((word, i) => {
-      const span = document.createElement('span');
-      span.className = 'egw-word';
-      span.textContent = word;
-      span.style.setProperty('--i', String(Math.min(i, MAX_WORD_DELAY)));
-      frag.appendChild(span);
-      if (i < words.length - 1) frag.appendChild(document.createTextNode(' '));
-    });
-    h.setAttribute('aria-label', words.join(' '));
-    h.replaceChildren(frag);
-    h.setAttribute('data-words', h.getBoundingClientRect().top < fold ? 'in' : '');
-  }
-
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        io.unobserve(entry.target);
-        entry.target.setAttribute('data-words', 'in');
-      }
-    },
-    { rootMargin: '0px 0px -10% 0px', threshold: 0 },
-  );
-  originals.forEach((_, h) => {
-    if (h.getAttribute('data-words') === '') io.observe(h);
-  });
-
-  const restore = () => {
-    io.disconnect();
-    originals.forEach((nodes, h) => {
-      h.replaceChildren(...nodes);
-      h.removeAttribute('data-words');
-      h.removeAttribute('aria-label');
-    });
-    originals.clear();
-  };
-  window.addEventListener('beforeprint', restore, { once: true });
-  return restore;
 }
