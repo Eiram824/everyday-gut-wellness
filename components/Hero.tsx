@@ -33,7 +33,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, onJumpToReset, onOpenEBoo
           {/* Main Copy Column */}
           <div className="lg:col-span-7 space-y-6">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-serif font-bold text-[#14382B] leading-[1.15] tracking-tight [text-wrap:balance]">
-              Restore Your Natural Digestive Rhythm with Simple Daily Habits
+              <span className="egw-hero-title">Restore Your Natural Digestive Rhythm with Simple Daily Habits</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-[#4A463F] leading-relaxed max-w-2xl font-light">

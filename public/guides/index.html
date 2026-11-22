@@ -22,6 +22,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <script src="/consent.js"></script>
+    <script src="/motion.js" defer></script>
     <style>
 :root{--ivory:#FBF9F5;--forest:#14382B;--forest-soft:#EAF1ED;--terra:#A3502C;--terra-soft:#F8EFEA;--ink:#2C2A26;--muted:#635F57;--border:#E5DFD5}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
@@ -60,6 +61,10 @@ th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-a
 footer.site{background:var(--forest);color:var(--forest-soft);font-size:14px;padding:32px 0}
 footer.site a,footer.site .linklike{color:#fff;margin-right:16px;display:inline-block;padding:6px 0}
 footer.site p{margin:12px 0 0;opacity:.85;font-size:13px}
+@media (prefers-reduced-motion:no-preference){[data-reveal]{opacity:0;transform:translate3d(0,20px,0);transition:opacity .6s ease-out,transform .6s cubic-bezier(.22,.61,.36,1)}[data-reveal=in]{opacity:1;transform:none}[data-reveal-delay='1']{transition-delay:90ms}[data-reveal-delay='2']{transition-delay:180ms}[data-reveal-delay='3']{transition-delay:270ms}[data-reveal-delay='4']{transition-delay:360ms}}
+@media (prefers-reduced-motion:no-preference){.btn,.cards li{transition:transform .25s cubic-bezier(.22,.61,.36,1),box-shadow .25s ease}.btn:active{transform:scale(.97)}}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){.btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px -10px rgba(20,56,43,.45)}.cards li:not([data-reveal]):hover{transform:translateY(-3px);box-shadow:0 14px 30px -20px rgba(20,56,43,.35)}}
+@media print{[data-reveal]{opacity:1!important;transform:none!important}}
 </style>
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"CollectionPage","name":"Everyday Digestive Health Guides","url":"https://everydaygutwellness.com/guides/","hasPart":[{"@type":"Article","headline":"Soluble vs Insoluble Fiber: What Is the Difference?","url":"https://everydaygutwellness.com/guides/soluble-vs-insoluble-fiber"},{"@type":"Article","headline":"A Simple Morning Routine for Regular Bowel Movements","url":"https://everydaygutwellness.com/guides/morning-routine-for-regular-bowel-movements"},{"@type":"Article","headline":"How Often Should You Poop? What Is Normal","url":"https://everydaygutwellness.com/guides/how-often-should-you-poop"},{"@type":"Article","headline":"How Much Fiber Do You Need a Day?","url":"https://everydaygutwellness.com/guides/how-much-fiber-per-day"},{"@type":"Article","headline":"Foods That Help Constipation (and How Much to Eat)","url":"https://everydaygutwellness.com/guides/foods-that-help-constipation"},{"@type":"Article","headline":"Does Drinking Water Help Constipation?","url":"https://everydaygutwellness.com/guides/does-drinking-water-help-constipation"},{"@type":"Article","headline":"Constipation When Traveling: How to Prevent It","url":"https://everydaygutwellness.com/guides/constipation-when-traveling"},{"@type":"Article","headline":"Constipation: When to See a Doctor","url":"https://everydaygutwellness.com/guides/constipation-when-to-see-a-doctor"}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://everydaygutwellness.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://everydaygutwellness.com/guides/"}]}]}</script>
   </head>

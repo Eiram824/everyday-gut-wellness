@@ -18,11 +18,24 @@ import MythVsFact from './components/MythVsFact';
 import MedicalAdvice from './components/MedicalAdvice';
 import ProductSection from './components/ProductSection';
 import TrustAndFooter from './components/TrustAndFooter';
+import { initReveal } from './reveal';
 
 export function App() {
   const [isEBookOpen, setIsEBookOpen] = useState(false);
   const [isLeadCaptureOpen, setIsLeadCaptureOpen] = useState(false);
   const [isLeadAdminOpen, setIsLeadAdminOpen] = useState(false);
+
+  // Subtle fade/slide-up as sections scroll into view (skips anything visible on load).
+  React.useEffect(() => {
+    let cleanup = () => {};
+    const frame = window.requestAnimationFrame(() => {
+      cleanup = initReveal();
+    });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      cleanup();
+    };
+  }, []);
 
   // Discreet creator access (Ctrl+Shift+L or #admin in URL) without showing public footer button
   React.useEffect(() => {

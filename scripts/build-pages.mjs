@@ -93,6 +93,10 @@ th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-a
 footer.site{background:var(--forest);color:var(--forest-soft);font-size:14px;padding:32px 0}
 footer.site a,footer.site .linklike{color:#fff;margin-right:16px;display:inline-block;padding:6px 0}
 footer.site p{margin:12px 0 0;opacity:.85;font-size:13px}
+@media (prefers-reduced-motion:no-preference){[data-reveal]{opacity:0;transform:translate3d(0,20px,0);transition:opacity .6s ease-out,transform .6s cubic-bezier(.22,.61,.36,1)}[data-reveal=in]{opacity:1;transform:none}[data-reveal-delay='1']{transition-delay:90ms}[data-reveal-delay='2']{transition-delay:180ms}[data-reveal-delay='3']{transition-delay:270ms}[data-reveal-delay='4']{transition-delay:360ms}}
+@media (prefers-reduced-motion:no-preference){.btn,.cards li{transition:transform .25s cubic-bezier(.22,.61,.36,1),box-shadow .25s ease}.btn:active{transform:scale(.97)}}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){.btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px -10px rgba(20,56,43,.45)}.cards li:not([data-reveal]):hover{transform:translateY(-3px);box-shadow:0 14px 30px -20px rgba(20,56,43,.35)}}
+@media print{[data-reveal]{opacity:1!important;transform:none!important}}
 `;
 
 function layout({ urlPath, title, description, index = true, ogType = 'website', jsonLd = [], inner }) {
@@ -125,6 +129,7 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <script src="/consent.js"></script>
+    <script src="/motion.js" defer></script>
     <style>${CSS}</style>${ld}
   </head>
   <body>

@@ -22,6 +22,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <script src="/consent.js"></script>
+    <script src="/motion.js" defer></script>
     <style>
 :root{--ivory:#FBF9F5;--forest:#14382B;--forest-soft:#EAF1ED;--terra:#A3502C;--terra-soft:#F8EFEA;--ink:#2C2A26;--muted:#635F57;--border:#E5DFD5}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
@@ -60,6 +61,10 @@ th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-a
 footer.site{background:var(--forest);color:var(--forest-soft);font-size:14px;padding:32px 0}
 footer.site a,footer.site .linklike{color:#fff;margin-right:16px;display:inline-block;padding:6px 0}
 footer.site p{margin:12px 0 0;opacity:.85;font-size:13px}
+@media (prefers-reduced-motion:no-preference){[data-reveal]{opacity:0;transform:translate3d(0,20px,0);transition:opacity .6s ease-out,transform .6s cubic-bezier(.22,.61,.36,1)}[data-reveal=in]{opacity:1;transform:none}[data-reveal-delay='1']{transition-delay:90ms}[data-reveal-delay='2']{transition-delay:180ms}[data-reveal-delay='3']{transition-delay:270ms}[data-reveal-delay='4']{transition-delay:360ms}}
+@media (prefers-reduced-motion:no-preference){.btn,.cards li{transition:transform .25s cubic-bezier(.22,.61,.36,1),box-shadow .25s ease}.btn:active{transform:scale(.97)}}
+@media (hover:hover) and (prefers-reduced-motion:no-preference){.btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px -10px rgba(20,56,43,.45)}.cards li:not([data-reveal]):hover{transform:translateY(-3px);box-shadow:0 14px 30px -20px rgba(20,56,43,.35)}}
+@media print{[data-reveal]{opacity:1!important;transform:none!important}}
 </style>
     <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","@id":"https://everydaygutwellness.com/guides/how-often-should-you-poop#article","headline":"How Often Should You Poop? What Is Normal","description":"Normal bowel movement frequency ranges from three times a day to three times a week. Learn what matters more than the count, and how to read the Bristol stool chart.","datePublished":"2026-11-19","dateModified":"2026-11-19","mainEntityOfPage":"https://everydaygutwellness.com/guides/how-often-should-you-poop","image":"https://everydaygutwellness.com/assets/images/ebook_cover_guide_1793359029909.jpg","author":{"@type":"Person","@id":"https://everydaygutwellness.com/about.html#editor","name":"Mark Laurence E. Medina","jobTitle":"Founder and editor","url":"https://everydaygutwellness.com/about.html#editor","worksFor":{"@id":"https://everydaygutwellness.com/#organization"}},"publisher":{"@type":"Organization","@id":"https://everydaygutwellness.com/#organization","name":"Everyday Gut Wellness","url":"https://everydaygutwellness.com/","logo":{"@type":"ImageObject","url":"https://everydaygutwellness.com/logo-512.png","width":512,"height":512},"email":"hello@everydaygutwellness.com"},"inLanguage":"en"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://everydaygutwellness.com/"},{"@type":"ListItem","position":2,"name":"Guides","item":"https://everydaygutwellness.com/guides/"},{"@type":"ListItem","position":3,"name":"How Often Should You Poop? What Is Normal","item":"https://everydaygutwellness.com/guides/how-often-should-you-poop"}]}]}</script>
   </head>
