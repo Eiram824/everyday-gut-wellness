@@ -102,61 +102,63 @@ export function initReveal(): () => void {
 }
 
 /**
- * Headings (H2/H3) get a different entrance from the content blocks:
- * the text rises out of an invisible mask line, and H2s draw a short
- * terracotta accent bar underneath. Hover sheen lives in index.css.
+ * Headings (H2/H3) get their own motion, different from the content blocks:
+ * - Entrance: the words appear one after another, each rising softly into place.
+ * - Hover: the words do a small wave (each lifts a few pixels in turn) and warm
+ *   to terracotta. Styles live in index.css.
+ * Only plain-text headings are split into word spans; the original text nodes are
+ * kept and put back on cleanup, so React's view of the DOM stays correct.
  */
 function initHeadings(fold: number): () => void {
+  const MAX_WORD_DELAY = 14;
   const headings = Array.from(
     document.querySelectorAll<HTMLElement>('#free-ebook h2, main h2, main h3'),
   );
-  const finish = (h: HTMLElement) => h.setAttribute('data-heading', 'done');
-  const play = (h: HTMLElement) => {
-    h.setAttribute('data-heading', 'in');
-    const onEnd = (e: TransitionEvent) => {
-      if (e.target !== h || e.propertyName !== 'clip-path') return;
-      h.removeEventListener('transitionend', onEnd);
-      finish(h);
-    };
-    h.addEventListener('transitionend', onEnd);
-    window.setTimeout(() => finish(h), 1600);
-  };
+  const originals = new Map<HTMLElement, ChildNode[]>();
+
+  for (const h of headings) {
+    const nodes = Array.from(h.childNodes);
+    if (!nodes.length || !nodes.every((n) => n.nodeType === Node.TEXT_NODE)) continue;
+    const words = (h.textContent || '').trim().split(/\s+/);
+    if (!words.length) continue;
+    originals.set(h, nodes);
+    const frag = document.createDocumentFragment();
+    words.forEach((word, i) => {
+      const span = document.createElement('span');
+      span.className = 'egw-word';
+      span.textContent = word;
+      span.style.setProperty('--i', String(Math.min(i, MAX_WORD_DELAY)));
+      frag.appendChild(span);
+      if (i < words.length - 1) frag.appendChild(document.createTextNode(' '));
+    });
+    h.setAttribute('aria-label', words.join(' '));
+    h.replaceChildren(frag);
+    h.setAttribute('data-words', h.getBoundingClientRect().top < fold ? 'in' : '');
+  }
 
   const io = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
         io.unobserve(entry.target);
-        (waiting.get(entry.target) || []).forEach(play);
-        waiting.delete(entry.target);
+        entry.target.setAttribute('data-words', 'in');
       }
     },
-    { rootMargin: '0px 0px -12% 0px', threshold: 0 },
+    { rootMargin: '0px 0px -10% 0px', threshold: 0 },
   );
-  // A masked heading has no visible area, so watch its parent block instead.
-  const waiting = new Map<Element, HTMLElement[]>();
+  originals.forEach((_, h) => {
+    if (h.getAttribute('data-words') === '') io.observe(h);
+  });
 
-  for (const h of headings) {
-    if (getComputedStyle(h).textAlign === 'center') h.setAttribute('data-heading-center', '');
-    if (h.getBoundingClientRect().top < fold) {
-      // Already on screen: no mask, just draw the accent bar.
-      requestAnimationFrame(() => finish(h));
-      continue;
-    }
-    h.setAttribute('data-heading', '');
-    const anchor = h.parentElement || h;
-    if (!waiting.has(anchor)) {
-      waiting.set(anchor, []);
-      io.observe(anchor);
-    }
-    waiting.get(anchor)!.push(h);
-  }
-
-  return () => {
+  const restore = () => {
     io.disconnect();
-    headings.forEach((h) => {
-      h.removeAttribute('data-heading');
-      h.removeAttribute('data-heading-center');
+    originals.forEach((nodes, h) => {
+      h.replaceChildren(...nodes);
+      h.removeAttribute('data-words');
+      h.removeAttribute('aria-label');
     });
+    originals.clear();
   };
+  window.addEventListener('beforeprint', restore, { once: true });
+  return restore;
 }
