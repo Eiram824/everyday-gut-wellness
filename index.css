@@ -34,3 +34,40 @@ h1, h2, h3, h4, .font-serif {
 @media print {
   html [data-reveal] { opacity: 1 !important; transform: none !important; }
 }
+
+/* Hover / tap motion. Subtle lift on hover (mouse only), gentle press on click/tap.
+   Skips elements that already have their own hover transform, and anything mid scroll-reveal. */
+@media (prefers-reduced-motion: no-preference) {
+  #root button:not(:disabled):not([class*='hover:-translate']):not([class*='hover:translate']):not([class*='hover:scale']):not([class*='active:scale']),
+  #root a[class*='rounded'][class*='bg-']:not([class*='hover:-translate']):not([class*='hover:translate']):not([class*='hover:scale']) {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  #root button:not(:disabled):not([class*='hover:-translate']):not([class*='hover:translate']):not([class*='hover:scale']):not([class*='active:scale']):active,
+  #root a[class*='rounded'][class*='bg-']:not([class*='hover:-translate']):not([class*='hover:translate']):not([class*='hover:scale']):active {
+    transform: scale(0.97);
+    transition-duration: 90ms;
+  }
+
+  main section .bg-white[class*='rounded-'][class*='border']:not([data-reveal]):not([class*='hover:-translate']),
+  main article:not([data-reveal]) {
+    transition-property: transform, box-shadow, border-color;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  main article img { transition: transform 600ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  #root a[class*='rounded'][class*='bg-']:not([class*='hover:-translate']):not([class*='hover:translate']):not([class*='hover:scale']):hover,
+  #root button[class*='bg-']:not(:disabled):not([class*='hover:-translate']):not([class*='hover:translate']):not([class*='hover:scale']):not([class*='active:scale']):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px -10px rgba(20, 56, 43, 0.45);
+  }
+  main section .bg-white[class*='rounded-'][class*='border']:not([data-reveal]):not([class*='hover:-translate']):hover,
+  main article:not([data-reveal]):hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px -22px rgba(20, 56, 43, 0.35);
+  }
+  main article:hover img { transform: scale(1.03); }
+}
