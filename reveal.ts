@@ -31,7 +31,8 @@ function collectTargets(section: Element): Element[] {
     const isHeader = !!block.querySelector(':scope > h2');
     const isList = hasClass(block, 'grid') || hasClass(block, 'space-y') || block.tagName === 'UL';
     if ((isHeader || isList) && block.children.length > 0) {
-      targets.push(...Array.from(block.children));
+      // Headings get their own entrance (see initHeadings), so skip them here.
+      targets.push(...Array.from(block.children).filter((c) => !/^H[1-3]$/.test(c.tagName)));
     } else {
       targets.push(block);
     }
@@ -52,7 +53,12 @@ export function initReveal(): () => void {
       el.removeAttribute('data-reveal');
       el.removeAttribute('data-reveal-delay');
     };
-    el.addEventListener('transitionend', done, { once: true });
+    const onEnd = (e: TransitionEvent) => {
+      if (e.target !== el) return; // ignore transitions bubbling up from children
+      el.removeEventListener('transitionend', onEnd);
+      done();
+    };
+    el.addEventListener('transitionend', onEnd);
     window.setTimeout(done, 1400); // safety net if transitionend never fires
   };
 
@@ -83,12 +89,74 @@ export function initReveal(): () => void {
     }
   });
 
+  const stopHeadings = initHeadings(fold);
   const revealAll = () => hidden.forEach((el) => el.removeAttribute('data-reveal'));
   window.addEventListener('beforeprint', revealAll);
 
   return () => {
     io.disconnect();
+    stopHeadings();
     window.removeEventListener('beforeprint', revealAll);
     revealAll();
+  };
+}
+
+/**
+ * Headings (H2/H3) get a different entrance from the content blocks:
+ * the text rises out of an invisible mask line, and H2s draw a short
+ * terracotta accent bar underneath. Hover sheen lives in index.css.
+ */
+function initHeadings(fold: number): () => void {
+  const headings = Array.from(
+    document.querySelectorAll<HTMLElement>('#free-ebook h2, main h2, main h3'),
+  );
+  const finish = (h: HTMLElement) => h.setAttribute('data-heading', 'done');
+  const play = (h: HTMLElement) => {
+    h.setAttribute('data-heading', 'in');
+    const onEnd = (e: TransitionEvent) => {
+      if (e.target !== h || e.propertyName !== 'clip-path') return;
+      h.removeEventListener('transitionend', onEnd);
+      finish(h);
+    };
+    h.addEventListener('transitionend', onEnd);
+    window.setTimeout(() => finish(h), 1600);
+  };
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        io.unobserve(entry.target);
+        (waiting.get(entry.target) || []).forEach(play);
+        waiting.delete(entry.target);
+      }
+    },
+    { rootMargin: '0px 0px -12% 0px', threshold: 0 },
+  );
+  // A masked heading has no visible area, so watch its parent block instead.
+  const waiting = new Map<Element, HTMLElement[]>();
+
+  for (const h of headings) {
+    if (getComputedStyle(h).textAlign === 'center') h.setAttribute('data-heading-center', '');
+    if (h.getBoundingClientRect().top < fold) {
+      // Already on screen: no mask, just draw the accent bar.
+      requestAnimationFrame(() => finish(h));
+      continue;
+    }
+    h.setAttribute('data-heading', '');
+    const anchor = h.parentElement || h;
+    if (!waiting.has(anchor)) {
+      waiting.set(anchor, []);
+      io.observe(anchor);
+    }
+    waiting.get(anchor)!.push(h);
+  }
+
+  return () => {
+    io.disconnect();
+    headings.forEach((h) => {
+      h.removeAttribute('data-heading');
+      h.removeAttribute('data-heading-center');
+    });
   };
 }
