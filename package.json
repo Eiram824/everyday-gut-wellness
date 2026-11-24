@@ -9,8 +9,8 @@
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test",
-    "build": "node scripts/generate-pdf.mjs && node scripts/build-pages.mjs && vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --outfile=server-dist/server.cjs",
-    "build:client": "node scripts/generate-pdf.mjs && node scripts/build-pages.mjs && vite build",
+    "build": "node scripts/generate-pdf.mjs && node scripts/build-pages.mjs && vite build && tsx scripts/prerender-home.tsx && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --outfile=server-dist/server.cjs",
+    "build:client": "node scripts/generate-pdf.mjs && node scripts/build-pages.mjs && vite build && tsx scripts/prerender-home.tsx",
     "build:pages": "node scripts/build-pages.mjs",
     "start": "node server-dist/server.cjs",
     "preview": "vite preview"

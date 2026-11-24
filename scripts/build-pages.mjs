@@ -124,7 +124,6 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
     <meta property="og:site_name" content="${BRAND}" />
     <meta property="og:image" content="${OG_IMAGE}" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" href="data:," />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
