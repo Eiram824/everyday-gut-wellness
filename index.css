@@ -106,3 +106,13 @@ h1, h2, h3, h4, .font-serif {
   #root section .overflow-hidden:hover > img:not([class*='hover:scale']) { transform: scale(1.03); }
   #hero h1:hover .egw-hero-title { background-size: 100% 3px; }
 }
+
+/* Free eBook announcement bar (same look as the static pages' bar in scripts/build-pages.mjs) */
+.ebar{display:block;height:36px;overflow:hidden;background:#14382B;color:#F4EFE6;text-decoration:none;font-size:13px;line-height:36px;white-space:nowrap}
+.ebar:hover{color:#fff}
+.ebar:focus-visible{outline:3px solid #B85D36;outline-offset:-3px}
+.ebar-track{display:inline-flex;will-change:transform;animation:ebar 80s linear infinite}
+.ebar:hover .ebar-track,.ebar:focus-visible .ebar-track{animation-play-state:paused}
+.ebar-item{padding:0 28px}.ebar-item b{font-weight:700;color:#fff}.ebar-item u{text-underline-offset:3px}
+@keyframes ebar{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+@media (prefers-reduced-motion:reduce){.ebar{height:auto;min-height:36px;white-space:normal;text-align:center;line-height:1.45;padding:8px 16px}.ebar-track{animation:none;display:inline}.ebar-item{padding:0}.ebar-item~.ebar-item{display:none}}

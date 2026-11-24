@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
+import AnnouncementBar from './components/AnnouncementBar';
 import Hero from './components/Hero';
 import EBookBanner from './components/EBookBanner';
 import EBookReader from './components/EBookReader';
@@ -144,6 +145,9 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#FBF9F5] font-sans text-[#2C2A26] selection:bg-[#EAD3C7] selection:text-[#14382B]">
+      {/* Free eBook running bar */}
+      <AnnouncementBar onOpenEBook={() => handleOpenEBook()} />
+
       {/* Top Bar Navigation */}
       <Navbar 
         onNavigate={scrollToSection} 
