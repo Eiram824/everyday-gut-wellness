@@ -19,7 +19,10 @@ const ROOT = process.cwd();
 const SITE = 'https://everydaygutwellness.com';
 const BRAND = 'Everyday Gut Wellness';
 const EMAIL = 'hello@everydaygutwellness.com';
-const OG_IMAGE = `${SITE}/assets/images/ebook_cover_guide_1793359029909.jpg`;
+const OG_IMAGE = `${SITE}/assets/og/default.jpg`;
+// Per-article share card (1200x630) made by scripts/make-og-images.mjs; falls back to the default card.
+const ogImageFor = (slug) =>
+  fs.existsSync(path.join(ROOT, 'public', 'assets', 'og', `${slug}.jpg`)) ? `${SITE}/assets/og/${slug}.jpg` : OG_IMAGE;
 
 const esc = (s) =>
   String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -55,6 +58,9 @@ function readingMinutes(html) {
   return Math.max(1, Math.round(words / 230));
 }
 
+// Slow, gentle eBook announcement bar (CSS-only marquee; static when reduced motion is on).
+const EBAR_ITEM = '<span class="ebar-item"><b>Free 7-Day Gut Reset eBook</b> &middot; Gentle daily habits, one small step at a time &middot; <u>Get it free</u></span>';
+const EBAR_ITEMS = EBAR_ITEM.repeat(3);
 const CSS = `
 :root{--ivory:#FBF9F5;--forest:#14382B;--forest-soft:#EAF1ED;--terra:#A3502C;--terra-soft:#F8EFEA;--ink:#2C2A26;--muted:#635F57;--border:#E5DFD5}
 *{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
@@ -63,6 +69,11 @@ a{color:var(--forest);text-decoration:underline;text-underline-offset:3px}a:hove
 :focus-visible{outline:3px solid var(--terra);outline-offset:2px}
 .skip{position:absolute;left:-999px}.skip:focus{left:16px;top:8px;background:#fff;padding:8px 12px;z-index:10}
 header.site{background:#fff;border-bottom:1px solid var(--border)}
+.ebar{display:block;height:36px;overflow:hidden;background:var(--forest);color:#F4EFE6;text-decoration:none;font-size:13px;line-height:36px;white-space:nowrap}.ebar:hover{color:#fff}
+.ebar-track{display:inline-flex;will-change:transform;animation:ebar 80s linear infinite}.ebar:hover .ebar-track,.ebar:focus-visible .ebar-track{animation-play-state:paused}
+.ebar-item{padding:0 28px}.ebar-item b{font-weight:700;color:#fff}.ebar-item u{text-underline-offset:3px}
+@keyframes ebar{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+@media (prefers-reduced-motion:reduce){.ebar{text-align:center}.ebar-track{animation:none;display:inline}.ebar-item~.ebar-item{display:none}}
 .wrap{max-width:760px;margin:0 auto;padding:0 20px}
 header.site .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px 16px;min-height:64px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
 .brand{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:20px;color:var(--forest);text-decoration:none;display:inline-flex;align-items:center;gap:10px}.brand img{width:28px;height:28px;flex-shrink:0}
@@ -100,7 +111,7 @@ footer.site p{margin:12px 0 0;opacity:.85;font-size:13px}
 @media print{[data-reveal]{opacity:1!important;transform:none!important}}
 `;
 
-function layout({ urlPath, title, description, index = true, ogType = 'website', jsonLd = [], inner }) {
+function layout({ urlPath, title, description, index = true, ogType = 'website', jsonLd = [], inner, ogImage = OG_IMAGE }) {
   const url = `${SITE}${urlPath}`;
   const canonical = index
     ? `\n    <link rel="canonical" href="${url}" />\n    <meta property="og:url" content="${url}" />`
@@ -123,8 +134,11 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
     <meta property="og:title" content="${esc(title)}" />
     <meta property="og:description" content="${esc(description)}" />
     <meta property="og:site_name" content="${BRAND}" />
-    <meta property="og:image" content="${OG_IMAGE}" />
+    <meta property="og:image" content="${ogImage}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="${ogImage}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
@@ -133,6 +147,7 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
     <style>${CSS}</style>${ld}
   </head>
   <body>
+    <a class="ebar" href="/#free-guide" aria-label="Get the free 7-Day Gentle Gut Reset eBook"><span class="ebar-track" aria-hidden="true">${EBAR_ITEMS}${EBAR_ITEMS}</span></a>
     <header class="site">
       <div class="wrap">
         <a class="skip" href="#main">Skip to content</a>
@@ -271,7 +286,7 @@ ${g.body}${meta.product ? productCard(meta.product) : ''}
         datePublished: meta.published,
         dateModified: g.updated,
         mainEntityOfPage: `${SITE}${g.urlPath}`,
-        image: OG_IMAGE,
+        image: ogImageFor(g.slug),
         author: EDITOR,
         publisher: ORG,
         inLanguage: 'en',
@@ -282,7 +297,7 @@ ${g.body}${meta.product ? productCard(meta.product) : ''}
         [meta.h1, g.urlPath],
       ]),
     ];
-    writeOut(`${base.replace(/^\//, '')}${g.slug}.html`, layout({ urlPath: g.urlPath, title: meta.title, description: meta.description, ogType: 'article', jsonLd, inner }));
+    writeOut(`${base.replace(/^\//, '')}${g.slug}.html`, layout({ urlPath: g.urlPath, title: meta.title, description: meta.description, ogType: 'article', jsonLd, inner, ogImage: ogImageFor(g.slug) }));
   }
 
   const indexInner = indent(`<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <span aria-current="page">${crumb}</span></nav>
