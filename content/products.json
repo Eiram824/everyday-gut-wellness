@@ -1,0 +1,26 @@
+{
+  "shopLinksLive": false,
+  "products": {
+    "heat-belt": {
+      "name": "WarmCore Belly Comfort Belt",
+      "short": "belt",
+      "price": "$59.95",
+      "url": "https://shop.everydaygutwellness.com/products/warmcore-belly-comfort-belt-heat-gentle-vibration",
+      "blurb": "A rechargeable, adjustable heat belt with gentle vibration, made for hands-free warmth on the lower belly or back during cramps and bloated days."
+    },
+    "castor-kit": {
+      "name": "Castor Oil Pack Kit",
+      "short": "kit",
+      "price": "$74.95",
+      "url": "https://shop.everydaygutwellness.com/products/castor-oil-pack-kit-reusable-organic-cotton-wrap-2-oz-cold-pressed-oil",
+      "blurb": "A reusable organic cotton wrap with 2 oz of cold-pressed castor oil, for a calm, warm belly ritual. For use on the skin only."
+    },
+    "ritual-set": {
+      "name": "The Belly Comfort Ritual Set",
+      "short": "set",
+      "price": "$119.95",
+      "url": "https://shop.everydaygutwellness.com/products/the-belly-comfort-ritual-set",
+      "blurb": "The WarmCore belt and the castor oil pack kit together, for an evening wind-down ritual."
+    }
+  }
+}

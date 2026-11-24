@@ -10,6 +10,7 @@ import EBookBanner from './components/EBookBanner';
 import EBookReader from './components/EBookReader';
 import LeadCaptureModal from './components/LeadCaptureModal';
 import GuidesTeaser from './components/GuidesTeaser';
+import ComfortTeaser from './components/ComfortTeaser';
 import LeadAdminModal from './components/LeadAdminModal';
 import DailyHabitCheck from './components/DailyHabitCheck';
 import FiberLesson from './components/FiberLesson';
@@ -178,6 +179,7 @@ export function App() {
 
         {/* Latest crawlable guides (static pages under /guides/) */}
         <GuidesTeaser />
+        <ComfortTeaser />
 
         {/* Section 7: Paid digital product — checkout hosted by Gumroad. */}
         <ProductSection />
