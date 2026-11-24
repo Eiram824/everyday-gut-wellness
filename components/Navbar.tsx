@@ -18,9 +18,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onNavigate, onOpenEBook }) => {
     { label: 'Habit Check', id: 'daily-check' },
     { label: 'Fiber Guide', id: 'fiber-lesson' },
     { label: 'Routine Reset', id: 'routine-reset' },
-    { label: 'Myth vs Fact', id: 'myths' },
     { label: 'Medical Signs', id: 'medical-advice' },
     { label: 'Guides', id: 'guides', href: '/guides/' },
+    { label: 'Belly Comfort', id: 'comfort', href: '/comfort/' },
     { label: '14-Day Workbook', id: 'gut-clarity-workbook' },
   ];
 

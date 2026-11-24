@@ -66,7 +66,7 @@ header.site{background:#fff;border-bottom:1px solid var(--border)}
 .wrap{max-width:760px;margin:0 auto;padding:0 20px}
 header.site .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px 16px;min-height:64px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
 .brand{font-family:'Playfair Display',Georgia,serif;font-weight:700;font-size:20px;color:var(--forest);text-decoration:none;display:inline-flex;align-items:center;gap:10px}.brand img{width:28px;height:28px;flex-shrink:0}
-nav.top a{font-size:14px;font-weight:600;text-decoration:none;margin-right:16px}
+nav.top a{font-size:14px;font-weight:600;text-decoration:none;margin-right:16px;white-space:nowrap;display:inline-block}
 main{padding:40px 0 64px}
 .crumbs{font-size:13px;color:var(--muted);margin:0 0 16px}.crumbs a{color:var(--muted)}
 .eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--terra);margin:0 0 8px}
@@ -82,6 +82,7 @@ th,td{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-a
 .warn{background:var(--terra-soft);border-left:4px solid var(--terra);padding:16px 20px;border-radius:6px;margin:28px 0;font-size:15px}
 .cta{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;margin:40px 0}
 .cta h2{margin-top:0}
+.product{background:var(--terra-soft);border:1px solid var(--border);border-radius:14px;padding:22px;margin:40px 0}.product h2{margin-top:0}.disclosure{font-size:13px;color:var(--muted);margin:12px 0 0}
 .btn{display:inline-block;background:var(--forest);color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:999px;margin-top:8px}
 .btn:hover{background:var(--terra);color:#fff}
 .sources{font-size:14px;color:var(--muted)}.sources li{margin:8px 0}
@@ -136,7 +137,7 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
       <div class="wrap">
         <a class="skip" href="#main">Skip to content</a>
         <a class="brand" href="/"><img src="/logo.svg" alt="" width="28" height="28" />${BRAND}</a>
-        <nav class="top" aria-label="Main"><a href="/">Home</a><a href="/guides/">Guides</a><a href="/about.html">About</a><a href="/#gut-clarity-workbook">Workbook</a></nav>
+        <nav class="top" aria-label="Main"><a href="/">Home</a><a href="/guides/">Guides</a><a href="/comfort/">Belly Comfort</a><a href="/about.html">About</a><a href="/#gut-clarity-workbook">Workbook</a></nav>
       </div>
     </header>
     <main id="main">
@@ -146,7 +147,7 @@ ${inner}
     </main>
     <footer class="site">
       <div class="wrap">
-        <a href="/">Home</a><a href="/guides/">Guides</a><a href="/about.html">About</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a><a href="mailto:${EMAIL}">Contact</a><button type="button" class="linklike" onclick="window.egwCookieSettings&&window.egwCookieSettings()">Cookie settings</button>
+        <a href="/">Home</a><a href="/guides/">Guides</a><a href="/comfort/">Belly Comfort</a><a href="/about.html">About</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a><a href="mailto:${EMAIL}">Contact</a><button type="button" class="linklike" onclick="window.egwCookieSettings&&window.egwCookieSettings()">Cookie settings</button>
         <p>${BRAND} is an independent educational publication. It does not provide medical advice, diagnosis, or treatment. Always talk with a qualified clinician about your own health.</p>
         <p>&copy; ${new Date().getUTCFullYear()} ${BRAND}. All rights reserved.</p>
       </div>
@@ -188,108 +189,178 @@ for (const p of pages) {
   writeOut(meta.path.replace(/^\//, ''), layout({ urlPath: meta.path, title: meta.title, description: meta.description, index: !meta.noindex, inner }));
 }
 
-// ---------- Guides ----------
-const guides = readContent('content/guides')
-  .filter((g) => !g.meta.draft)
-  .map((g) => {
-    for (const k of ['title', 'h1', 'description', 'published', 'summary']) {
-      if (!g.meta[k]) throw new Error(`content/guides/${g.file}: meta.${k} is required`);
-    }
-    if (!g.body.includes('id="when-to-see-a-doctor"')) {
-      throw new Error(`content/guides/${g.file}: needs a section with id="when-to-see-a-doctor"`);
-    }
-    return { ...g, urlPath: `/guides/${g.slug}`, updated: g.meta.updated || g.meta.published, minutes: readingMinutes(g.body) };
-  })
-  .sort((a, b) => (a.meta.published < b.meta.published ? 1 : -1));
+// ---------- Article collections ----------
+// Two separate sections, so the core gut-wellness guides stay focused:
+//   /guides/   everyday digestive habits (fiber, fluids, routine)
+//   /comfort/  belly comfort: period cramps, bloating, heat and castor oil packs
+// Comfort articles may name a product (meta.product, see content/products.json).
+// Product cards and shop links only appear when products.json has "shopLinksLive": true.
+const SHOP = JSON.parse(fs.readFileSync(path.join(ROOT, 'content', 'products.json'), 'utf8'));
 
-for (const g of guides) {
-  const { meta } = g;
-  const related = guides.filter((o) => o.slug !== g.slug).slice(0, 3);
-  const relatedHtml = related.length
-    ? `\n<h2>Keep reading</h2>\n<ul class="cards">\n${related
-        .map((o) => `  <li><a href="${o.urlPath}">${esc(o.meta.h1)}</a><p>${esc(o.meta.summary)}</p></li>`)
-        .join('\n')}\n</ul>`
-    : '';
-  const inner = indent(`<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <a href="/guides/">Guides</a> &rsaquo; <span aria-current="page">${esc(meta.h1)}</span></nav>
+function loadArticles(dir, base) {
+  return readContent(dir)
+    .filter((g) => !g.meta.draft)
+    .map((g) => {
+      for (const k of ['title', 'h1', 'description', 'published', 'summary']) {
+        if (!g.meta[k]) throw new Error(`${dir}/${g.file}: meta.${k} is required`);
+      }
+      if (!g.body.includes('id="when-to-see-a-doctor"')) {
+        throw new Error(`${dir}/${g.file}: needs a section with id="when-to-see-a-doctor"`);
+      }
+      if (g.meta.product && !SHOP.products[g.meta.product]) {
+        throw new Error(`${dir}/${g.file}: unknown meta.product "${g.meta.product}"`);
+      }
+      return { ...g, urlPath: `${base}${g.slug}`, updated: g.meta.updated || g.meta.published, minutes: readingMinutes(g.body) };
+    })
+    .sort((a, b) => {
+      if (a.meta.published !== b.meta.published) return a.meta.published < b.meta.published ? 1 : -1;
+      // Same day: optional meta.order puts pillar articles first.
+      if (a.meta.order != null && b.meta.order != null) return a.meta.order - b.meta.order;
+      return -1;
+    });
+}
+
+/** Related reads: same topic first (meta.eyebrow), then the rest of the section. */
+function relatedFor(g, list) {
+  const others = list.filter((o) => o.slug !== g.slug);
+  const same = others.filter((o) => o.meta.eyebrow === g.meta.eyebrow);
+  return [...same, ...others.filter((o) => !same.includes(o))].slice(0, 3);
+}
+
+function productCard(key) {
+  const p = SHOP.products[key];
+  if (!SHOP.shopLinksLive || !p) return '';
+  return `
+<div class="product">
+  <p class="eyebrow">From our shop</p>
+  <h2>${esc(p.name)}</h2>
+  <p>${esc(p.blurb)}</p>
+  <a class="btn" href="${esc(p.url)}?utm_source=website&amp;utm_medium=article&amp;utm_campaign=${esc(key)}" rel="noopener">See the ${esc(p.short)} &middot; ${esc(p.price)}</a>
+  <p class="disclosure">We sell this product in our own shop. It is a comfort tool, not a treatment. <a href="/about.html#funding">How we are funded</a></p>
+</div>`;
+}
+
+function buildSection(cfg) {
+  const { dir, base, crumb, indexTitle, indexH1, indexLede, indexDescription, emptyText } = cfg;
+  const list = loadArticles(dir, base);
+  for (const g of list) {
+    const { meta } = g;
+    const related = relatedFor(g, list);
+    const relatedHtml = related.length
+      ? `\n<h2>Keep reading</h2>\n<ul class="cards">\n${related
+          .map((o) => `  <li><a href="${o.urlPath}">${esc(o.meta.h1)}</a><p>${esc(o.meta.summary)}</p></li>`)
+          .join('\n')}\n</ul>`
+      : '';
+    const inner = indent(`<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <a href="${base}">${crumb}</a> &rsaquo; <span aria-current="page">${esc(meta.h1)}</span></nav>
 <p class="eyebrow">${esc(meta.eyebrow || 'Guide')}</p>
 <h1>${esc(meta.h1)}</h1>
 <p class="byline">By <a href="/about.html#editor" rel="author">${EDITOR_NAME}</a>, founder and editor &middot; Updated <time datetime="${g.updated}">${longDate(g.updated)}</time> &middot; ${g.minutes} min read</p>
 <div class="note"><strong>Educational information, not medical advice.</strong> This guide is general information for healthy adults and is not reviewed for your personal situation. Talk with a clinician about symptoms that are new, severe, or persistent. <a href="#when-to-see-a-doctor">When to see a doctor</a></div>
-${g.body}
+${g.body}${meta.product ? productCard(meta.product) : ''}
 <div class="cta">
   <h2>Get the free 7-Day Gentle Gut Reset Guide</h2>
   <p>A printable, one-week plan for building steady fiber, fluid, and meal-rhythm habits, one small change at a time.</p>
   <a class="btn" href="/#free-guide">Get the free guide</a>
 </div>${relatedHtml}`);
-  const jsonLd = [
-    {
-      '@type': 'Article',
-      '@id': `${SITE}${g.urlPath}#article`,
-      headline: meta.h1,
-      description: meta.description,
-      datePublished: meta.published,
-      dateModified: g.updated,
-      mainEntityOfPage: `${SITE}${g.urlPath}`,
-      image: OG_IMAGE,
-      author: EDITOR,
-      publisher: ORG,
-      inLanguage: 'en',
-    },
-    breadcrumb([
-      ['Home', '/'],
-      ['Guides', '/guides/'],
-      [meta.h1, g.urlPath],
-    ]),
-  ];
-  writeOut(`guides/${g.slug}.html`, layout({ urlPath: g.urlPath, title: meta.title, description: meta.description, ogType: 'article', jsonLd, inner }));
-}
-
-const indexInner = indent(`<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <span aria-current="page">Guides</span></nav>
-<p class="eyebrow">Guides</p>
-<h1>Everyday Digestive Health Guides</h1>
-<p class="lede">Practical, evidence-informed guides to fiber, fluids, meal rhythm, and the daily habits that support regular digestion, plus clear signs for when to see a doctor.</p>
-${
-  guides.length
-    ? `<ul class="cards">\n${guides
-        .map((g) => `  <li><a href="${g.urlPath}">${esc(g.meta.h1)}</a><p>${esc(g.meta.summary)}</p></li>`)
-        .join('\n')}\n</ul>`
-    : '<p>New guides are on the way.</p>'
-}`);
-writeOut(
-  'guides/index.html',
-  layout({
-    urlPath: '/guides/',
-    title: `Digestive Health Guides | ${BRAND}`,
-    description: 'Practical, evidence-informed guides to fiber, hydration, meal rhythm, and everyday digestive habits, with clear signs for when to see a doctor.',
-    jsonLd: [
+    const jsonLd = [
       {
-        '@type': 'CollectionPage',
-        name: 'Everyday Digestive Health Guides',
-        url: `${SITE}/guides/`,
-        hasPart: guides.map((g) => ({ '@type': 'Article', headline: g.meta.h1, url: `${SITE}${g.urlPath}` })),
+        '@type': 'Article',
+        '@id': `${SITE}${g.urlPath}#article`,
+        headline: meta.h1,
+        description: meta.description,
+        datePublished: meta.published,
+        dateModified: g.updated,
+        mainEntityOfPage: `${SITE}${g.urlPath}`,
+        image: OG_IMAGE,
+        author: EDITOR,
+        publisher: ORG,
+        inLanguage: 'en',
       },
       breadcrumb([
         ['Home', '/'],
-        ['Guides', '/guides/'],
+        [crumb, base],
+        [meta.h1, g.urlPath],
       ]),
-    ],
-    inner: indexInner,
-  }),
-);
+    ];
+    writeOut(`${base.replace(/^\//, '')}${g.slug}.html`, layout({ urlPath: g.urlPath, title: meta.title, description: meta.description, ogType: 'article', jsonLd, inner }));
+  }
+
+  const indexInner = indent(`<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <span aria-current="page">${crumb}</span></nav>
+<p class="eyebrow">${crumb}</p>
+<h1>${esc(indexH1)}</h1>
+<p class="lede">${indexLede}</p>
+${
+  list.length
+    ? `<ul class="cards">\n${list
+        .map((g) => `  <li><a href="${g.urlPath}">${esc(g.meta.h1)}</a><p>${esc(g.meta.summary)}</p></li>`)
+        .join('\n')}\n</ul>`
+    : `<p>${emptyText}</p>`
+}`);
+  writeOut(
+    `${base.replace(/^\//, '')}index.html`,
+    layout({
+      urlPath: base,
+      title: indexTitle,
+      description: indexDescription,
+      jsonLd: [
+        {
+          '@type': 'CollectionPage',
+          name: indexH1,
+          url: `${SITE}${base}`,
+          hasPart: list.map((g) => ({ '@type': 'Article', headline: g.meta.h1, url: `${SITE}${g.urlPath}` })),
+        },
+        breadcrumb([
+          ['Home', '/'],
+          [crumb, base],
+        ]),
+      ],
+      inner: indexInner,
+    }),
+  );
+  return list;
+}
+
+const guides = buildSection({
+  dir: 'content/guides',
+  base: '/guides/',
+  crumb: 'Guides',
+  indexTitle: `Digestive Health Guides | ${BRAND}`,
+  indexH1: 'Everyday Digestive Health Guides',
+  indexLede: 'Practical, evidence-informed guides to fiber, fluids, meal rhythm, and the daily habits that support regular digestion, plus clear signs for when to see a doctor.',
+  indexDescription: 'Practical, evidence-informed guides to fiber, hydration, meal rhythm, and everyday digestive habits, with clear signs for when to see a doctor.',
+  emptyText: 'New guides are on the way.',
+});
+
+const comfort = buildSection({
+  dir: 'content/comfort',
+  base: '/comfort/',
+  crumb: 'Belly Comfort',
+  indexTitle: `Belly Comfort Guides: Period Cramps, Bloating and Heat | ${BRAND}`,
+  indexH1: 'Belly Comfort Guides',
+  indexLede: 'Calm, evidence-informed help for period cramps, bloating, and an uncomfortable belly: what actually helps at home, how to use heat safely, and when to see a doctor.',
+  indexDescription: 'Evidence-informed guides to period cramps, bloating, heat therapy and castor oil packs: what helps at home, how to use heat safely, and when to see a doctor.',
+  emptyText: 'New comfort guides are on the way.',
+});
 
 // ---------- Homepage teaser data ----------
 fs.writeFileSync(
   path.join(ROOT, 'content', 'guides-index.json'),
   JSON.stringify(guides.map((g) => ({ href: g.urlPath, title: g.meta.h1, summary: g.meta.summary, minutes: g.minutes })), null, 2) + '\n',
 );
+fs.writeFileSync(
+  path.join(ROOT, 'content', 'comfort-index.json'),
+  JSON.stringify(comfort.map((g) => ({ href: g.urlPath, title: g.meta.h1, summary: g.meta.summary, minutes: g.minutes })), null, 2) + '\n',
+);
 
 // ---------- Sitemap ----------
 const today = new Date().toISOString().slice(0, 10);
-const newest = guides.reduce((acc, g) => (g.updated > acc ? g.updated : acc), '2026-11-19');
+const newest = [...guides, ...comfort].reduce((acc, g) => (g.updated > acc ? g.updated : acc), '2026-11-19');
 const urls = [
   { loc: '/', lastmod: newest > today ? today : newest, changefreq: 'weekly', priority: '1.0' },
   { loc: '/guides/', lastmod: newest, changefreq: 'weekly', priority: '0.8' },
   ...guides.map((g) => ({ loc: g.urlPath, lastmod: g.updated, changefreq: 'monthly', priority: '0.7' })),
+  ...(comfort.length ? [{ loc: '/comfort/', lastmod: comfort.reduce((a, g) => (g.updated > a ? g.updated : a), ''), changefreq: 'weekly', priority: '0.8' }] : []),
+  ...comfort.map((g) => ({ loc: g.urlPath, lastmod: g.updated, changefreq: 'monthly', priority: '0.7' })),
   ...pages
     .filter((p) => !p.meta.noindex)
     .map((p) => ({ loc: p.meta.path, lastmod: p.meta.updated, changefreq: 'yearly', priority: p.meta.path === '/about.html' ? '0.5' : '0.3' })),
@@ -311,4 +382,4 @@ ${urls
 `,
 );
 
-console.log(`[Pages] Built ${pages.length} pages, ${guides.length} guides, guides index, and sitemap (${urls.length} URLs).`);
+console.log(`[Pages] Built ${pages.length} pages, ${guides.length} guides, ${comfort.length} comfort guides, section indexes, and sitemap (${urls.length} URLs).`);
