@@ -4,7 +4,7 @@
 */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 
@@ -14,12 +14,18 @@ function mount() {
     console.error('Root element #root not found during mount');
     return;
   }
-  const root = createRoot(rootElement);
-  root.render(
+  const app = (
     <React.StrictMode>
       <App />
     </React.StrictMode>
   );
+  // The production homepage is prerendered at build time (scripts/prerender-home.tsx)
+  // so search engines see the full page; React then attaches to that markup.
+  if (rootElement.hasAttribute('data-prerendered')) {
+    hydrateRoot(rootElement, app);
+  } else {
+    createRoot(rootElement).render(app);
+  }
 }
 
 if (document.readyState === 'loading') {

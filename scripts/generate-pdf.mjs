@@ -70,7 +70,7 @@ async function generatePDF() {
       color: colorBorder,
     });
 
-    page.drawText('Free Educational Guide  |  www.everyday-gut-wellness.netlify.app', {
+    page.drawText('Free Educational Guide  |  everydaygutwellness.com', {
       x: 40,
       y: 26,
       size: 7.5,
@@ -168,7 +168,7 @@ async function generatePDF() {
       font: helveticaBold,
       color: colorWhite,
     });
-    coverPage.drawText('Clinically reviewed guidelines aligned with gastroenterology fundamentals.', {
+    coverPage.drawText('Evidence-informed, based on NHS and US NIH public health guidance.', {
       x: 50,
       y: height - 362,
       size: 9,
@@ -202,7 +202,7 @@ async function generatePDF() {
       { num: 'Ch. 4', title: 'Smart Fiber Swaps & Eliminating Bloat Triggers', page: 'Page 5' },
       { num: 'Ch. 5', title: 'Daily Printable Habit Checklist & Stool Consistency Log', page: 'Page 6' },
       { num: 'Appx.', title: 'Medical Red Flags, Safety Guidelines & Ingredient Transparency', page: 'Page 7' },
-      { num: 'Ref.', title: 'Recommended Tools, Habit Support & Clinical References', page: 'Page 8' },
+      { num: 'Ref.', title: 'Recommended Tools, Habit Support & Sources', page: 'Page 8' },
     ];
 
     let tocY = 285;
@@ -302,7 +302,7 @@ async function generatePDF() {
     page.drawRectangle({
       x: 50, y: y - 85, width: 495, height: 85, color: colorLightGreen, borderColor: rgb(180 / 255, 210 / 255, 195 / 255), borderWidth: 1
     });
-    page.drawText('CLINICAL TAKEAWAY FOR YOUR ROUTINE', { x: 65, y: y - 20, size: 9, font: helveticaBold, color: colorForest });
+    page.drawText('KEY TAKEAWAY FOR YOUR ROUTINE', { x: 65, y: y - 20, size: 9, font: helveticaBold, color: colorForest });
     drawParagraph(
       page,
       'Irregular bowel movements are rarely caused by a "lazy colon." They are almost always the result of disrupted autonomic signals: chronic low fluid intake, suppressed bathroom urges, sedentary posture, or excessive sympathetic stress during morning hours.',
@@ -407,7 +407,7 @@ async function generatePDF() {
 
     y = drawParagraph(
       page,
-      'When increasing dietary fiber, many people make the mistake of adding large amounts of raw cruciferous vegetables or coarse wheat bran all at once. This triggers sudden bacterial fermentation, resulting in painful gas and distension. Use these clinically proven gentle swaps instead:',
+      'When increasing dietary fiber, many people make the mistake of adding large amounts of raw cruciferous vegetables or coarse wheat bran all at once. This triggers sudden bacterial fermentation, resulting in painful gas and distension. Try these gentler, evidence-informed swaps instead:',
       50, y, 495, helvetica, 9.5, 15, colorText
     );
     y -= 15;
@@ -605,8 +605,8 @@ async function generatePDF() {
     drawParagraph(
       page,
       'Everyday Gut Wellness is dedicated to providing evidence-informed, transparent, and hype-free digestive health education. Share this free guide with family and friends who could benefit from a gentle, physiological approach to gut comfort.\n\n' +
-      'Official Website: https://everyday-gut-wellness.netlify.app\n' +
-      'Support & Feedback: juggler.laurence1020@gmail.com',
+      'Official Website: https://everydaygutwellness.com\n' +
+      'Support & Feedback: hello@everydaygutwellness.com',
       65, y - 48, 465, helvetica, 9, 15, colorWhite
     );
   }

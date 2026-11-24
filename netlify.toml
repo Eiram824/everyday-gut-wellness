@@ -61,6 +61,12 @@
 # 3. No SPA catch-all: the app uses #hash navigation, so unknown paths get
 #    Netlify's real 404 response (public/404.html with status 404).
 
+# Keep the free guide PDF out of search results: readers get it through the signup.
+[[headers]]
+  for = "/The-7-Day-Gentle-Gut-Reset-Guide.pdf"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
 # Security headers for every page and file.
 [[headers]]
   for = "/*"
