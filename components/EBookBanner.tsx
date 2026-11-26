@@ -64,7 +64,7 @@ export const EBookBanner: React.FC<EBookBannerProps> = ({ onOpenEBook }) => {
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#14382B] shrink-0 mt-0.5" />
-                  <span><strong>Chapter 2:</strong> The 5 Daily Habits That Heal Digestion</span>
+                  <span><strong>Chapter 2:</strong> The 5 Daily Habits That Support Everyday Digestion</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#14382B] shrink-0 mt-0.5" />

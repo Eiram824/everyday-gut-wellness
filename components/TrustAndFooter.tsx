@@ -167,7 +167,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
 
             <div className="pt-2 text-xs text-[#EAF1ED]/70 leading-relaxed bg-white/5 p-3 rounded-lg border border-white/10">
               <span className="font-semibold text-white block mb-0.5">Independent Educational Publishing:</span>
-              Everyday Gut Wellness is an independent educational publishing project. The free guide is available now, and our printable workbooks are sold securely through Gumroad. We do not sell or promote third-party affiliate supplements.
+              Everyday Gut Wellness is an independent educational publishing project. The free guide is available now, and our printable workbooks are sold securely through Gumroad. We also run a small online shop of simple comfort tools (a heat belt and a castor oil pack kit), and our belly comfort guides say so clearly when they mention them. We do not sell supplements or join supplement affiliate programs.
             </div>
           </div>
         </div>
@@ -231,7 +231,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                   </p>
                   <div className="p-4 bg-[#FBF9F5] rounded-xl border border-[#E5DFD5] space-y-1.5 text-xs">
                     <div><strong>Email:</strong> <a href="mailto:hello@everydaygutwellness.com" className="underline">hello@everydaygutwellness.com</a></div>
-                    <div><strong>Response Window:</strong> 2–3 business days for non-clinical inquiries.</div>
+                    <div><strong>Response Window:</strong> 1–2 business days for non-clinical inquiries.</div>
                   </div>
                   <p className="text-xs text-[#635F57] italic">
                     Note: Our editorial staff cannot answer individual medical questions or provide diagnostic consultations. Please contact your physician for personalized medical care.
