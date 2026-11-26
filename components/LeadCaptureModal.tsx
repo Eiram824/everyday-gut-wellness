@@ -35,6 +35,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<'queued' | 'unavailable' | 'not_requested'>('not_requested');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -83,6 +84,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
         }));
       } catch {}
 
+      setEmailStatus(!marketingConsent ? 'not_requested' : data.emailDeliveryStatus === 'queued' ? 'queued' : 'unavailable');
       setIsSuccess(true);
       if (typeof window !== 'undefined' && (window as any).gtag) {
         (window as any).gtag('event', 'generate_lead', {
@@ -137,6 +139,13 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
               </h3>
               <p className="text-xs sm:text-sm text-[#4A463F] leading-relaxed">
                 <>Your complimentary copy of <strong className="text-[#14382B">The 7-Day Gentle Gut Reset Guide</strong> is ready. Your download should begin automatically.</>
+              </p>
+              <p className="text-xs sm:text-sm font-medium text-[#14382B] leading-relaxed" role="status">
+                {emailStatus === 'queued'
+                  ? 'We are also emailing you a copy. Check your inbox (and the Promotions or Spam folder) in a few minutes.'
+                  : emailStatus === 'unavailable'
+                    ? 'Email delivery is not available right now, so please save your PDF below.'
+                    : 'No email was requested, so please save your PDF below. Tick the email box next time if you want a copy in your inbox.'}
               </p>
             </div>
 
