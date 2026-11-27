@@ -111,6 +111,11 @@ footer.site p{margin:12px 0 0;opacity:.85;font-size:13px}
 @media print{[data-reveal]{opacity:1!important;transform:none!important}}
 `;
 
+// Shop links and product cards only appear when products.json has "shopLinksLive": true.
+const SHOP = JSON.parse(fs.readFileSync(path.join(ROOT, 'content', 'products.json'), 'utf8'));
+// The footer Shop link stays off the core /guides/ pages so the fiber and constipation guides remain purely educational.
+const shopNav = (urlPath) => (SHOP.shopLinksLive && !urlPath.startsWith('/guides/') ? '<a href="https://shop.everydaygutwellness.com/?utm_source=website&amp;utm_medium=footer" rel="noopener">Shop</a>' : '');
+
 function layout({ urlPath, title, description, index = true, ogType = 'website', jsonLd = [], inner, ogImage = OG_IMAGE }) {
   const url = `${SITE}${urlPath}`;
   const canonical = index
@@ -162,7 +167,7 @@ ${inner}
     </main>
     <footer class="site">
       <div class="wrap">
-        <a href="/">Home</a><a href="/guides/">Guides</a><a href="/comfort/">Belly Comfort</a><a href="/about">About</a><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="mailto:${EMAIL}">Contact</a><button type="button" class="linklike" onclick="window.egwCookieSettings&&window.egwCookieSettings()">Cookie settings</button>
+        <a href="/">Home</a><a href="/guides/">Guides</a><a href="/comfort/">Belly Comfort</a>${shopNav(urlPath)}<a href="/about">About</a><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="mailto:${EMAIL}">Contact</a><button type="button" class="linklike" onclick="window.egwCookieSettings&&window.egwCookieSettings()">Cookie settings</button>
         <p>${BRAND} is an independent educational publication. It does not provide medical advice, diagnosis, or treatment. Always talk with a qualified clinician about your own health.</p>
         <p>&copy; ${new Date().getUTCFullYear()} ${BRAND}. All rights reserved.</p>
       </div>
@@ -210,7 +215,6 @@ for (const p of pages) {
 //   /comfort/  belly comfort: period cramps, bloating, heat and castor oil packs
 // Comfort articles may name a product (meta.product, see content/products.json).
 // Product cards and shop links only appear when products.json has "shopLinksLive": true.
-const SHOP = JSON.parse(fs.readFileSync(path.join(ROOT, 'content', 'products.json'), 'utf8'));
 
 function loadArticles(dir, base) {
   return readContent(dir)

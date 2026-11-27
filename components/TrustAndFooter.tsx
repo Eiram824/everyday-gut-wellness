@@ -108,6 +108,15 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                   The 14-Day Gut Clarity Workbook
                 </button>
               </li>
+              <li>
+                <a
+                  href="https://shop.everydaygutwellness.com/?utm_source=website&utm_medium=footer"
+                  rel="noopener"
+                  className="hover:text-white transition-colors"
+                >
+                  Our Shop: Belly Comfort Tools
+                </a>
+              </li>
             </ul>
           </div>
 
