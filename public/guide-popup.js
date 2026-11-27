@@ -40,8 +40,26 @@
       '<p>Get the free 7-Day Gentle Gut Reset guide: small daily habits, a printable tracker, and no harsh detoxes.</p>' +
       '<a class="gp-btn" href="/#free-guide">Get the free guide</a>' +
       '<small>Free. Unsubscribe from our emails anytime.</small></div>';
-    function close() { back.remove(); document.removeEventListener('keydown', onKey); }
-    function onKey(e) { if (e.key === 'Escape') close(); }
+    // Keep keyboard focus inside the card and make the page behind it inert while open.
+    var hidden = [];
+    Array.prototype.forEach.call(document.body.children, function (el) {
+      if (!el.inert) { el.inert = true; el.setAttribute('aria-hidden', 'true'); hidden.push(el); }
+    });
+    var opener = document.activeElement;
+    function close() {
+      back.remove();
+      document.removeEventListener('keydown', onKey);
+      hidden.forEach(function (el) { el.inert = false; el.removeAttribute('aria-hidden'); });
+      if (opener && opener.focus) opener.focus();
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key !== 'Tab') return;
+      var f = back.querySelectorAll('button, a[href]'), first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      else if (!back.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+    }
     back.addEventListener('click', function (e) { if (e.target === back) close(); });
     back.querySelector('.gp-x').addEventListener('click', close);
     document.addEventListener('keydown', onKey);

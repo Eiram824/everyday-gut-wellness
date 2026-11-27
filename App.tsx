@@ -91,7 +91,9 @@ export function App() {
     const show = () => {
       if (done || read(SEEN) || read('gut_reset_subscriber')) return;
       // Wait while another window or the cookie banner is open, so nothing stacks.
-      if (anyModalOpenRef.current || !read('egw_cookie_consent')) {
+      const otherDialogOpen =
+        anyModalOpenRef.current || !!document.querySelector('[role="dialog"][aria-modal="true"]');
+      if (otherDialogOpen || !read('egw_cookie_consent')) {
         if (!retry) retry = window.setTimeout(() => { retry = 0; show(); }, 3000);
         return;
       }
