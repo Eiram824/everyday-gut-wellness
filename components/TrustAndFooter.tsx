@@ -118,7 +118,7 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
             </h4>
             <div className="space-y-2.5">
               <a
-                href="/about.html"
+                href="/about"
                 className="block text-xs text-[#EAF1ED]/80 hover:text-white transition-colors text-left"
               >
                 About Everyday Gut Wellness
@@ -131,13 +131,13 @@ export const TrustAndFooter: React.FC<TrustAndFooterProps> = ({ onNavigate }) =>
                 Editorial Standards & Sources
               </button>
               <a
-                href="/privacy.html"
+                href="/privacy"
                 className="block text-xs text-[#EAF1ED]/80 hover:text-white transition-colors text-left"
               >
                 Privacy Policy & Data Security
               </a>
               <a
-                href="/terms.html"
+                href="/terms"
                 className="block text-xs text-[#EAF1ED]/80 hover:text-white transition-colors text-left"
               >
                 Terms of Service & User Agreement

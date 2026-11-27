@@ -152,7 +152,7 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
       <div class="wrap">
         <a class="skip" href="#main">Skip to content</a>
         <a class="brand" href="/"><img src="/logo.svg" alt="" width="28" height="28" />${BRAND}</a>
-        <nav class="top" aria-label="Main"><a href="/">Home</a><a href="/guides/">Guides</a><a href="/comfort/">Belly Comfort</a><a href="/about.html">About</a><a href="/#gut-clarity-workbook">Workbook</a></nav>
+        <nav class="top" aria-label="Main"><a href="/">Home</a><a href="/guides/">Guides</a><a href="/comfort/">Belly Comfort</a><a href="/about">About</a><a href="/#gut-clarity-workbook">Workbook</a></nav>
       </div>
     </header>
     <main id="main">
@@ -162,7 +162,7 @@ ${inner}
     </main>
     <footer class="site">
       <div class="wrap">
-        <a href="/">Home</a><a href="/guides/">Guides</a><a href="/comfort/">Belly Comfort</a><a href="/about.html">About</a><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a><a href="mailto:${EMAIL}">Contact</a><button type="button" class="linklike" onclick="window.egwCookieSettings&&window.egwCookieSettings()">Cookie settings</button>
+        <a href="/">Home</a><a href="/guides/">Guides</a><a href="/comfort/">Belly Comfort</a><a href="/about">About</a><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="mailto:${EMAIL}">Contact</a><button type="button" class="linklike" onclick="window.egwCookieSettings&&window.egwCookieSettings()">Cookie settings</button>
         <p>${BRAND} is an independent educational publication. It does not provide medical advice, diagnosis, or treatment. Always talk with a qualified clinician about your own health.</p>
         <p>&copy; ${new Date().getUTCFullYear()} ${BRAND}. All rights reserved.</p>
       </div>
@@ -180,7 +180,7 @@ const indent = (html, n = 8) =>
 
 const ORG = { '@type': 'Organization', '@id': `${SITE}/#organization`, name: BRAND, url: `${SITE}/`, logo: { '@type': 'ImageObject', url: `${SITE}/logo-512.png`, width: 512, height: 512 }, email: EMAIL };
 const EDITOR_NAME = 'Mark Laurence E. Medina';
-const EDITOR = { '@type': 'Person', '@id': `${SITE}/about.html#editor`, name: EDITOR_NAME, jobTitle: 'Founder and editor', url: `${SITE}/about.html#editor`, worksFor: { '@id': `${SITE}/#organization` } };
+const EDITOR = { '@type': 'Person', '@id': `${SITE}/about#editor`, name: EDITOR_NAME, jobTitle: 'Founder and editor', url: `${SITE}/about#editor`, worksFor: { '@id': `${SITE}/#organization` } };
 
 function breadcrumb(items) {
   return {
@@ -201,7 +201,7 @@ for (const p of pages) {
   const { meta } = p;
   const updated = meta.updated ? `\n<p class="updated">Last updated: ${longDate(meta.updated)}</p>` : '';
   const inner = indent(`<p class="eyebrow">${esc(meta.eyebrow)}</p>\n<h1>${esc(meta.h1)}</h1>${updated}\n${p.body}`);
-  writeOut(meta.path.replace(/^\//, ''), layout({ urlPath: meta.path, title: meta.title, description: meta.description, index: !meta.noindex, inner }));
+  writeOut(meta.path.replace(/^\//, ''), layout({ urlPath: meta.path.replace(/\.html$/, ''), title: meta.title, description: meta.description, index: !meta.noindex, inner }));
 }
 
 // ---------- Article collections ----------
@@ -251,7 +251,7 @@ function productCard(key) {
   <h2>${esc(p.name)}</h2>
   <p>${esc(p.blurb)}</p>
   <a class="btn" href="${esc(p.url)}?utm_source=website&amp;utm_medium=article&amp;utm_campaign=${esc(key)}" rel="noopener">See the ${esc(p.short)} &middot; ${esc(p.price)}</a>
-  <p class="disclosure">We sell this product in our own shop. It is a comfort tool, not a treatment. <a href="/about.html#funding">How we are funded</a></p>
+  <p class="disclosure">We sell this product in our own shop. It is a comfort tool, not a treatment. <a href="/about#funding">How we are funded</a></p>
 </div>`;
 }
 
@@ -269,7 +269,7 @@ function buildSection(cfg) {
     const inner = indent(`<nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> &rsaquo; <a href="${base}">${crumb}</a> &rsaquo; <span aria-current="page">${esc(meta.h1)}</span></nav>
 <p class="eyebrow">${esc(meta.eyebrow || 'Guide')}</p>
 <h1>${esc(meta.h1)}</h1>
-<p class="byline">By <a href="/about.html#editor" rel="author">${EDITOR_NAME}</a>, founder and editor &middot; Updated <time datetime="${g.updated}">${longDate(g.updated)}</time> &middot; ${g.minutes} min read</p>
+<p class="byline">By <a href="/about#editor" rel="author">${EDITOR_NAME}</a>, founder and editor &middot; Updated <time datetime="${g.updated}">${longDate(g.updated)}</time> &middot; ${g.minutes} min read</p>
 <div class="note"><strong>Educational information, not medical advice.</strong> This guide is general information for healthy adults and is not reviewed for your personal situation. Talk with a clinician about symptoms that are new, severe, or persistent. <a href="#when-to-see-a-doctor">When to see a doctor</a></div>
 ${g.body}${meta.product ? productCard(meta.product) : ''}
 <div class="cta">
@@ -378,7 +378,7 @@ const urls = [
   ...comfort.map((g) => ({ loc: g.urlPath, lastmod: g.updated, changefreq: 'monthly', priority: '0.7' })),
   ...pages
     .filter((p) => !p.meta.noindex)
-    .map((p) => ({ loc: p.meta.path, lastmod: p.meta.updated, changefreq: 'yearly', priority: p.meta.path === '/about.html' ? '0.5' : '0.3' })),
+    .map((p) => ({ loc: p.meta.path.replace(/\.html$/, ''), lastmod: p.meta.updated, changefreq: 'yearly', priority: p.meta.path === '/about.html' ? '0.5' : '0.3' })),
 ];
 writeOut(
   'sitemap.xml',

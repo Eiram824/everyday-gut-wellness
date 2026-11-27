@@ -93,7 +93,7 @@
     banner.innerHTML =
       '<p style="margin:0 0 12px">We use Google Analytics cookies to see which pages are useful. ' +
       'No advertising cookies. You can change this any time under &ldquo;Cookie settings&rdquo;. ' +
-      '<a href="/privacy.html#cookies" style="color:#14382B;text-decoration:underline">Privacy Policy</a></p>' +
+      '<a href="/privacy#cookies" style="color:#14382B;text-decoration:underline">Privacy Policy</a></p>' +
       '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
       '<button type="button" data-c="reject" style="flex:1 1 140px;min-height:44px;padding:10px 16px;border-radius:999px;border:2px solid #14382B;background:#FFFFFF;color:#14382B;font-weight:700;cursor:pointer">Reject</button>' +
       '<button type="button" data-c="accept" style="flex:1 1 140px;min-height:44px;padding:10px 16px;border-radius:999px;border:2px solid #14382B;background:#14382B;color:#FFFFFF;font-weight:700;cursor:pointer">Accept</button>' +
