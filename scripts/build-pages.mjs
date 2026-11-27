@@ -131,6 +131,7 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="alternate" type="application/rss+xml" title="${BRAND}" href="${SITE}/feed.xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${esc(title)}</title>
     <meta name="description" content="${esc(description)}" />
@@ -402,4 +403,45 @@ ${urls
 `,
 );
 
-console.log(`[Pages] Built ${pages.length} pages, ${guides.length} guides, ${comfort.length} comfort guides, section indexes, and sitemap (${urls.length} URLs).`);
+// ---------- RSS feed (Pinterest auto-publish and feed readers) ----------
+// Pinterest's "Auto-publish" reads this feed and turns each new article into a Pin.
+// Image per item: a tall Pin image public/assets/pins/<slug>.jpg (1000x1500) if present,
+// otherwise the article's 1200x630 share card.
+const pinImageFor = (slug) =>
+  fs.existsSync(path.join(ROOT, 'public', 'assets', 'pins', `${slug}.jpg`)) ? `${SITE}/assets/pins/${slug}.jpg` : ogImageFor(slug);
+const rfc822 = (iso) => new Date(`${iso}T12:00:00Z`).toUTCString();
+const feedItems = [...guides, ...comfort]
+  .sort((a, b) => (a.meta.published === b.meta.published ? 0 : a.meta.published < b.meta.published ? 1 : -1))
+  .slice(0, 50);
+writeOut(
+  'feed.xml',
+  `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>${BRAND}</title>
+    <link>${SITE}/</link>
+    <description>Gentle, evidence-informed gut health guides: bloating, period cramp comfort, fiber, constipation and everyday digestive habits.</description>
+    <language>en-us</language>
+    <atom:link href="${SITE}/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>${rfc822(newest > today ? today : newest)}</lastBuildDate>
+${feedItems
+  .map((g) => {
+    const img = pinImageFor(g.slug);
+    return `    <item>
+      <title>${esc(g.meta.h1)}</title>
+      <link>${SITE}${g.urlPath}</link>
+      <guid isPermaLink="true">${SITE}${g.urlPath}</guid>
+      <pubDate>${rfc822(g.meta.published)}</pubDate>
+      <category>${esc(g.meta.eyebrow || 'Gut health')}</category>
+      <description>${esc(g.meta.description)}</description>
+      <enclosure url="${img}" type="image/jpeg" length="0" />
+      <media:content url="${img}" medium="image" type="image/jpeg" />
+    </item>`;
+  })
+  .join('\n')}
+  </channel>
+</rss>
+`,
+);
+
+console.log(`[Pages] Built ${pages.length} pages, ${guides.length} guides, ${comfort.length} comfort guides, section indexes, sitemap (${urls.length} URLs) and RSS feed (${feedItems.length} items).`);
