@@ -924,5 +924,75 @@
   "title": "What Counts as Constipation? A Clear, Simple Answer",
   "description": "Anywhere from three times a day to three times a week can be healthy. You are likely constipated if you have had fewer than three bowel movements in a week, or hard, painful stools. What counts, what helps first, and the signs that need a doctor.",
   "keywords": "what is constipation, constipation signs, constipation symptoms, bowel movement frequency, constipation relief"
+ },
+ {
+  "slug": "bloated-after-eating",
+  "n": 1,
+  "board": "Bloating Relief Tips & Remedies",
+  "eyebrow": "Bloating",
+  "style": "A",
+  "headline": "Why am I bloated after every meal?",
+  "sub": "Common reasons + gentle habits",
+  "bullets": null,
+  "title": "Why Do I Feel Bloated After Eating? Causes and Gentle Habits",
+  "description": "Bloated after almost every meal? The usual reasons are swallowed air, gas-making foods, big or rich meals, slow digestion and your cycle. Learn what is going on and the gentle everyday habits that help most people, plus the signs that need a doctor.",
+  "keywords": "bloated after eating, bloating after meals, why am i bloated, stomach bloating after eating, gut health tips"
+ },
+ {
+  "slug": "bloated-after-eating",
+  "n": 2,
+  "board": "Bloating Relief Tips & Remedies",
+  "eyebrow": "After meals",
+  "style": "C",
+  "headline": "Bloated after eating? Try these",
+  "sub": "Gentle habits for a calmer belly",
+  "bullets": [
+   "Slow down your first 5 bites",
+   "Walk 10–15 minutes after eating",
+   "Massage gently, clockwise",
+   "Add gentle warmth"
+  ],
+  "title": "Bloated After Eating? 4 Gentle Habits to Try",
+  "description": "Simple, gentle habits for bloating after meals: eat slower, walk after eating, a clockwise belly massage and gentle warmth. Read the full guide for the common causes and when bloating needs a doctor.",
+  "keywords": "bloating after eating relief, bloated stomach tips, walking after eating, belly massage for bloating, digestion tips"
+ },
+ {
+  "slug": "bloated-after-eating",
+  "n": 3,
+  "board": "Bloating Relief Tips & Remedies",
+  "eyebrow": "Bloating",
+  "style": "B",
+  "headline": "8 reasons your belly bloats after meals",
+  "sub": "And a gentle first step for each",
+  "bullets": null,
+  "title": "8 Common Reasons You Feel Bloated After Eating",
+  "description": "Eating fast, fizzy drinks, big meals, rich food, gas-making foods, salt, constipation and your cycle can all cause bloating after meals. See each reason in plain words with one gentle first step to try.",
+  "keywords": "causes of bloating after eating, why do i bloat after meals, bloating causes, gas and bloating, gut health"
+ },
+ {
+  "slug": "bloated-after-eating",
+  "n": 4,
+  "board": "Bloating Relief Tips & Remedies",
+  "eyebrow": "Bloating",
+  "style": "D",
+  "headline": "Do you look pregnant after eating?",
+  "sub": "Why it happens and when it is normal",
+  "bullets": null,
+  "title": "Look Pregnant After Eating? What Is Normal and What Is Not",
+  "description": "A rounder belly after a big meal is common, especially later in the day, and it should go down by morning. Learn why it happens, the gentle habits that help, and the bloating signs that should always be checked.",
+  "keywords": "look pregnant after eating, belly swelling after eating, bloated belly, food baby, bloating after meals"
+ },
+ {
+  "slug": "bloated-after-eating",
+  "n": 5,
+  "board": "Bloating Relief Tips & Remedies",
+  "eyebrow": "After meals",
+  "style": "A",
+  "headline": "Does walking after eating help bloating?",
+  "sub": "The 10-minute habit worth trying",
+  "bullets": null,
+  "title": "Does Walking After Eating Help Bloating?",
+  "description": "A gentle 10 to 15 minute walk after a meal helps gas move through the gut and is one of the simplest habits for bloating after eating. Read the full guide for more gentle habits and when to see a doctor.",
+  "keywords": "walking after eating, walk after meals bloating, bloating relief habits, digestion walk, gut health routine"
  }
 ]

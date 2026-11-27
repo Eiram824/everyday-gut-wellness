@@ -248,6 +248,18 @@ function relatedFor(g, list) {
   return [...same, ...others.filter((o) => !same.includes(o))].slice(0, 3);
 }
 
+/** FAQPage schema from an article's <h2 id="faq"> section: each <h3> question followed by one <p> answer. */
+function faqFor(body) {
+  const m = body.match(/<h2 id="faq">[\s\S]*?(?=<h2|$)/);
+  if (!m) return [];
+  const text = (h) => h.replace(/<[^>]+>/g, '').replace(/&rsquo;/g, '\u2019').replace(/&ldquo;/g, '\u201c').replace(/&rdquo;/g, '\u201d').replace(/&amp;/g, '&').trim();
+  return [...m[0].matchAll(/<h3>([\s\S]*?)<\/h3>\s*<p>([\s\S]*?)<\/p>/g)].map(([, q, a]) => ({
+    '@type': 'Question',
+    name: text(q),
+    acceptedAnswer: { '@type': 'Answer', text: text(a) },
+  }));
+}
+
 function productCard(key) {
   const p = SHOP.products[key];
   if (!SHOP.shopLinksLive || !p) return '';
@@ -303,6 +315,8 @@ ${g.body}${meta.product ? productCard(meta.product) : ''}
         [meta.h1, g.urlPath],
       ]),
     ];
+    const faq = faqFor(g.body);
+    if (faq.length) jsonLd.push({ '@type': 'FAQPage', mainEntity: faq });
     writeOut(`${base.replace(/^\//, '')}${g.slug}.html`, layout({ urlPath: g.urlPath, title: meta.title, description: meta.description, ogType: 'article', jsonLd, inner, ogImage: ogImageFor(g.slug) }));
   }
 
