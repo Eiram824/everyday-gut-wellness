@@ -72,6 +72,58 @@ export function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Gentle one-time invitation to the free guide: after ~30s, half-page scroll, or
+  // (desktop) exit intent. Shown once per visitor and never to people who already signed up.
+  const anyModalOpenRef = React.useRef(false);
+  anyModalOpenRef.current = isEBookOpen || isLeadCaptureOpen || isLeadAdminOpen;
+  React.useEffect(() => {
+    const SEEN = 'egw_guide_popup_seen';
+    const read = (k: string) => {
+      try {
+        return window.localStorage.getItem(k);
+      } catch (err) {
+        return '1';
+      }
+    };
+    if (read(SEEN) || read('gut_reset_subscriber')) return;
+    let done = false;
+    let retry = 0;
+    const show = () => {
+      if (done || read(SEEN) || read('gut_reset_subscriber')) return;
+      // Wait while another window or the cookie banner is open, so nothing stacks.
+      const otherDialogOpen =
+        anyModalOpenRef.current || !!document.querySelector('[role="dialog"][aria-modal="true"]');
+      if (otherDialogOpen || !read('egw_cookie_consent')) {
+        if (!retry) retry = window.setTimeout(() => { retry = 0; show(); }, 3000);
+        return;
+      }
+      done = true;
+      try {
+        window.localStorage.setItem(SEEN, String(Date.now()));
+      } catch (err) {}
+      cleanup();
+      setIsLeadCaptureOpen(true);
+    };
+    const onScroll = () => {
+      const h = document.documentElement.scrollHeight - window.innerHeight;
+      if (h > 0 && window.scrollY / h >= 0.5) show();
+    };
+    const onLeave = (e: MouseEvent) => {
+      if (!e.relatedTarget && e.clientY <= 0) show();
+    };
+    const desktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const timer = window.setTimeout(show, 30000);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    if (desktop) document.addEventListener('mouseout', onLeave);
+    function cleanup() {
+      window.clearTimeout(timer);
+      window.clearTimeout(retry);
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('mouseout', onLeave);
+    }
+    return cleanup;
+  }, []);
+
   // Checks whether the user is already subscribed before opening the lead modal
   const handleOpenEBook = (forceDirect = false) => {
     if (forceDirect) {
