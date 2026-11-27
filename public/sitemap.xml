@@ -97,19 +97,19 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://everydaygutwellness.com/about.html</loc>
+    <loc>https://everydaygutwellness.com/about</loc>
     <lastmod>2026-11-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://everydaygutwellness.com/privacy.html</loc>
+    <loc>https://everydaygutwellness.com/privacy</loc>
     <lastmod>2026-11-24</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://everydaygutwellness.com/terms.html</loc>
+    <loc>https://everydaygutwellness.com/terms</loc>
     <lastmod>2026-11-26</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
