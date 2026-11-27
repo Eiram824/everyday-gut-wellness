@@ -149,6 +149,7 @@ function layout({ urlPath, title, description, index = true, ogType = 'website',
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
     <script src="/consent.js"></script>
     <script src="/motion.js" defer></script>
+    <script src="/guide-popup.js" defer></script>
     <style>${CSS}</style>${ld}
   </head>
   <body>
