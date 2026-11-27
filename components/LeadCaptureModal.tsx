@@ -32,7 +32,10 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 }) => {
   const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
-  const [marketingConsent, setMarketingConsent] = useState(false);
+  // Getting the free guide includes the guide email and follow-up tips (clear
+  // notice under the form, unsubscribe link in every email), so every signup
+  // is sent with consent recorded.
+  const marketingConsent = true;
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [emailStatus, setEmailStatus] = useState<'queued' | 'unavailable' | 'not_requested'>('not_requested');
@@ -145,7 +148,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                   ? 'We are also emailing you a copy. Check your inbox (and the Promotions or Spam folder) in a few minutes.'
                   : emailStatus === 'unavailable'
                     ? 'Email delivery is not available right now, so please save your PDF below.'
-                    : 'No email was requested, so please save your PDF below. Tick the email box next time if you want a copy in your inbox.'}
+                    : 'Please save your PDF below.'}
               </p>
             </div>
 
@@ -173,7 +176,7 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
 
             <div className="pt-1 flex items-center gap-1.5 text-[11px] sm:text-xs text-[#6F6A62]">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Free guide access. Optional email updates can be unsubscribed anytime.</span>
+              <span>Free guide access. Unsubscribe from our emails anytime.</span>
             </div>
           </div>
         ) : (
@@ -272,19 +275,10 @@ export const LeadCaptureModal: React.FC<LeadCaptureModalProps> = ({
                   </div>
                 </div>
 
-                {/* Optional Marketing Consent Checkbox */}
-                <div className="flex items-start gap-2.5 pt-1 bg-[#F8F6F0] p-3 rounded-xl border border-[#E5DFD5]">
-                  <input
-                    id="lead-marketing-consent"
-                    type="checkbox"
-                    checked={marketingConsent}
-                    onChange={(e) => setMarketingConsent(e.target.checked)}
-                    className="w-4 h-4 mt-0.5 rounded border-[#D5CFC5] text-[#14382B] focus:ring-[#14382B] accent-[#14382B] cursor-pointer"
-                  />
-                  <label htmlFor="lead-marketing-consent" className="text-xs text-[#4A463F] leading-snug select-none cursor-pointer">
-                    <span className="font-semibold text-[#14382B]">(Optional)</span> Yes, email me a copy of the guide, plus practical routine tips, new guides, and product updates from Everyday Gut Wellness. Unsubscribe anytime with one click. See our <a href="/privacy" target="_blank" rel="noopener" className="underline text-[#14382B]">Privacy Policy</a>.
-                  </label>
-                </div>
+                {/* Email notice: requesting the guide includes the guide email and tips */}
+                <p id="lead-email-notice" className="text-xs text-[#4A463F] leading-snug pt-1 bg-[#F8F6F0] p-3 rounded-xl border border-[#E5DFD5]">
+                  We'll email you the guide plus gentle gut tips, new guides, and product updates from Everyday Gut Wellness. Unsubscribe anytime with one click. See our <a href="/privacy" target="_blank" rel="noopener" className="underline text-[#14382B]">Privacy Policy</a>.
+                </p>
 
                 {/* Submit Button */}
                 <button
